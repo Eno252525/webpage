@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shto/Ndrysho Produkt — IT Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 62.5%; }
+    body { background: #0E0E0E; color: #fff; font-family: 'Inter', sans-serif; font-size: 1.4rem; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    a { text-decoration: none; color: inherit; }
+    .admin-layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+    .admin-sidebar { background: #141414; border-right: 1px solid rgba(255,255,255,0.07); padding: 28px 20px; position: sticky; top: 0; height: 100vh; }
+    .sidebar-logo { height: 28px; margin-bottom: 32px; display: block; }
+    .sidebar-nav { list-style: none; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.55); border-radius: 2px; transition: all 0.15s; }
+    .sidebar-nav a:hover, .sidebar-nav a.active { color: #F0A020; background: rgba(240,160,32,0.08); }
+    .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 16px 0; }
+    .sidebar-logout { display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.35); cursor: pointer; border-radius: 2px; transition: color 0.15s; background: none; border: none; width: 100%; }
+    .sidebar-logout:hover { color: #ef4444; }
+    .admin-main { padding: 36px 40px; max-width: 900px; }
+    .admin-header { display: flex; align-items: center; gap: 16px; margin-bottom: 36px; }
+    .back-btn { background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; padding: 6px; transition: color 0.15s; }
+    .back-btn:hover { color: white; }
+    .admin-title { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 2.8rem; letter-spacing: 0.02em; text-transform: uppercase; }
+    /* Form */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label { font-size: 1.1rem; font-weight: 300; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; text-transform: uppercase; }
+    .form-required { color: #F0A020; margin-left: 3px; }
+    .form-input, .form-select, .form-textarea {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+      color: white; padding: 11px 14px; font-family: 'Inter', sans-serif; font-size: 1.4rem;
+      outline: none; transition: border-color 0.15s; width: 100%;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: rgba(240,160,32,0.5); }
+    .form-select option { background: #1e1e1e; }
+    .form-textarea { resize: vertical; min-height: 100px; }
+    /* Section headings */
+    .form-section { margin: 32px 0 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .form-section-title { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+    /* Checkboxes */
+    .form-checks { display: flex; gap: 28px; flex-wrap: wrap; }
+    .form-check { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .form-check input { accent-color: #F0A020; width: 16px; height: 16px; cursor: pointer; }
+    .form-check-label { font-size: 1.3rem; color: rgba(255,255,255,0.7); }
+    /* Attributes */
+    .attr-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .attr-input { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 9px 12px; font-family: 'Inter', sans-serif; font-size: 1.3rem; outline: none; }
+    .attr-input:focus { border-color: rgba(240,160,32,0.4); }
+    .btn-remove-attr { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.3); font-size: 1.8rem; line-height: 1; transition: color 0.15s; padding: 0 6px; }
+    .btn-remove-attr:hover { color: #ef4444; }
+    .btn-add-attr { background: none; border: 1px dashed rgba(255,255,255,0.2); color: rgba(255,255,255,0.45); padding: 8px 16px; cursor: pointer; font-size: 1.2rem; transition: all 0.15s; margin-top: 4px; }
+    .btn-add-attr:hover { border-color: rgba(240,160,32,0.4); color: #F0A020; }
+    /* Image upload */
+    .upload-zone {
+      border: 2px dashed rgba(255,255,255,0.15); padding: 32px;
+      text-align: center; cursor: pointer; transition: border-color 0.15s;
+      margin-bottom: 14px;
+    }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: rgba(240,160,32,0.4); }
+    .upload-zone p { color: rgba(255,255,255,0.4); font-size: 1.3rem; }
+    .upload-zone p span { color: #F0A020; }
+    .image-previews { display: flex; flex-wrap: wrap; gap: 10px; }
+    .img-preview-wrap { position: relative; width: 100px; height: 100px; }
+    .img-preview { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .img-preview-del { position: absolute; top: -6px; right: -6px; background: #ef4444; border: none; cursor: pointer; width: 20px; height: 20px; border-radius: 50%; color: white; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; line-height: 1; }
+    /* Submit */
+    .form-actions { display: flex; gap: 12px; margin-top: 36px; }
+    .btn-save { background: #F0A020; color: #141414; border: none; padding: 14px 36px; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.4rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.15s; }
+    .btn-save:hover { background: white; }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-cancel { background: none; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); padding: 14px 28px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.4rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+    .btn-cancel:hover { border-color: rgba(255,255,255,0.4); color: white; }
+    .admin-toast { position: fixed; bottom: 24px; right: 24px; background: #141414; border: 1px solid rgba(255,255,255,0.1); padding: 14px 20px; font-size: 1.3rem; z-index: 1000; opacity: 0; transform: translateY(12px); transition: all 0.2s; pointer-events: none; }
+    .admin-toast.show { opacity: 1; transform: none; }
+    .admin-toast.success { border-color: rgba(240,160,32,0.4); color: #F0A020; }
+    .admin-toast.error { border-color: rgba(239,68,68,0.4); color: #ef4444; }
+    @media (max-width: 900px) { .admin-layout { grid-template-columns: 1fr; } .admin-sidebar { display: none; } .form-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <img src="/IT Store LOGO.png" alt="IT Store" class="sidebar-logo">
+      <ul class="sidebar-nav">
+        <li><a href="/admin">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Produktet
+        </a></li>
+        <li><a href="/admin/product" class="active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+          Shto Produkt
+        </a></li>
+      </ul>
+      <div class="sidebar-divider"></div>
+      <button class="sidebar-logout" id="logout-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Dil
+      </button>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-header">
+        <button class="back-btn" onclick="history.back()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+        </button>
+        <h1 class="admin-title" id="page-title">Shto Produkt</h1>
+      </div>
+
+      <form id="product-form" enctype="multipart/form-data">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">Emri i produktit <span class="form-required">*</span></label>
+            <input type="text" class="form-input" id="name" name="name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Slug (URL)</label>
+            <input type="text" class="form-input" id="slug" name="slug" placeholder="auto-gjenerohet">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kategoria</label>
+            <select class="form-select" id="category_id" name="category_id">
+              <option value="">— Zgjidh kategorinë —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Marka (Brand)</label>
+            <input type="text" class="form-input" id="brand" name="brand" placeholder="p.sh. Apple, Samsung, Lenovo…">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Çmimi (€) <span class="form-required">*</span></label>
+            <input type="number" class="form-input" id="price" name="price" step="0.01" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Çmimi me zbritje (€)</label>
+            <input type="number" class="form-input" id="sale_price" name="sale_price" step="0.01" min="0" placeholder="bosh = pa zbritje">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Përshkrimi i shkurtër</label>
+            <input type="text" class="form-input" id="short_description" name="short_description" placeholder="Shfaqet në faqen e produktit">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Përshkrimi i plotë</label>
+            <textarea class="form-textarea" id="description" name="description" rows="5" style="min-height:140px;"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Etiketa (badge)</label>
+            <select class="form-select" id="badge" name="badge">
+              <option value="">Asnjë</option>
+              <option value="i ri">I ri</option>
+              <option value="ofertë">Ofertë</option>
+              <option value="të përdorur">Të Përdorur</option>
+            </select>
+          </div>
+          <div class="form-group" style="justify-content:flex-end;">
+            <div class="form-checks">
+              <label class="form-check">
+                <input type="checkbox" id="featured" name="featured" value="true">
+                <span class="form-check-label">E veçuar (shfaqet në faqe)</span>
+              </label>
+              <label class="form-check">
+                <input type="checkbox" id="in_stock" name="in_stock" value="true" checked>
+                <span class="form-check-label">Në stok</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attributes -->
+        <div class="form-section"><p class="form-section-title">Specifikimet Teknike</p></div>
+        <div id="attrs-container"></div>
+        <button type="button" class="btn-add-attr" id="add-attr-btn">+ Shto Specifikim</button>
+
+        <!-- Images -->
+        <div class="form-section"><p class="form-section-title">Imazhet</p></div>
+        <div class="upload-zone" id="upload-zone">
+          <p>Tërhiq imazhet këtu ose <span>kliko për të zgjedhur</span></p>
+          <p style="font-size:1.1rem;margin-top:6px;color:rgba(255,255,255,0.25);">JPG, PNG, WebP — max 10MB secila</p>
+        </div>
+        <input type="file" id="file-input" multiple accept="image/*" style="display:none;">
+        <div class="image-previews" id="image-previews"></div>
+        <input type="hidden" id="existing-images" name="existing_images" value="[]">
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn-save" id="save-btn">Ruaj Produktin</button>
+          <button type="button" class="btn-cancel" onclick="history.back()">Anulo</button>
+        </div>
+      </form>
+    </main>
+  </div>
+  <div class="admin-toast" id="admin-toast"></div>
+
+  <script>
+    fetch('/api/admin/check').then(r => { if (!r.ok) window.location.href = '/admin/login'; }).catch(() => window.location.href = '/admin/login');
+
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method: 'POST' });
+      window.location.href = '/admin/login';
+    });
+
+    function toast(msg, type = 'success') {
+      const el = document.getElementById('admin-toast');
+      el.textContent = msg; el.className = `admin-toast ${type} show`;
+      clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2800);
+    }
+
+    // Slug auto-gen
+    let slugManual = false;
+    document.getElementById('slug').addEventListener('input', () => slugManual = true);
+    document.getElementById('name').addEventListener('input', e => {
+      if (!slugManual) {
+        document.getElementById('slug').value = e.target.value.toLowerCase()
+          .replace(/ë/g,'e').replace(/ç/g,'c').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      }
+    });
+
+    // Load categories into select
+    async function loadCats() {
+      const res = await fetch('/api/categories');
+      const cats = await res.json();
+      const select = document.getElementById('category_id');
+      const flat = cats.flatMap(c => [c, ...(c.children || [])]);
+      flat.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id; opt.textContent = c.name;
+        select.appendChild(opt);
+      });
+      return flat;
+    }
+
+    // Attributes
+    const attrsContainer = document.getElementById('attrs-container');
+    function addAttrRow(key = '', val = '') {
+      const row = document.createElement('div');
+      row.className = 'attr-row';
+      row.innerHTML = `
+        <input type="text" class="attr-input attr-key" placeholder="Emri (p.sh. RAM)" value="${esc(key)}">
+        <input type="text" class="attr-input attr-val" placeholder="Vlera (p.sh. 16GB)" value="${esc(val)}">
+        <button type="button" class="btn-remove-attr">×</button>`;
+      row.querySelector('.btn-remove-attr').addEventListener('click', () => row.remove());
+      attrsContainer.appendChild(row);
+    }
+    document.getElementById('add-attr-btn').addEventListener('click', () => addAttrRow());
+
+    // Image handling
+    let newFiles = [];
+    let existingImages = [];
+
+    function renderPreviews() {
+      const container = document.getElementById('image-previews');
+      container.innerHTML = [
+        ...existingImages.map((src, i) => `
+          <div class="img-preview-wrap">
+            <img class="img-preview" src="${esc(src)}" alt="">
+            <button type="button" class="img-preview-del" data-type="existing" data-idx="${i}">×</button>
+          </div>`),
+        ...newFiles.map((f, i) => `
+          <div class="img-preview-wrap">
+            <img class="img-preview" src="${URL.createObjectURL(f)}" alt="">
+            <button type="button" class="img-preview-del" data-type="new" data-idx="${i}">×</button>
+          </div>`)
+      ].join('');
+      document.getElementById('existing-images').value = JSON.stringify(existingImages);
+      container.querySelectorAll('.img-preview-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.dataset.type === 'existing') existingImages.splice(Number(btn.dataset.idx), 1);
+          else newFiles.splice(Number(btn.dataset.idx), 1);
+          renderPreviews();
+        });
+      });
+    }
+
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => {
+      e.preventDefault(); uploadZone.classList.remove('drag-over');
+      newFiles.push(...Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+      renderPreviews();
+    });
+    fileInput.addEventListener('change', () => {
+      newFiles.push(...Array.from(fileInput.files));
+      fileInput.value = '';
+      renderPreviews();
+    });
+
+    // Load existing product if editing
+    const editId = new URLSearchParams(location.search).get('id');
+    if (editId) {
+      document.getElementById('page-title').textContent = 'Ndrysho Produktin';
+      fetch(`/api/products/${editId}`).then(r => r.json()).then(p => {
+        document.getElementById('name').value = p.name || '';
+        document.getElementById('slug').value = p.slug || '';
+        document.getElementById('price').value = p.price || '';
+        document.getElementById('sale_price').value = p.sale_price || '';
+        document.getElementById('short_description').value = p.short_description || '';
+        document.getElementById('description').value = p.description || '';
+        document.getElementById('badge').value = p.badge || '';
+        document.getElementById('featured').checked = !!p.featured;
+        document.getElementById('in_stock').checked = p.in_stock !== false;
+        document.getElementById('brand').value = p.brand || '';
+        document.getElementById('category_id').value = p.category_id || '';
+        existingImages = Array.isArray(p.images) ? [...p.images] : [];
+        renderPreviews();
+        slugManual = true;
+        // Attributes
+        if (p.attributes && typeof p.attributes === 'object') {
+          Object.entries(p.attributes).forEach(([k, v]) => addAttrRow(k, v));
+        }
+      });
+    } else {
+      addAttrRow(); // start with one empty row
+    }
+
+    loadCats().then(() => {
+      if (editId) document.getElementById('category_id').value = /* set after load */ '';
+      // Re-apply after cats load
+      if (editId) fetch(`/api/products/${editId}`).then(r => r.json()).then(p => {
+        document.getElementById('category_id').value = p.category_id || '';
+      });
+    });
+
+    // Submit
+    document.getElementById('product-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true; btn.textContent = 'Duke ruajtur…';
+
+      // Build attributes object
+      const attrs = {};
+      attrsContainer.querySelectorAll('.attr-row').forEach(row => {
+        const key = row.querySelector('.attr-key').value.trim();
+        const val = row.querySelector('.attr-val').value.trim();
+        if (key) attrs[key] = val;
+      });
+
+      const formData = new FormData();
+      formData.append('name', document.getElementById('name').value);
+      formData.append('slug', document.getElementById('slug').value);
+      formData.append('price', document.getElementById('price').value);
+      formData.append('sale_price', document.getElementById('sale_price').value);
+      formData.append('short_description', document.getElementById('short_description').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('category_id', document.getElementById('category_id').value);
+      formData.append('brand', document.getElementById('brand').value);
+      formData.append('badge', document.getElementById('badge').value);
+      formData.append('featured', document.getElementById('featured').checked);
+      formData.append('in_stock', document.getElementById('in_stock').checked);
+      formData.append('attributes', JSON.stringify(attrs));
+      formData.append('existing_images', JSON.stringify(existingImages));
+      newFiles.forEach(f => formData.append('images', f));
+
+      const url = editId ? `/api/admin/products/${editId}` : '/api/admin/products';
+      const method = editId ? 'PUT' : 'POST';
+      try {
+        const res = await fetch(url, { method, body: formData });
+        const data = await res.json();
+        if (data.error) { toast(data.error, 'error'); btn.disabled = false; btn.textContent = 'Ruaj Produktin'; return; }
+        toast('Produkti u ruajt!');
+        setTimeout(() => window.location.href = '/admin', 1200);
+      } catch {
+        toast('Gabim gjatë ruajtjes.', 'error');
+        btn.disabled = false; btn.textContent = 'Ruaj Produktin';
+      }
+    });
+  </script>
+</body>
+</html>

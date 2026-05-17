@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Store — Information & Technology Resource Specialist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/shared.css">
+  <style>
+    /* Homepage: expand header for search row */
+    :root { --header-height: 117px; }
+    header {
+      flex-direction: column;
+      align-items: stretch;
+      height: auto;
+      padding: 0;
+      gap: 0;
+    }
+    .header-nav {
+      display: flex; align-items: center;
+      padding: 0 var(--site-px); gap: 32px;
+      height: 65px; flex-shrink: 0;
+    }
+    .header-search-row {
+      border-top: 1px solid rgba(0,0,0,0.07);
+      padding: 10px var(--site-px);
+      background: var(--color-bg);
+    }
+    .header-search-form {
+      position: relative; max-width: 560px; margin: 0 auto;
+      display: flex; align-items: center;
+    }
+    .header-search-input {
+      width: 100%; background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.1); border-right: none;
+      color: #141414; padding: 9px 14px 9px 40px;
+      font-family: 'Inter', sans-serif; font-size: 1.3rem;
+      outline: none; transition: border-color 0.15s;
+    }
+    .header-search-input:focus { border-color: rgba(240,160,32,0.5); }
+    .header-search-input::placeholder { color: rgba(20,20,20,0.4); }
+    .header-search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: rgba(20,20,20,0.35); pointer-events: none;
+    }
+    .header-search-btn {
+      background: var(--color-amber); border: none; cursor: pointer;
+      padding: 0 20px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700; font-size: 1.15rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #141414;
+      white-space: nowrap; transition: background 0.15s;
+      flex-shrink: 0; align-self: stretch;
+    }
+    .header-search-btn:hover { background: #141414; color: #fff; }
+    /* Scroll hide/show */
+    header.header-hidden { transform: translateY(-100%); }
+
+    /* Homepage-specific styles */
+    .hero-banner { position: relative; width: 100%; overflow: hidden; }
+    .hero-banner img { width: 100%; height: 65vh; min-height: 440px; object-fit: cover; display: block; }
+    .hero-gradient {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(20,20,20,0.88) 0%, rgba(20,20,20,0.4) 45%, transparent 100%);
+    }
+    .hero-content { position: absolute; bottom: 44px; left: var(--site-px); }
+    .hero-label {
+      font-family: 'Inter', sans-serif; font-weight: 700;
+      font-size: 1.1rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--color-amber); margin-bottom: 12px;
+    }
+    .hero-title { font-size: clamp(3.6rem, 6vw, 8rem); color: white; margin-bottom: 24px; }
+    .feature-band { position: relative; width: 100%; overflow: hidden; }
+    .feature-band img { width: 100%; height: 52vh; min-height: 360px; object-fit: cover; display: block; }
+    .feature-band-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to right, rgba(20,20,20,0.88) 30%, rgba(20,20,20,0.3) 70%, transparent 100%);
+      display: flex; align-items: center;
+    }
+    .feature-band-content { padding: 0 var(--site-px); }
+    .feature-tag {
+      font-family: 'Inter', sans-serif; font-weight: 700;
+      font-size: 1.1rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--color-amber); margin-bottom: 10px;
+    }
+    .feature-title { font-size: clamp(3rem, 5vw, 6.5rem); color: white; margin-bottom: 24px; }
+    .promo-banner {
+      background: var(--color-bg2); padding: 72px var(--site-px);
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .promo-banner::before {
+      content: ''; position: absolute; top: -80px; left: 50%;
+      transform: translateX(-50%); width: 600px; height: 300px;
+      background: radial-gradient(ellipse, rgba(240,160,32,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .promo-number {
+      font-family: 'Inter', sans-serif; font-weight: 900;
+      font-size: clamp(8rem, 18vw, 22rem); color: rgba(0,0,0,0.04);
+      line-height: 0.85; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); white-space: nowrap;
+      pointer-events: none; user-select: none;
+    }
+    .promo-label {
+      font-family: 'Inter', sans-serif; font-weight: 700;
+      font-size: 1.1rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--color-amber); margin-bottom: 12px; position: relative;
+    }
+    .promo-title { font-size: clamp(3rem, 5vw, 6rem); color: #141414; margin-bottom: 20px; position: relative; }
+    .promo-title em { font-style: normal; color: var(--color-amber); }
+    .promo-desc {
+      font-size: 1.4rem; font-weight: 300; color: rgba(20,20,20,0.55);
+      max-width: 480px; margin: 0 auto 32px; line-height: 1.7; position: relative;
+    }
+
+    /* ─── Hover Button ──────────────────────────────────────────────── */
+    .hover-btn {
+      position: relative; isolation: isolate;
+      padding: 14px 36px; border-radius: 100px; border: none;
+      font-family: 'Inter', sans-serif; font-weight: 600;
+      font-size: 1.5rem; letter-spacing: 0.03em; color: #fff;
+      cursor: pointer; overflow: hidden;
+      display: inline-flex; align-items: center; gap: 10px;
+      -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+      background: rgba(240, 160, 32, 0.13);
+      --circle-start: #FFD080; --circle-end: #C07810;
+    }
+    .hover-btn::before {
+      content: ''; position: absolute; inset: 0;
+      border-radius: inherit; pointer-events: none; z-index: 1;
+      box-shadow:
+        inset 0 0 0 1px rgba(240,160,32,0.38),
+        inset 0 0 18px 0 rgba(240,160,32,0.13),
+        inset 0 -3px 12px 0 rgba(240,160,32,0.2),
+        0 1px 3px 0 rgba(0,0,0,0.55),
+        0 4px 14px 0 rgba(0,0,0,0.5);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .hover-btn:active::before { transform: scale(0.975); }
+    .hover-btn:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
+    .hover-btn .hb-circle {
+      position: absolute; width: 12px; height: 12px;
+      transform: translate(-50%, -50%); border-radius: 50%;
+      filter: blur(10px); pointer-events: none; z-index: -1;
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .hover-btn .hb-circle.fade-in { opacity: 0.8; }
+    .hover-btn .hb-circle.fade-out { opacity: 0; transition: opacity 1.2s ease; }
+
+    /* ─── Carousel ──────────────────────────────────────────────────── */
+    #featured-grid, #new-grid, #laptops-grid, #sale-grid {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      overscroll-behavior-x: contain;
+      touch-action: pan-y;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      cursor: grab;
+    }
+    #featured-grid::-webkit-scrollbar, #new-grid::-webkit-scrollbar, #laptops-grid::-webkit-scrollbar, #sale-grid::-webkit-scrollbar { display: none; }
+    #featured-grid.dragging, #new-grid.dragging, #laptops-grid.dragging, #sale-grid.dragging {
+      scroll-snap-type: none; cursor: grabbing; user-select: none;
+    }
+    #featured-grid .product-card, #new-grid .product-card, #laptops-grid .product-card, #sale-grid .product-card,
+    #featured-grid .skeleton-card, #new-grid .skeleton-card, #laptops-grid .skeleton-card, #sale-grid .skeleton-card {
+      flex: 0 0 calc(25% - 1.5px); scroll-snap-align: start;
+    }
+    .carousel-see-more {
+      flex: 0 0 calc(25% - 1.5px); scroll-snap-align: start;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--color-bg2); position: relative; overflow: hidden;
+      transition: background 0.2s; text-decoration: none;
+    }
+    .carousel-see-more::after {
+      content: ''; position: absolute; inset: 0;
+      border: 1.5px solid rgba(240,160,32,0.15); pointer-events: none;
+    }
+    .carousel-see-more:hover { background: rgba(240,160,32,0.05); }
+    .carousel-see-more:hover .csm-circle { background: var(--color-amber); color: #141414; transform: scale(1.08); }
+    .csm-inner { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 48px 24px; text-align: center; }
+    .csm-circle {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 1.5px solid var(--color-amber);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-amber);
+      transition: background 0.2s, color 0.2s, transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .csm-text {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800; font-size: 1.9rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--color-amber); line-height: 1.15;
+    }
+    .carousel-wrap { position: relative; }
+    .carousel-nav-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 1px solid rgba(20,20,20,0.1); cursor: pointer; z-index: 3;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.92); color: rgba(20,20,20,0.6);
+      box-shadow: 0 3px 10px rgba(20,20,20,0.12), 0 1px 3px rgba(20,20,20,0.08);
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.22s ease;
+    }
+    .carousel-nav-arrow svg { width: 22px; height: 22px; }
+    .carousel-nav-arrow.arrow-right { right: 14px; }
+    .carousel-nav-arrow.arrow-left { left: 14px; opacity: 0; pointer-events: none; }
+    .carousel-nav-arrow.arrow-left.visible { opacity: 1; pointer-events: auto; }
+    .carousel-nav-arrow:hover {
+      background: #fff; color: var(--color-amber);
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: 0 5px 14px rgba(20,20,20,0.16), 0 1px 4px rgba(20,20,20,0.1);
+    }
+    .carousel-nav-arrow:active { transform: translateY(-50%) scale(0.96); }
+    .carousel-nav-arrow:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
+    @media (max-width: 1100px) {
+      #featured-grid .product-card, #new-grid .product-card, #laptops-grid .product-card, #sale-grid .product-card,
+      #featured-grid .skeleton-card, #new-grid .skeleton-card, #laptops-grid .skeleton-card, #sale-grid .skeleton-card,
+      .carousel-see-more { flex: 0 0 calc(33.333% - 2px); }
+    }
+    @media (max-width: 700px) {
+      #featured-grid .product-card, #new-grid .product-card, #laptops-grid .product-card, #sale-grid .product-card,
+      #featured-grid .skeleton-card, #new-grid .skeleton-card, #laptops-grid .skeleton-card, #sale-grid .skeleton-card,
+      .carousel-see-more { flex: 0 0 calc(50% - 2px); }
+    }
+    /* Hide carousel arrows on touch-first widths — swipe is the gesture */
+    @media (max-width: 700px) {
+      .carousel-nav-arrow { display: none; }
+    }
+
+    /* ─── Sale Section ──────────────────────────────────────────────────── */
+    .sale-section { background: var(--color-bg2); }
+    .sale-tag {
+      display: inline-block;
+      background: var(--color-amber); color: #141414;
+      font-family: 'Inter', sans-serif;
+      font-weight: 800; font-size: 1.05rem;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      padding: 4px 11px; margin-bottom: 10px;
+    }
+    .sale-discount-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1.5px solid var(--color-amber);
+      padding: 6px 16px; margin-bottom: 10px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700; font-size: 1.1rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(20,20,20,0.6);
+    }
+    .sale-discount-pill strong {
+      color: var(--color-amber); font-weight: 900; font-size: 1.35rem;
+    }
+
+    /* ─── Phone polish ──────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .header-search-row { padding: 8px var(--site-px); }
+      .header-search-btn { padding: 0 14px; }
+      .hero-banner img { height: 56vh; min-height: 380px; }
+      .hero-content { bottom: 28px; }
+      .feature-band img { height: 44vh; min-height: 300px; }
+      .promo-banner { padding: 52px var(--site-px); }
+      .marquee-item { font-size: 1.1rem; padding: 0 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header id="main-header">
+    <div class="header-nav">
+      <div class="nav-logo">
+        <a href="/"><img src="/IT Store LOGO.png" alt="IT Store"></a>
+      </div>
+      <nav style="flex:1;">
+        <ul class="nav-links">
+          <li><a href="/" class="active">Home</a></li>
+          <li class="has-dropdown" id="shop-nav-item">
+            <a href="/shop.html" class="shop-nav-link">
+              Shop
+              <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </a>
+            <div class="nav-dropdown" id="shop-dropdown">
+              <div class="nav-dropdown-inner">
+                <div class="dropdown-section-label">Kategorite kryesore</div>
+                <div class="dropdown-featured-grid">
+                  <a href="/shop.html?cat=laptop" class="dropdown-cat-card">
+                    <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=225&fit=crop&auto=format" alt="Laptop">
+                    <div class="dropdown-cat-overlay"></div>
+                    <div class="dropdown-cat-content">
+                      <span class="dropdown-cat-tag">Kategoria</span>
+                      <span class="dropdown-cat-name">Laptop <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                    </div>
+                  </a>
+                  <a href="/shop.html?cat=monitore" class="dropdown-cat-card">
+                    <img src="https://images.unsplash.com/photo-1621288698258-f76aa9fd2186?w=400&h=225&fit=crop&auto=format" alt="Monitor">
+                    <div class="dropdown-cat-overlay"></div>
+                    <div class="dropdown-cat-content">
+                      <span class="dropdown-cat-tag">Kategoria</span>
+                      <span class="dropdown-cat-name">Monitor <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                    </div>
+                  </a>
+                  <a href="/shop.html?cat=pc" class="dropdown-cat-card">
+                    <img src="https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=400&h=225&fit=crop&auto=format" alt="PC & Desktop">
+                    <div class="dropdown-cat-overlay"></div>
+                    <div class="dropdown-cat-content">
+                      <span class="dropdown-cat-tag">Kategoria</span>
+                      <span class="dropdown-cat-name">PC & Desktop <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                    </div>
+                  </a>
+                  <a href="/shop.html?cat=workstation" class="dropdown-cat-card">
+                    <img src="https://images.unsplash.com/photo-1593152167544-085d3b9c4938?w=400&h=225&fit=crop&auto=format" alt="Workstation">
+                    <div class="dropdown-cat-overlay"></div>
+                    <div class="dropdown-cat-content">
+                      <span class="dropdown-cat-tag">Kategoria</span>
+                      <span class="dropdown-cat-name">Workstation <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                    </div>
+                  </a>
+                </div>
+                <div class="dropdown-secondary-header">
+                  <span class="dropdown-secondary-label">Kategori të tjera</span>
+                  <span class="dropdown-secondary-line"></span>
+                  <a href="/shop.html" class="dropdown-secondary-all">Të gjitha produktet <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+                </div>
+                <div class="dropdown-secondary-cols">
+                  <div class="dropdown-col">
+                    <span class="dropdown-col-title">Laptop</span>
+                    <a href="/shop.html?cat=macbook" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M6 20h12M12 17v3"/></svg>
+                      MacBook
+                    </a>
+                    <a href="/shop.html?cat=business-laptops" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                      Business Laptops
+                    </a>
+                    <a href="/shop.html?cat=workstation-laptops" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="1"/><path d="M2 20h20"/></svg>
+                      Workstation Laptops
+                    </a>
+                  </div>
+                  <div class="dropdown-col">
+                    <span class="dropdown-col-title">Desktop</span>
+                    <a href="/shop.html?cat=desktop" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                      Desktop
+                    </a>
+                    <a href="/shop.html?cat=aio" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="13" rx="2"/><path d="M12 16v4M9 20h6"/><circle cx="12" cy="9" r="2.5"/></svg>
+                      AIO
+                    </a>
+                  </div>
+                  <div class="dropdown-col">
+                    <span class="dropdown-col-title">Networking</span>
+                    <a href="/shop.html?cat=networking" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+                      Networking
+                    </a>
+                    <a href="/shop.html?cat=server" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/></svg>
+                      Server
+                    </a>
+                    <a href="/shop.html?cat=switch" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01"/></svg>
+                      Switch
+                    </a>
+                    <a href="/shop.html?cat=mikrotik" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="13" width="20" height="7" rx="2"/><path d="M6 16.5h.01"/><path d="M12 13V8M12 8 9 5M12 8l3-3"/></svg>
+                      MikroTik
+                    </a>
+                    <a href="/shop.html?cat=nas" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
+                      NAS
+                    </a>
+                    <a href="/shop.html?cat=kvm" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M10 16v4M14 16v4"/></svg>
+                      KVM
+                    </a>
+                  </div>
+                  <div class="dropdown-col">
+                    <span class="dropdown-col-title">Komponente</span>
+                    <a href="/shop.html?cat=komponente" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="4" x2="9" y2="9"/><line x1="15" y1="4" x2="15" y2="9"/><line x1="9" y1="15" x2="9" y2="20"/><line x1="15" y1="15" x2="15" y2="20"/><line x1="4" y1="9" x2="9" y2="9"/><line x1="4" y1="15" x2="9" y2="15"/><line x1="15" y1="9" x2="20" y2="9"/><line x1="15" y1="15" x2="20" y2="15"/></svg>
+                      Komponente
+                    </a>
+                    <a href="/shop.html?cat=gpu" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2.5"/><circle cx="15" cy="12" r="2.5"/><path d="M4 18v3"/></svg>
+                      GPU
+                    </a>
+                    <a href="/shop.html?cat=ram" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="1"/><path d="M6 16v3M10 16v3M14 16v3M18 16v3M7 12h2M11 12h2M15 12h2"/></svg>
+                      RAM
+                    </a>
+                    <a href="/shop.html?cat=ssd" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 12h6"/><circle cx="17" cy="12" r="1" fill="currentColor"/></svg>
+                      SSD
+                    </a>
+                    <a href="/shop.html?cat=hdd" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="9" cy="12" r="3.5"/><circle cx="9" cy="12" r="1" fill="currentColor"/><path d="M15 15l3-3"/></svg>
+                      HDD
+                    </a>
+                  </div>
+                  <div class="dropdown-col">
+                    <span class="dropdown-col-title">Të tjera</span>
+                    <a href="/shop.html?cat=gaming" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M7 12h4M9 10v4"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1" fill="currentColor"/></svg>
+                      Gaming
+                    </a>
+                    <a href="/shop.html?cat=ups" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                      UPS
+                    </a>
+                    <a href="/shop.html?cat=licensa" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M11.4 11.6 21 2"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                      Licensa
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
+          <li><a href="/na-kontaktoni.html">Na Kontaktoni</a></li>
+          <li><a href="/shop.html?sale=1" class="nav-sale-link">Sale</a></li>
+        </ul>
+      </nav>
+      <div class="nav-icons">
+        <a href="tel:+355693181062" class="nav-phone" aria-label="Na telefononi">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg>
+          +355 69 318 1062
+        </a>
+        <button class="nav-icon-btn cart-icon-btn" aria-label="Kërkesa">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          <span class="cart-count" style="display:none;">0</span>
+        </button>
+        <button class="nav-icon-btn hamburger" id="hamburger" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="header-search-row">
+      <form class="header-search-form" id="header-search-form">
+        <span class="header-search-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+        </span>
+        <input type="search" id="header-search-input" class="header-search-input" placeholder="Kërko laptopë, workstation, periferikë…" autocomplete="off">
+        <button type="submit" class="header-search-btn">Kërko</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- MOBILE NAV -->
+  <div class="mobile-nav" id="mobile-nav">
+    <div class="mobile-nav-panel">
+      <button class="mobile-nav-close" id="mobile-nav-close">×</button>
+      <ul class="mobile-nav-links">
+        <li><a href="/">Home</a></li>
+        <li style="border-bottom:1px solid rgba(0,0,0,0.07);">
+          <button class="mobile-shop-toggle" id="mobile-shop-toggle">
+            Shop
+            <svg class="mobile-shop-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <ul class="mobile-shop-children" id="mobile-shop-children">
+            <li><a href="/shop.html?cat=laptop">Laptop</a></li>
+            <li><a href="/shop.html?cat=monitore">Monitor</a></li>
+            <li><a href="/shop.html?cat=pc">PC & Desktop</a></li>
+            <li><a href="/shop.html?cat=workstation">Workstation</a></li>
+            <li><a href="/shop.html?cat=macbook">MacBook</a></li>
+            <li><a href="/shop.html?cat=networking">Networking</a></li>
+            <li><a href="/shop.html?cat=komponente">Komponente</a></li>
+            <li><a href="/shop.html?cat=ups">UPS</a></li>
+            <li><a href="/shop.html">Të gjitha produktet</a></li>
+          </ul>
+        </li>
+        <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
+        <li><a href="/na-kontaktoni.html">Na Kontaktoni</a></li>
+        <li><a href="/shop.html?sale=1" class="nav-sale-link">Zbritje — Sale</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <main>
+    <!-- HERO BANNER -->
+    <div class="hero-banner">
+      <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1440&h=700&fit=crop&auto=format" alt="IT Store">
+      <div class="hero-gradient"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">TEKNOLOGJIA<br>E SË ARDHMES</h1>
+        <button class="hover-btn" onclick="window.location='/shop.html'">
+          Shfleto Produktet
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;position:relative;z-index:2;"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- MARQUEE -->
+    <div class="marquee-band">
+      <div class="marquee-track">
+        <span class="marquee-item">Laptop</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Monitor</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Komponente</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Workstation</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Gaming</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Desktop</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Rrjet</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Licensa</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Laptop</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Monitor</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Komponente</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Workstation</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Gaming</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Desktop</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Rrjet</span><span class="marquee-dot">·</span>
+        <span class="marquee-item">Licensa</span><span class="marquee-dot">·</span>
+      </div>
+    </div>
+
+    <!-- FEATURED PRODUCTS (Laptops) -->
+    <section class="collection-section">
+      <div class="collection-header">
+        <h2 class="collection-title">Laptop</h2>
+      </div>
+      <div class="carousel-wrap">
+        <button class="carousel-nav-arrow arrow-left" data-target="featured-grid" aria-label="Kthehu">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="product-grid" id="featured-grid"></div>
+        <button class="carousel-nav-arrow arrow-right" data-target="featured-grid" aria-label="Shfaq më shumë">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- PC & DESKTOP -->
+    <section class="collection-section">
+      <div class="collection-header">
+        <h2 class="collection-title">PC & Desktop</h2>
+      </div>
+      <div class="carousel-wrap">
+        <button class="carousel-nav-arrow arrow-left" data-target="new-grid" aria-label="Kthehu">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="product-grid" id="new-grid"></div>
+        <button class="carousel-nav-arrow arrow-right" data-target="new-grid" aria-label="Shfaq më shumë">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- FEATURE BAND -->
+    <div class="feature-band">
+      <img src="https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=1440&h=560&fit=crop&auto=format" alt="Koleksioni Premium">
+      <div class="feature-band-overlay">
+        <div class="feature-band-content">
+          <p class="feature-tag">Koleksion Ekskluziv</p>
+          <h2 class="feature-title">TEKNOLOGJI<br>PREMIUM</h2>
+          <a href="/shop.html" class="btn-primary">Shfleto Tani</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKSTATIONS SECTION -->
+    <section class="collection-section">
+      <div class="collection-header">
+        <h2 class="collection-title">Workstation</h2>
+      </div>
+      <div class="carousel-wrap">
+        <button class="carousel-nav-arrow arrow-left" data-target="laptops-grid" aria-label="Kthehu">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="product-grid" id="laptops-grid"></div>
+        <button class="carousel-nav-arrow arrow-right" data-target="laptops-grid" aria-label="Shfaq më shumë">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- FEATURE BAND 2 -->
+    <div class="feature-band">
+      <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=1440&h=560&fit=crop&auto=format" alt="Ofertat e Sezonit">
+      <div class="feature-band-overlay" style="background:linear-gradient(to left,rgba(20,20,20,0.88) 30%,rgba(20,20,20,0.3) 70%,transparent 100%);justify-content:flex-end;">
+        <div class="feature-band-content" style="text-align:right;">
+          <p class="feature-tag">Ky Sezon</p>
+          <h2 class="feature-title">OFERTAT<br>MË TË MIRA</h2>
+          <a href="/shop.html?orderby=price_asc" class="btn-primary">Shiko Ofertat</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SALE SECTION -->
+    <section class="collection-section sale-section">
+      <div class="collection-header">
+        <div>
+          <span class="sale-tag">Sale</span>
+          <h2 class="collection-title">Produkte me Zbritje</h2>
+        </div>
+        <div style="display:flex;align-items:center;gap:20px;">
+          <span class="sale-discount-pill">Deri në <strong id="sale-max-pct">—%</strong> zbritje</span>
+          <a href="/shop.html?sale=1" class="view-all-link">Shiko të gjitha</a>
+        </div>
+      </div>
+      <div class="carousel-wrap">
+        <button class="carousel-nav-arrow arrow-left" data-target="sale-grid" aria-label="Kthehu">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="product-grid" id="sale-grid"></div>
+        <button class="carousel-nav-arrow arrow-right" data-target="sale-grid" aria-label="Shfaq më shumë">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- PROMO / CTA -->
+    <section class="promo-banner">
+      <span class="promo-number">SALE</span>
+      <p class="promo-label">Ofertë me Kohë të Kufizuar</p>
+      <h2 class="promo-title">Pajisjet e se nesermes<br><em>te disponueshme sot</em></h2>
+      <p class="promo-desc">Çmime të pathyeshme për pajisje IT premium. Sasi të kufizuara — veproni shpejt.</p>
+      <a href="/shop.html" class="btn-primary" style="position:relative;">Shfleto Të Gjitha Ofertat</a>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-banner">
+      <div class="footer-badge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Dërgim i Shpejtë
+      </div>
+      <div class="footer-badge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg>
+        Suport Teknik
+      </div>
+      <div class="footer-badge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Çmime Konkurruese
+      </div>
+    </div>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div>
+          <img src="/IT Store LOGO.png" alt="IT Store" class="footer-brand-logo">
+          <p class="footer-brand-desc">Information & Technology Resource Specialist. Partneri juaj i besuar për zgjidhje teknologjike premium dhe këshilla eksperte.</p>
+          <div class="footer-social">
+            <a href="https://www.facebook.com/itstorealbania/" class="social-link" aria-label="Facebook" target="_blank" rel="noopener">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/itstore_computers/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+            </a>
+            <a href="#" class="social-link" aria-label="WhatsApp" id="footer-wa">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Produktet</p>
+          <ul>
+            <li><a href="/shop.html?cat=laptop">Laptop</a></li>
+            <li><a href="/shop.html?cat=desktop">Desktop</a></li>
+            <li><a href="/shop.html?cat=monitore">Monitor</a></li>
+            <li><a href="/shop.html?cat=licensa">Licensa</a></li>
+            <li><a href="/shop.html?cat=komponente">Komponente</a></li>
+            <li><a href="/shop.html?cat=gaming">Gaming</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Kompania</p>
+          <ul>
+            <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
+            <li><a href="/na-kontaktoni.html">Na Kontaktoni</a></li>
+            <li><a href="#">Kthimi i Produktit</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Kontakt</p>
+          <div class="footer-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>Rr. Ibrahim Pashë Bushatlliu, Tiranë, Shqipëri</span>
+          </div>
+          <div class="footer-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg>
+            <a href="tel:+355693181062">+355 69 318 1062</a>
+          </div>
+          <div class="footer-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            <a href="https://wa.me/355693181062">WhatsApp</a>
+          </div>
+          <div class="footer-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <a href="mailto:info@itstore.al">info@itstore.al</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Qëndroni të Informuar</p>
+          <p style="font-size:1.2rem;font-weight:300;color:rgba(20,20,20,0.5);margin-bottom:20px;line-height:1.65;">
+            Merrni ofertat e fundit dhe produktet e reja direkt në email.
+          </p>
+          <input type="email" class="newsletter-input" placeholder="Adresa juaj email">
+          <button class="newsletter-btn">Abonohu</button>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 IT Store — Information &amp; Technology Resource Specialist</p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { getProducts } from '/js/api.js';
+    import { renderProductCard, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, openBasket } from '/js/ui.js';
+    import { updateBadge } from '/js/basket.js';
+    import { loadConfig } from '/js/config.js';
+
+    loadConfig();
+
+    // Mobile nav
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('mobile-nav').classList.add('open');
+    });
+    document.getElementById('mobile-nav-close').addEventListener('click', () => {
+      document.getElementById('mobile-nav').classList.remove('open');
+    });
+    document.getElementById('mobile-nav').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+    });
+
+    // Shop dropdown
+    (function() {
+      const shopItem = document.getElementById('shop-nav-item');
+      const shopDrop = document.getElementById('shop-dropdown');
+      if (!shopItem || !shopDrop) return;
+      let timer;
+      const show = () => { clearTimeout(timer); shopDrop.classList.add('open'); shopItem.classList.add('dropdown-open'); };
+      const hide = () => { timer = setTimeout(() => { shopDrop.classList.remove('open'); shopItem.classList.remove('dropdown-open'); }, 200); };
+      shopItem.addEventListener('mouseenter', show);
+      shopItem.addEventListener('mouseleave', hide);
+      shopDrop.addEventListener('mouseenter', show);
+      shopDrop.addEventListener('mouseleave', hide);
+      const mobileToggle = document.getElementById('mobile-shop-toggle');
+      const mobileChildren = document.getElementById('mobile-shop-children');
+      if (mobileToggle && mobileChildren) {
+        mobileToggle.addEventListener('click', () => {
+          const isOpen = mobileChildren.classList.contains('open');
+          mobileChildren.classList.toggle('open', !isOpen);
+          mobileToggle.classList.toggle('open', !isOpen);
+        });
+      }
+    })();
+
+    // Header search
+    document.getElementById('header-search-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const q = document.getElementById('header-search-input').value.trim();
+      if (q) window.location.href = `/shop.html?q=${encodeURIComponent(q)}`;
+      else window.location.href = '/shop.html';
+    });
+
+    // Scroll hide/show header
+    (function () {
+      const header = document.getElementById('main-header');
+      let lastY = 0;
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const y = window.scrollY;
+            if (y < 10) {
+              header.classList.remove('header-hidden');
+            } else if (y > lastY + 6) {
+              header.classList.add('header-hidden');
+            } else if (y < lastY - 6) {
+              header.classList.remove('header-hidden');
+            }
+            lastY = y;
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
+    })();
+
+    initBasketDrawer();
+    updateBadge();
+
+    // Wire cart button to open drawer
+    document.querySelector('.cart-icon-btn').addEventListener('click', openBasket);
+
+    // Rank products so the most interesting ones lead: admin-featured first,
+    // then discounted, in-stock and properly-priced (complete) listings.
+    function interestScore(p) {
+      let s = 0;
+      if (p.featured) s += 1000;
+      if (Number(p.sale_price) > 0) s += 200;
+      if (p.in_stock) s += 80;
+      if (Number(p.price) > 0) s += 60;
+      if ((p.images || []).length > 1) s += 10;
+      return s;
+    }
+
+    // Round-robin pick across brands so a single brand never dominates a row
+    // and the key brands stay represented in the visible cards.
+    function pickByBrand(products, n) {
+      const byBrand = new Map();
+      for (const p of products) {
+        const b = (p.brand || 'Tjetër').trim();
+        if (!byBrand.has(b)) byBrand.set(b, []);
+        byBrand.get(b).push(p);
+      }
+      const out = [];
+      let progressed = true;
+      while (out.length < n && progressed) {
+        progressed = false;
+        for (const list of byBrand.values()) {
+          if (list.length && out.length < n) { out.push(list.shift()); progressed = true; }
+        }
+      }
+      return out;
+    }
+
+    async function loadSection(gridId, params, shopUrl, opts = {}) {
+      const grid = document.getElementById(gridId);
+      grid.innerHTML = renderSkeletons(4);
+      try {
+        // Mixed-brand sections pull the full category so the round-robin can
+        // reach every brand, not just whatever lands in the newest 24.
+        const poolSize = opts.mixBrands ? 100 : 24;
+        let { products } = await getProducts({ per_page: poolSize, ...params });
+        if (opts.excludeBrands && opts.excludeBrands.length) {
+          const blocked = opts.excludeBrands.map(b => b.toLowerCase());
+          products = products.filter(p => !blocked.includes((p.brand || '').toLowerCase()));
+        }
+        if (products.length === 0) {
+          grid.innerHTML = '<p style="color:rgba(20,20,20,0.4);padding:20px;">Nuk ka produkte ende.</p>';
+          return [];
+        }
+        const ranked = [...products].sort((a, b) => interestScore(b) - interestScore(a));
+        const products8 = opts.mixBrands ? pickByBrand(ranked, 8) : ranked.slice(0, 8);
+        grid.innerHTML = products8.map(renderProductCard).join('');
+        const seeMore = document.createElement('a');
+        seeMore.href = shopUrl;
+        seeMore.className = 'carousel-see-more';
+        seeMore.innerHTML = `<div class="csm-inner"><div class="csm-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></div><span class="csm-text">Shiko<br>më shumë</span></div>`;
+        grid.appendChild(seeMore);
+        return products8;
+      } catch {
+        grid.innerHTML = '<p style="color:rgba(20,20,20,0.4);padding:20px;">Gabim gjatë ngarkimit.</p>';
+        return [];
+      }
+    }
+
+    // Load all sections
+    const [laptops, pcs, workstations, saleProducts] = await Promise.all([
+      loadSection('featured-grid', { category: 'laptop', orderby: 'featured' }, '/shop.html?cat=laptop'),
+      loadSection('new-grid', { category: 'pc', orderby: 'featured' }, '/shop.html?cat=pc', { excludeBrands: ['Zotac'], mixBrands: true }),
+      loadSection('laptops-grid', { category: 'workstation', orderby: 'featured' }, '/shop.html?cat=workstation', { excludeBrands: ['Fujitsu'], mixBrands: true }),
+      loadSection('sale-grid', { sale: '1' }, '/shop.html?sale=1'),
+    ]);
+
+    const allProducts = [...laptops, ...pcs, ...workstations, ...saleProducts];
+    wireAddToBasketButtons(allProducts);
+
+    // Update max discount badge
+    const maxDiscount = saleProducts
+      .filter(p => p.sale_price && Number(p.price) > 0)
+      .reduce((max, p) => {
+        const pct = Math.round((1 - Number(p.sale_price) / Number(p.price)) * 100);
+        return pct > max ? pct : max;
+      }, 0);
+    const pctEl = document.getElementById('sale-max-pct');
+    if (pctEl && maxDiscount > 0) pctEl.textContent = maxDiscount + '%';
+
+    // Wire carousel arrows
+    document.querySelectorAll('.carousel-nav-arrow.arrow-right').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const grid = document.getElementById(btn.dataset.target);
+        if (!grid) return;
+        const card = grid.querySelector('.product-card, .skeleton-card');
+        const amount = card ? card.offsetWidth + 2 : grid.clientWidth * 0.25;
+        grid.scrollBy({ left: amount, behavior: 'smooth' });
+      });
+    });
+    document.querySelectorAll('.carousel-nav-arrow.arrow-left').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const grid = document.getElementById(btn.dataset.target);
+        if (!grid) return;
+        const card = grid.querySelector('.product-card, .skeleton-card');
+        const amount = card ? card.offsetWidth + 2 : grid.clientWidth * 0.25;
+        grid.scrollBy({ left: -amount, behavior: 'smooth' });
+      });
+    });
+    ['featured-grid', 'new-grid', 'laptops-grid', 'sale-grid'].forEach(id => {
+      const grid = document.getElementById(id);
+      const leftArrow = document.querySelector(`.carousel-nav-arrow.arrow-left[data-target="${id}"]`);
+      if (!grid || !leftArrow) return;
+      grid.addEventListener('scroll', () => leftArrow.classList.toggle('visible', grid.scrollLeft > 4));
+    });
+
+    // Swipe / drag-to-scroll for carousels — works for touch and mouse
+    function enableDragScroll(grid) {
+      let down = false, startX = 0, startScroll = 0, moved = false;
+      let lastX = 0, lastT = 0, velocity = 0, raf = 0;
+      grid.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        cancelAnimationFrame(raf);
+        down = true; moved = false;
+        startX = lastX = e.clientX;
+        startScroll = grid.scrollLeft;
+        lastT = e.timeStamp; velocity = 0;
+        grid.classList.add('dragging');
+        try { grid.setPointerCapture(e.pointerId); } catch {}
+      });
+      grid.addEventListener('pointermove', (e) => {
+        if (!down) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 5) moved = true;
+        grid.scrollLeft = startScroll - dx;
+        const dt = e.timeStamp - lastT;
+        if (dt > 0) velocity = (e.clientX - lastX) / dt;
+        lastX = e.clientX; lastT = e.timeStamp;
+      });
+      const end = (e, glide) => {
+        if (!down) return;
+        down = false;
+        grid.classList.remove('dragging');
+        try { grid.releasePointerCapture(e.pointerId); } catch {}
+        if (glide && Math.abs(velocity) > 0.06) {
+          let v = velocity, prev = performance.now();
+          const step = (now) => {
+            const dt = Math.min(now - prev, 32); prev = now;
+            grid.scrollLeft -= v * dt;
+            v *= Math.pow(0.94, dt / 16);
+            if (Math.abs(v) > 0.02) raf = requestAnimationFrame(step);
+          };
+          raf = requestAnimationFrame(step);
+        }
+      };
+      grid.addEventListener('pointerup', (e) => end(e, true));
+      grid.addEventListener('pointercancel', (e) => end(e, false));
+      grid.addEventListener('dragstart', (e) => e.preventDefault());
+      grid.addEventListener('click', (e) => {
+        if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+      }, true);
+    }
+    ['featured-grid', 'new-grid', 'laptops-grid', 'sale-grid'].forEach(id => {
+      const g = document.getElementById(id);
+      if (g) enableDragScroll(g);
+    });
+
+    // Set WhatsApp footer link
+    const waNum = window.__WA_NUMBER__;
+    document.getElementById('footer-wa').href = `https://wa.me/${waNum}`;
+  </script>
+
+  <script>
+    // Hover button glow-circle effect
+    (function () {
+      function initHoverBtns() {
+        document.querySelectorAll('.hover-btn').forEach(function (btn) {
+          var isListening = false, lastAdded = 0;
+          btn.addEventListener('pointerenter', function () { isListening = true; });
+          btn.addEventListener('pointerleave', function () { isListening = false; });
+          btn.addEventListener('pointermove', function (e) {
+            if (!isListening) return;
+            var now = Date.now();
+            if (now - lastAdded > 100) {
+              lastAdded = now;
+              var rect = btn.getBoundingClientRect();
+              var x = e.clientX - rect.left, y = e.clientY - rect.top;
+              var pct = ((x / btn.offsetWidth) * 100).toFixed(1);
+              var el = document.createElement('div');
+              el.className = 'hb-circle';
+              el.style.left = x + 'px';
+              el.style.top = y + 'px';
+              el.style.background = 'linear-gradient(to right,var(--circle-start) ' + pct + '%,var(--circle-end) ' + pct + '%)';
+              btn.appendChild(el);
+              requestAnimationFrame(function () { el.classList.add('fade-in'); });
+              setTimeout(function () { el.classList.remove('fade-in'); el.classList.add('fade-out'); }, 1000);
+              setTimeout(function () { el.remove(); }, 2200);
+            }
+          });
+        });
+      }
+      document.readyState === 'loading'
+        ? document.addEventListener('DOMContentLoaded', initHoverBtns)
+        : initHoverBtns();
+    })();
+  </script>
+</body>
+</html>

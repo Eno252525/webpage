@@ -1,0 +1,44 @@
+# Secrets — NEVER commit
+.env
+.env.*
+!.env.example
+
+# Dependencies (better-sqlite3 is native — rebuilt on the server)
+node_modules/
+
+# Database files — live data; never deploy over the server's copy
+*.db*
+*.sqlite*
+
+# User uploads — live data, managed on the server
+uploads/
+
+# Stale deploy duplicate — deploy via git, not by syncing this folder
+deploy/
+
+# Loose source images at the project root (the app serves public/ + uploads/)
+/*.jpg
+/*.jpeg
+/*.png
+/*.webp
+/*.avif
+
+# Build / debug artifacts
+temporary screenshots/
+_dbg.mjs
+_test_script.js
+
+# Data exports / backups
+*.csv
+*.xlsx
+products-data.json
+products-final.json
+
+# Archives / deploy bundles — build fresh, don't track
+*.zip
+*.rar
+*.7z
+
+# OS / editor
+.DS_Store
+Thumbs.db

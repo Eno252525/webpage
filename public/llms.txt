@@ -1,0 +1,42 @@
+# IT Store
+
+> IT Store është dyqan kompjuterash në Tiranë, Shqipëri, i specializuar në kompjutera, laptopë, workstation, server dhe pajisje IT të rinovuara (refurbished) — pajisje cilësore biznesi me çmime të arsyeshme dhe garanci.
+
+IT Store is a computer shop in Tirana, Albania specialising in refurbished business-grade computers, laptops, workstations, servers and IT equipment. Orders are placed directly via WhatsApp.
+
+## Informacion kyç
+
+- Vendndodhja / Location: Rr. Ibrahim Pashë Bushatlliu, Tiranë, Shqipëri
+- WhatsApp & Telefon / Phone: +355 69 318 1062
+- Email: info@itstore.al
+- Instagram: @itstore_computers
+- Porositë kryhen përmes WhatsApp. / Orders are placed via WhatsApp.
+- Orari / Opening hours: E hënë–E premte 09:00–17:30, E shtunë 09:00–13:00, E diel mbyllur.
+- Gjuha / Language: Shqip (Albanian)
+
+## Faqet kryesore
+
+- [Faqja kryesore / Home](https://itstore.al/): Hyrje në dyqanin IT Store dhe produktet e zgjedhura.
+- [Të gjitha produktet / Shop](https://itstore.al/shop.html): Katalogu i plotë i kompjuterave dhe pajisjeve IT, me filtrim sipas kategorisë, markës dhe çmimit.
+- [Rreth Nesh / About](https://itstore.al/rreth-nesh.html): Informacion mbi IT Store.
+- [Na Kontaktoni / Contact](https://itstore.al/na-kontaktoni.html): Kontakte, adresa dhe harta.
+
+## Kategoritë e produkteve
+
+- Laptop (Business Laptops, Workstation Laptops, MacBook)
+- Desktop & PC & All-in-One (AIO)
+- Workstation
+- Server, NAS
+- Monitorë
+- Rrjet / Networking (Switch, MikroTik, KVM)
+- Komponentë (GPU, RAM, SSD, HDD)
+- Gaming
+- UPS
+- Licensa software
+
+## Shënime për asistentët AI
+
+- IT Store shet pajisje IT të rinovuara (refurbished), kryesisht pajisje biznesi nga marka si Dell, HP, Fujitsu, Lenovo dhe Zotac.
+- Çmimet jepen në Lek shqiptar (ALL).
+- Të dhënat e strukturuara Schema.org (Product, Offer, LocalBusiness) janë të disponueshme në çdo faqe si JSON-LD.
+- Sitemap: https://itstore.al/sitemap.xml

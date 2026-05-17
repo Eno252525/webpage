@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — IT Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 62.5%; }
+    body { background: #0E0E0E; color: #fff; font-family: 'Inter', sans-serif; font-size: 1.4rem; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    a { text-decoration: none; color: inherit; }
+    /* Sidebar */
+    .admin-layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+    .admin-sidebar { background: #141414; border-right: 1px solid rgba(255,255,255,0.07); padding: 28px 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+    .sidebar-logo { height: 28px; margin-bottom: 32px; display: block; }
+    .sidebar-nav { list-style: none; }
+    .sidebar-nav li { margin-bottom: 2px; }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.2rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(255,255,255,0.55); border-radius: 2px; transition: all 0.15s;
+    }
+    .sidebar-nav a:hover, .sidebar-nav a.active { color: #F0A020; background: rgba(240,160,32,0.08); }
+    .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 16px 0; }
+    .sidebar-logout { display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.35); cursor: pointer; border-radius: 2px; transition: color 0.15s; background: none; border: none; width: 100%; }
+    .sidebar-logout:hover { color: #ef4444; }
+    /* Main content */
+    .admin-main { padding: 36px 40px; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .admin-title { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 3rem; letter-spacing: 0.02em; text-transform: uppercase; }
+    .btn-add {
+      display: flex; align-items: center; gap: 8px;
+      background: #F0A020; color: #141414;
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.2rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 12px 22px; border: none; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-add:hover { background: white; }
+    /* Table */
+    .admin-table-wrap { overflow-x: auto; }
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th {
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.1rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.45); padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.07); text-align: left;
+    }
+    .admin-table td { padding: 14px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+    .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .prod-thumb { width: 48px; height: 48px; object-fit: cover; background: #1a1a1a; display: block; }
+    .prod-name { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.3rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .prod-cat { font-size: 1.1rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .prod-price { font-family: 'Inter', sans-serif; font-weight: 700; color: #F0A020; font-size: 1.3rem; }
+    .price-was-small { font-size: 1.1rem; color: rgba(255,255,255,0.3); text-decoration: line-through; }
+    .badge-pill {
+      display: inline-block; font-family: 'Inter', sans-serif; font-weight: 800;
+      font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 2px 8px;
+    }
+    .badge-featured { background: rgba(240,160,32,0.15); color: #F0A020; border: 1px solid rgba(240,160,32,0.3); }
+    .badge-sale { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+    .badge-new { background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+    .badge-no-img { background: rgba(99,102,241,0.12); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); cursor: help; }
+    /* Stock toggle */
+    .stock-toggle { position: relative; width: 40px; height: 22px; }
+    .stock-toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: rgba(255,255,255,0.1);
+      border-radius: 22px; cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; width: 16px; height: 16px;
+      background: rgba(255,255,255,0.5); border-radius: 50%;
+      left: 3px; top: 3px; transition: transform 0.2s;
+    }
+    .stock-toggle input:checked + .toggle-slider { background: rgba(34,197,94,0.4); }
+    .stock-toggle input:checked + .toggle-slider::before { transform: translateX(18px); background: #22c55e; }
+    /* Action buttons */
+    .action-btn {
+      background: none; border: none; cursor: pointer; padding: 6px 10px;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.1rem;
+      letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.15s;
+    }
+    .btn-edit { color: rgba(255,255,255,0.5); }
+    .btn-edit:hover { color: #F0A020; }
+    .btn-delete { color: rgba(255,255,255,0.3); }
+    .btn-delete:hover { color: #ef4444; }
+    /* Search */
+    .table-toolbar { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; }
+    .admin-search {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: white; padding: 9px 14px; font-family: 'Inter', sans-serif;
+      font-size: 1.3rem; outline: none; transition: border-color 0.15s; width: 280px;
+    }
+    .admin-search:focus { border-color: rgba(240,160,32,0.4); }
+    .admin-search::placeholder { color: rgba(255,255,255,0.25); }
+    .results-label { font-size: 1.2rem; color: rgba(255,255,255,0.35); }
+    /* Categories section */
+    .section-card { background: #141414; border: 1px solid rgba(255,255,255,0.07); padding: 28px; margin-top: 48px; }
+    .section-card-title { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.8rem; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 20px; }
+    .cat-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .cat-tag {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      padding: 6px 12px; font-size: 1.2rem;
+    }
+    .cat-tag-del { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.3); font-size: 1.4rem; transition: color 0.15s; }
+    .cat-tag-del:hover { color: #ef4444; }
+    .add-cat-form { display: flex; gap: 8px; }
+    .add-cat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 9px 12px; font-family: 'Inter', sans-serif; font-size: 1.3rem; outline: none; }
+    .add-cat-input:focus { border-color: rgba(240,160,32,0.4); }
+    .btn-add-cat { background: rgba(240,160,32,0.12); color: #F0A020; border: 1px solid rgba(240,160,32,0.25); padding: 9px 18px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+    .btn-add-cat:hover { background: #F0A020; color: #141414; }
+    /* Toasts */
+    .admin-toast { position: fixed; bottom: 24px; right: 24px; background: #141414; border: 1px solid rgba(255,255,255,0.1); padding: 14px 20px; font-size: 1.3rem; z-index: 1000; opacity: 0; transform: translateY(12px); transition: all 0.2s; pointer-events: none; }
+    .admin-toast.show { opacity: 1; transform: none; }
+    .admin-toast.success { border-color: rgba(240,160,32,0.4); color: #F0A020; }
+    .admin-toast.error { border-color: rgba(239,68,68,0.4); color: #ef4444; }
+    /* Empty */
+    .table-empty { padding: 60px; text-align: center; color: rgba(255,255,255,0.3); font-size: 1.5rem; }
+    @media (max-width: 900px) { .admin-layout { grid-template-columns: 1fr; } .admin-sidebar { display: none; } .admin-main { padding: 24px 20px; } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <img src="/IT Store LOGO.png" alt="IT Store" class="sidebar-logo">
+      <ul class="sidebar-nav">
+        <li><a href="/admin" class="active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Produktet
+        </a></li>
+        <li><a href="/admin/product">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+          Shto Produkt
+        </a></li>
+      </ul>
+      <div class="sidebar-divider"></div>
+      <ul class="sidebar-nav">
+        <li><a href="/" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Faqja kryesore
+        </a></li>
+      </ul>
+      <div class="sidebar-divider"></div>
+      <button class="sidebar-logout" id="logout-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Dil
+      </button>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+      <div class="admin-header">
+        <h1 class="admin-title">Produktet</h1>
+        <a href="/admin/product" class="btn-add">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Shto Produkt
+        </a>
+      </div>
+
+      <div class="table-toolbar">
+        <input type="text" class="admin-search" id="table-search" placeholder="Kërko produkte…">
+        <button id="filter-no-img" class="btn-add-cat" style="white-space:nowrap;padding:9px 16px;font-size:1.1rem;" title="Trego vetëm produktet pa foto reale">📷 Pa foto</button>
+        <span class="results-label" id="table-count"></span>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width:60px;"></th>
+              <th>Produkti</th>
+              <th>Kategoria</th>
+              <th>Çmimi</th>
+              <th>Statusi</th>
+              <th>Stoku</th>
+              <th style="width:120px;"></th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody"></tbody>
+        </table>
+        <div id="table-empty" class="table-empty" style="display:none;">Nuk ka produkte. <a href="/admin/product" style="color:#F0A020;">Shto produktin e parë →</a></div>
+      </div>
+
+      <!-- Categories -->
+      <div class="section-card">
+        <h2 class="section-card-title">Kategoritë</h2>
+        <div class="cat-grid" id="cat-grid"></div>
+        <div class="add-cat-form">
+          <input type="text" class="add-cat-input" id="new-cat-name" placeholder="Emri i kategorisë (p.sh. Laptop)">
+          <input type="text" class="add-cat-input" id="new-cat-slug" placeholder="slug (p.sh. laptope)" style="max-width:180px;">
+          <button class="btn-add-cat" id="add-cat-btn">+ Shto</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="admin-toast" id="admin-toast"></div>
+
+  <script>
+    // Auth check
+    fetch('/api/admin/check').then(r => { if (!r.ok) window.location.href = '/admin/login'; }).catch(() => window.location.href = '/admin/login');
+
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+
+    function toast(msg, type = 'success') {
+      const el = document.getElementById('admin-toast');
+      el.textContent = msg;
+      el.className = `admin-toast ${type} show`;
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove('show'), 2800);
+    }
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method: 'POST' });
+      window.location.href = '/admin/login';
+    });
+
+    // Slug auto-gen
+    document.getElementById('new-cat-name').addEventListener('input', e => {
+      const slug = e.target.value.toLowerCase().replace(/ë/g,'e').replace(/ç/g,'c').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      document.getElementById('new-cat-slug').value = slug;
+    });
+
+    // Load categories
+    async function loadCategories() {
+      const res = await fetch('/api/admin/categories', { credentials: 'include' });
+      const cats = await res.json();
+      const grid = document.getElementById('cat-grid');
+      grid.innerHTML = cats.map(c => `
+        <div class="cat-tag">
+          <span>${esc(c.name)}</span>
+          <button class="cat-tag-del" data-id="${Number(c.id)}" title="Fshi kategorinë">×</button>
+        </div>`).join('') || '<p style="color:rgba(255,255,255,0.3);">Nuk ka kategori.</p>';
+      grid.querySelectorAll('.cat-tag-del').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Fshi këtë kategori?')) return;
+          const res = await fetch(`/api/admin/categories/${btn.dataset.id}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (data.error) { toast(data.error, 'error'); return; }
+          toast('Kategoria u fshi.'); loadCategories();
+        });
+      });
+    }
+
+    document.getElementById('add-cat-btn').addEventListener('click', async () => {
+      const name = document.getElementById('new-cat-name').value.trim();
+      const slug = document.getElementById('new-cat-slug').value.trim();
+      if (!name || !slug) { toast('Plotëso emrin dhe slug-un.', 'error'); return; }
+      const res = await fetch('/api/admin/categories', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, slug }),
+      });
+      const data = await res.json();
+      if (data.error) { toast(data.error, 'error'); return; }
+      toast('Kategoria u shtua!');
+      document.getElementById('new-cat-name').value = '';
+      document.getElementById('new-cat-slug').value = '';
+      loadCategories();
+    });
+
+    // Load products
+    let allProducts = [];
+    async function loadProducts() {
+      const res = await fetch('/api/admin/products', { credentials: 'include' });
+      allProducts = await res.json();
+      renderTable(allProducts);
+    }
+
+    function renderTable(products) {
+      const tbody = document.getElementById('products-tbody');
+      const empty = document.getElementById('table-empty');
+      document.getElementById('table-count').textContent = `${products.length} produkte`;
+      if (!products.length) {
+        tbody.innerHTML = ''; empty.style.display = 'block'; return;
+      }
+      empty.style.display = 'none';
+      tbody.innerHTML = products.map(p => {
+        const imgSrc = p.images?.[0] || '';
+        const isPlaceholder = imgSrc.includes('placehold.co');
+        const img = imgSrc ? `<img class="prod-thumb" src="${esc(imgSrc)}" alt="">` : `<div class="prod-thumb" style="background:#1a1a1a;"></div>`;
+        const fmtLek = n => Math.round(Number(n)).toLocaleString('en-US') + ' L';
+        const hasPrice = Number(p.price) > 0 || Number(p.sale_price) > 0;
+        const priceHTML = !hasPrice ? '<span style="color:rgba(255,255,255,0.3);">—</span>' : p.sale_price
+          ? `<span class="prod-price">${fmtLek(p.sale_price)}</span> <span class="price-was-small">${fmtLek(p.price)}</span>`
+          : `<span class="prod-price">${fmtLek(p.price)}</span>`;
+        const badges = [
+          p.featured ? '<span class="badge-pill badge-featured">⭐ E veçuar</span>' : '',
+          p.badge ? `<span class="badge-pill badge-${p.badge === 'i ri' ? 'new' : 'sale'}">${esc(p.badge)}</span>` : '',
+          isPlaceholder ? '<span class="badge-pill badge-no-img" title="Kjo foto është placeholder — ngarko një foto reale">📷 Pa foto</span>' : '',
+        ].filter(Boolean).join(' ');
+        return `<tr>
+          <td>${img}</td>
+          <td>
+            <p class="prod-name">${esc(p.name)}</p>
+            ${badges}
+          </td>
+          <td><span class="prod-cat">${esc(p.category_name || '—')}</span></td>
+          <td>${priceHTML}</td>
+          <td>${badges || '<span style="color:rgba(255,255,255,0.3);">—</span>'}</td>
+          <td>
+            <label class="stock-toggle">
+              <input type="checkbox" ${p.in_stock ? 'checked' : ''} data-id="${Number(p.id)}" class="stock-check">
+              <span class="toggle-slider"></span>
+            </label>
+          </td>
+          <td>
+            <button class="action-btn btn-edit" data-id="${Number(p.id)}">Ndrysho</button>
+            <button class="action-btn btn-delete" data-id="${Number(p.id)}">Fshi</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      // Stock toggle
+      tbody.querySelectorAll('.stock-check').forEach(chk => {
+        chk.addEventListener('change', async () => {
+          await fetch(`/api/admin/products/${chk.dataset.id}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ in_stock: chk.checked }),
+          });
+          toast(chk.checked ? 'Stoku u aktivizua.' : 'Stoku u çaktivizua.');
+        });
+      });
+
+      // Edit
+      tbody.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', () => window.location.href = `/admin/product?id=${btn.dataset.id}`);
+      });
+
+      // Delete
+      tbody.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Jeni i sigurt që doni ta fshini këtë produkt?')) return;
+          const res = await fetch(`/api/admin/products/${btn.dataset.id}`, { method: 'DELETE' });
+          if (res.ok) { toast('Produkti u fshi.'); loadProducts(); }
+          else { toast('Gabim gjatë fshirjes.', 'error'); }
+        });
+      });
+    }
+
+    // Table search
+    let showingNoImgOnly = false;
+    function applyFilters() {
+      const q = document.getElementById('table-search').value.toLowerCase();
+      let list = allProducts;
+      if (showingNoImgOnly) list = list.filter(p => (p.images?.[0] || '').includes('placehold.co'));
+      if (q) list = list.filter(p => p.name.toLowerCase().includes(q) || (p.category_name || '').toLowerCase().includes(q));
+      renderTable(list);
+    }
+    document.getElementById('table-search').addEventListener('input', applyFilters);
+    document.getElementById('filter-no-img').addEventListener('click', function() {
+      showingNoImgOnly = !showingNoImgOnly;
+      this.style.background = showingNoImgOnly ? '#6366f1' : '';
+      this.style.color = showingNoImgOnly ? 'white' : '';
+      applyFilters();
+    });
+
+    loadProducts();
+    loadCategories();
+  </script>
+</body>
+</html>

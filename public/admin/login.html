@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — IT Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 62.5%; }
+    body {
+      background: #0E0E0E; color: #fff;
+      font-family: 'Inter', sans-serif; font-size: 1.4rem;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+    .login-card {
+      width: 360px; background: #141414;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 48px 40px;
+    }
+    .login-logo { height: 32px; margin-bottom: 32px; display: block; }
+    .login-title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800; font-size: 2.4rem;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      margin-bottom: 28px; color: white;
+    }
+    .form-label { display: block; font-size: 1.15rem; font-weight: 300; color: rgba(255,255,255,0.5); margin-bottom: 7px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .form-input {
+      width: 100%; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: white; padding: 11px 14px;
+      font-family: 'Inter', sans-serif; font-size: 1.4rem;
+      outline: none; margin-bottom: 20px;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus { border-color: rgba(240,160,32,0.5); }
+    .btn-login {
+      width: 100%; background: #F0A020; color: #141414;
+      border: none; padding: 13px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 800; font-size: 1.4rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-login:hover { background: white; }
+    .error-msg { color: #ef4444; font-size: 1.2rem; margin-top: 12px; display: none; }
+    .back-link { display: block; text-align: center; margin-top: 20px; font-size: 1.2rem; color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.15s; }
+    .back-link:hover { color: rgba(255,255,255,0.7); }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <img src="/IT Store LOGO.png" alt="IT Store" class="login-logo">
+    <h1 class="login-title">Hyr si Admin</h1>
+    <form id="login-form">
+      <label class="form-label" for="password">Fjalëkalimi</label>
+      <input type="password" class="form-input" id="password" autocomplete="current-password" autofocus>
+      <button type="submit" class="btn-login" id="login-btn">Hyr</button>
+      <p class="error-msg" id="error-msg">Fjalëkalim i gabuar.</p>
+    </form>
+    <a href="/" class="back-link">← Ktheu në faqe</a>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const errEl = document.getElementById('error-msg');
+      const password = document.getElementById('password').value;
+      btn.textContent = 'Duke hyrë…';
+      btn.disabled = true;
+      errEl.style.display = 'none';
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password }),
+        });
+        if (res.ok) {
+          window.location.href = '/admin';
+        } else {
+          errEl.style.display = 'block';
+          btn.textContent = 'Hyr';
+          btn.disabled = false;
+        }
+      } catch {
+        errEl.textContent = 'Gabim lidhjeje. Provoni sërish.';
+        errEl.style.display = 'block';
+        btn.textContent = 'Hyr';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
