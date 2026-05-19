@@ -16,7 +16,7 @@ uploads/
 # Stale deploy duplicate — deploy via git, not by syncing this folder
 deploy/
 
-# Loose source images at the project root (the app serves public/ + uploads/)
+# Loose source images at the project root (the app serves webroot/ + uploads/)
 /*.jpg
 /*.jpeg
 /*.png

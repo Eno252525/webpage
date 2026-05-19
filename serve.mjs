@@ -1,6 +1,6 @@
 // NOTE: This is a minimal static-only server and is REDUNDANT with server.js
 // (which is the real app — API, admin, security headers). Prefer `node server.js`.
-// Kept here only as a lightweight fallback; it serves the public/ folder safely.
+// Kept here only as a lightweight fallback; it serves the webroot/ folder safely.
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
@@ -9,8 +9,8 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
 
-// Serve ONLY the public/ directory — never the project root (which holds .env, db, etc.).
-const ROOT = path.join(__dirname, 'public');
+// Serve ONLY the webroot/ directory — never the project root (which holds .env, db, etc.).
+const ROOT = path.join(__dirname, 'webroot');
 
 const MIME = {
   '.html': 'text/html',

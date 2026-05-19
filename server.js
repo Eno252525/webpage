@@ -100,7 +100,7 @@ app.get('/sitemap.xml', (req, res, next) => {
 
 // Static files — cached; HTML pages are served above by seoRoute, not here,
 // so stale-HTML caching is not a risk. Upload filenames are content-stable.
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
+app.use(express.static(path.join(__dirname, 'webroot'), { maxAge: '1d' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '30d', immutable: true }));
 
 // Favicon
@@ -118,14 +118,14 @@ app.use('/api/search', searchRouter);
 app.use('/api/admin', adminRouter);
 
 // Admin routes
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
-app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'login.html')));
-app.get('/admin/product', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'product.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'webroot', 'admin', 'index.html')));
+app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, 'webroot', 'admin', 'login.html')));
+app.get('/admin/product', (req, res) => res.sendFile(path.join(__dirname, 'webroot', 'admin', 'product.html')));
 
 // 404
 app.use((req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Route not found' });
-  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'), err => {
+  res.status(404).sendFile(path.join(__dirname, 'webroot', '404.html'), err => {
     if (err) res.status(404).send('404 - Not Found');
   });
 });

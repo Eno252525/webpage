@@ -19,7 +19,9 @@ import { fileURLToPath } from 'url';
 import { getProductBySlug, getCategories, getProductsForSitemap } from './database.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PUBLIC_DIR = path.join(__dirname, 'public');
+// HTML page templates live in webroot/; Node reads them and injects SEO tags.
+// (Renamed from public/ so the Passenger docroot can stay empty — see CLAUDE.md.)
+const WEBROOT_DIR = path.join(__dirname, 'webroot');
 
 // ── Site constants ───────────────────────────────────────────────────────────
 export const SITE_URL = (process.env.SITE_URL || 'https://itstore.al').replace(/\/+$/, '');
@@ -75,7 +77,7 @@ function absImg(src) {
 const htmlCache = new Map();
 function readPage(file) {
   if (!htmlCache.has(file)) {
-    htmlCache.set(file, fs.readFileSync(path.join(PUBLIC_DIR, file), 'utf8'));
+    htmlCache.set(file, fs.readFileSync(path.join(WEBROOT_DIR, file), 'utf8'));
   }
   return htmlCache.get(file);
 }

@@ -1,54 +1,57 @@
-# CLAUDE.md — Frontend Website Rules
+# CLAUDE.md
 
-## Always Do First
-- **Invoke the `frontend-design` skill** before writing any frontend code, every session, no exceptions.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Reference Images
-- If a reference image is provided: match layout, spacing, typography, and color exactly. Swap in placeholder content (images via `https://placehold.co/`, generic copy). Do not improve or add to the design.
-- If no reference image: design from scratch with high craft (see guardrails below).
-- Screenshot your output, compare against reference, fix mismatches, re-screenshot. Do at least 2 comparison rounds. Stop only when no visible differences remain or user says so.
+## Project
 
-## Local Server
-- **Always serve on localhost** — never screenshot a `file:///` URL.
-- Start the dev server: `node server.js` (serves `public/` + API routes at `http://localhost:3000`)
-- `server.js` lives in the project root. Start it in the background before taking any screenshots.
-- If the server is already running, do not start a second instance.
+IT Store (itstore.al) — a custom Node.js / Express 5 / SQLite storefront for a refurbished-computer shop in Tirana, Albania. It replaced a WooCommerce/WordPress site. There is **no checkout**: customers inquire per product via WhatsApp. UI language is Albanian (`sq`).
 
-## Screenshot Workflow
-- Puppeteer is installed at `C:/Users/eno/AppData/Local/Temp/puppeteer-test/`. Chrome cache is at `C:/Users/eno/.cache/puppeteer/`.
-- **Always screenshot from localhost:** `node screenshot.mjs http://localhost:3000`
-- Screenshots are saved automatically to `./temporary screenshots/screenshot-N.png` (auto-incremented, never overwritten).
-- Optional label suffix: `node screenshot.mjs http://localhost:3000 label` → saves as `screenshot-N-label.png`
-- `screenshot.mjs` lives in the project root. Use it as-is.
-- After screenshotting, read the PNG from `temporary screenshots/` with the Read tool — Claude can see and analyze the image directly.
-- When comparing, be specific: "heading is 32px but reference shows ~24px", "card gap is 16px but should be 24px"
-- Check: spacing/padding, font size/weight/line-height, colors (exact hex), alignment, border-radius, shadows, image sizing
+## Commands
 
-## Output Defaults
-- Single `index.html` file, all styles inline, unless user says otherwise
-- Tailwind CSS via CDN: `<script src="https://cdn.tailwindcss.com"></script>`
-- Placeholder images: `https://placehold.co/WIDTHxHEIGHT`
-- Mobile-first responsive
+- `npm install` — install dependencies (`better-sqlite3` is a native module, rebuilt per platform; never copy `node_modules` between OSes)
+- `node setup.js` — generate `JWT_SECRET` + `ADMIN_PASSWORD_HASH` into `.env`; required before the first start
+- `node server.js` — start the server (defaults to `http://localhost:3000`; `PORT` from `.env`)
+- `node screenshot.mjs http://localhost:3000 [label]` — Puppeteer screenshot → `temporary screenshots/screenshot-N[-label].png` (auto-incremented)
+- `node scripts/optimize-images.mjs` — convert `uploads/` images to WebP and repoint the DB (idempotent; backs the DB up first)
 
-## Brand Assets
-- Always check the `brand_assets/` folder before designing. It may contain logos, color guides, style guides, or images.
-- If assets exist there, use them. Do not use placeholders where real assets are available.
-- If a logo is present, use it. If a color palette is defined, use those exact values — do not invent brand colors.
+No test suite or linter is configured. The server **fails fast on startup** if `JWT_SECRET` or `ADMIN_PASSWORD_HASH` is missing — `.env` must exist and be populated.
 
-## Anti-Generic Guardrails
-- **Colors:** Never use default Tailwind palette (indigo-500, blue-600, etc.). Pick a custom brand color and derive from it.
-- **Shadows:** Never use flat `shadow-md`. Use layered, color-tinted shadows with low opacity.
-- **Typography:** Never use the same font for headings and body. Pair a display/serif with a clean sans. Apply tight tracking (`-0.03em`) on large headings, generous line-height (`1.7`) on body.
-- **Gradients:** Layer multiple radial gradients. Add grain/texture via SVG noise filter for depth.
-- **Animations:** Only animate `transform` and `opacity`. Never `transition-all`. Use spring-style easing.
-- **Interactive states:** Every clickable element needs hover, focus-visible, and active states. No exceptions.
-- **Images:** Add a gradient overlay (`bg-gradient-to-t from-black/60`) and a color treatment layer with `mix-blend-multiply`.
-- **Spacing:** Use intentional, consistent spacing tokens — not random Tailwind steps.
-- **Depth:** Surfaces should have a layering system (base → elevated → floating), not all sit at the same z-plane.
+## Architecture
 
-## Hard Rules
-- Do not add sections, features, or content not in the reference
-- Do not "improve" a reference design — match it
-- Do not stop after one screenshot pass
-- Do not use `transition-all`
-- Do not use default Tailwind blue/indigo as primary color
+### Request pipeline (`server.js`) — order is load-bearing
+1. Security headers (CSP, HSTS, etc.) + `compression`
+2. `legacyRedirects` (`redirects.js`) — 301s from the old WordPress/WooCommerce URL scheme
+3. SEO routes — `/`, `/shop.html`, `/product/:slug`, `/rreth-nesh.html`, `/na-kontaktoni.html`, `/sitemap.xml` are served by `seo.js`, **not** as static files
+4. `express.static` for `webroot/` (site assets + HTML templates) and `/uploads`
+5. `/api/*` routes and `/admin*` pages
+6. 404 handler
+
+A page route **must** be registered before `express.static`, or the raw HTML file is served without SEO injection.
+
+### SEO / SSR strategy (`seo.js`)
+Pages render their content client-side with JS, so non-JS crawlers would see an empty page. `seo.js` intercepts every HTML page request and injects into the static HTML: `<title>`, meta description, Open Graph, Twitter Card, and Schema.org JSON-LD (Store/LocalBusiness, WebSite, Product+Offer, BreadcrumbList). For product pages it also injects a server-rendered content block (`productSsr`) that the page's own JS overwrites on load — real users never see it, crawlers do. `sitemap.xml` is generated dynamically from the product DB. When changing page markup, keep the injection anchors intact (`</head>`, `<title>`, `<div class="product-page" id="product-page">`).
+
+### Data layer (`database.js`)
+SQLite via `better-sqlite3` (`products.db`, WAL mode). Two tables: `categories` (self-referencing `parent_id` gives subcategories) and `products` (`images` and `attributes` are JSON-encoded TEXT columns; `parseProduct` decodes them). Schema is created and migrated on import. All DB access goes through the exported query helpers — don't query the DB directly elsewhere.
+
+### API & admin
+`routes/products.js`, `categories.js`, `search.js` are public read-only JSON endpoints under `/api/`. `routes/admin.js` is the CMS: `/api/admin/login` bcrypt-compares against `ADMIN_PASSWORD_HASH` and issues a 7-day JWT in an httpOnly `adminToken` cookie; it also handles product/category CRUD and multer image uploads (extension + MIME whitelisted) into `uploads/`. `requireAuth` (`middleware/auth.js`) gates every admin write; `rateLimit` (`middleware/rateLimit.js`, in-memory per-IP) guards login. Admin UI lives in `webroot/admin/`.
+
+### Frontend
+`webroot/*.html` pages styled by `webroot/css/shared.css` plus per-page inline `<style>`; shared client JS in `webroot/js/` (`api.js`, `basket.js`, `ui.js`, `i18n.js`, `config.js`). The "basket" collects products into a WhatsApp message instead of a checkout; the WhatsApp number reaches the client via `/api/config`. Styling is **hand-written CSS — no Tailwind or CSS framework**. (A dead Tailwind CDN `<script>` was removed; do not re-add it.)
+
+## Deployment
+
+Hosted on a cPanel server (itstore.al) and run under **Phusion Passenger** via cPanel's Application Manager. Passenger's entry point is `app.js`, which just imports `server.js`; locally you still run `node server.js` directly.
+
+Passenger treats `<app-root>/public/` as a static document root served by Apache *outside* Node. To keep the SEO/SSR pipeline authoritative, `public/` is intentionally **empty** (only a `.gitkeep`) so every request falls through to Node. The real site assets and HTML page templates live in **`webroot/`** — served by `express.static` and read by `seo.js`. Do not put files in `public/`.
+
+The project root is a git repo (remote: GitHub); deploy by pulling on the server, then restarting the app in Application Manager. `.gitignore` excludes `.env`, `products.db*`, `uploads/`, and `node_modules/`, so a deploy never overwrites live data — the database and uploads are managed on the server and transferred manually only on the first deploy. Any `package.json` change requires `npm install` on the server. The WebP conversion lives in `products.db` + `uploads/` (both git-ignored), so run `scripts/optimize-images.mjs` on the server rather than expecting it through git.
+
+## Frontend design workflow (UI work only)
+
+- Invoke the `frontend-design` skill before writing frontend code.
+- Always serve on localhost (`node server.js`) and screenshot from there — never a `file://` URL. After screenshotting, read the PNG and compare; iterate at least twice, being specific about pixel/color differences.
+- With a reference image: match layout, spacing, typography, and color exactly (placeholder content via `https://placehold.co/`); do not "improve" or add to it. Without one: design from scratch with high craft.
+- Use real assets from `brand_assets/` if that folder is present rather than placeholders.
+- Anti-generic guardrails: custom brand colors (never the default Tailwind palette), layered/tinted shadows, a distinct display+body font pairing, animate only `transform`/`opacity` (never `transition-all`), and hover/focus-visible/active states on every interactive element.

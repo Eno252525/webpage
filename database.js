@@ -57,6 +57,20 @@ try {
   }
 }
 
+// ── Migration: add Komponente subcategories if missing ───────────────────────
+{
+  const komponenteCat = db.prepare("SELECT id FROM categories WHERE slug = 'komponente'").get();
+  if (komponenteCat) {
+    const insertSub = db.prepare(
+      'INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES (?, ?, ?, ?)'
+    );
+    insertSub.run('Caddy', 'caddy', komponenteCat.id, 0);
+    insertSub.run('Karta Rrjeti', 'karta-rrjeti', komponenteCat.id, 0);
+    insertSub.run('RAID Controller', 'raid-controller', komponenteCat.id, 0);
+    insertSub.run('SAS', 'sas', komponenteCat.id, 0);
+  }
+}
+
 // ── Seed default categories (only if empty) ──────────────────────────────────
 
 const catCount = db.prepare('SELECT COUNT(*) as n FROM categories').get().n;
