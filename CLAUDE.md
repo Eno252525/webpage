@@ -8,7 +8,7 @@ IT Store (itstore.al) — a custom Node.js / Express 5 / SQLite storefront for a
 
 ## Commands
 
-- `npm install` — install dependencies (`better-sqlite3` is a native module, rebuilt per platform; never copy `node_modules` between OSes)
+- `npm install` — install dependencies (`better-sqlite3` is a native module, rebuilt per platform; never copy `node_modules` between OSes). A project `.npmrc` sets `omit=dev`, so this skips devDependencies (`puppeteer`, `xlsx`); run `npm install --include=dev` to get them for local screenshot/data tooling.
 - `node setup.js` — generate `JWT_SECRET` + `ADMIN_PASSWORD_HASH` into `.env`; required before the first start
 - `node server.js` — start the server (defaults to `http://localhost:3000`; `PORT` from `.env`)
 - `node screenshot.mjs http://localhost:3000 [label]` — Puppeteer screenshot → `temporary screenshots/screenshot-N[-label].png` (auto-incremented)
