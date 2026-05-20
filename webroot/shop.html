@@ -558,12 +558,6 @@
             <li><a href="/shop.html?cat=workstation">Workstation</a></li>
             <li><a href="/shop.html?cat=macbook">MacBook</a></li>
             <li><a href="/shop.html?cat=networking">Networking</a></li>
-            <li><a href="/shop.html?cat=komponente">Komponente</a></li>
-            <li><a href="/shop.html?cat=sas">SAS</a></li>
-            <li><a href="/shop.html?cat=caddy">Caddy</a></li>
-            <li><a href="/shop.html?cat=raid-controller">RAID Controller</a></li>
-            <li><a href="/shop.html?cat=karta-rrjeti">Karta Rrjeti</a></li>
-            <li><a href="/shop.html?cat=ups">UPS</a></li>
             <li><a href="/shop.html">Të gjitha produktet</a></li>
           </ul>
         </li>
@@ -606,7 +600,7 @@
             <div class="sort-item" role="option" data-value="newest">Më të reja</div>
             <div class="sort-item" role="option" data-value="price_asc">Çmim ↑</div>
             <div class="sort-item" role="option" data-value="price_desc">Çmim ↓</div>
-            <div class="sort-item" role="option" data-value="featured">Të veçuara</div>
+            <div class="sort-item" role="option" data-value="popularity">Më të kërkuara</div>
           </div>
         </div>
         <div class="view-toggle">
@@ -1073,7 +1067,7 @@
     const sortTrigger = document.getElementById('sort-trigger');
     const sortMenu = document.getElementById('sort-menu');
     const sortLabelEl = document.getElementById('sort-label');
-    const SORT_LABELS = { newest: 'Më të reja', price_asc: 'Çmim ↑', price_desc: 'Çmim ↓', featured: 'Të veçuara' };
+    const SORT_LABELS = { newest: 'Më të reja', price_asc: 'Çmim ↑', price_desc: 'Çmim ↓', popularity: 'Më të kërkuara' };
 
     function setSortUI(val) {
       sortLabelEl.textContent = SORT_LABELS[val] || val;

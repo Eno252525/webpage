@@ -491,12 +491,6 @@
             <li><a href="/shop.html?cat=workstation">Workstation</a></li>
             <li><a href="/shop.html?cat=macbook">MacBook</a></li>
             <li><a href="/shop.html?cat=networking">Networking</a></li>
-            <li><a href="/shop.html?cat=komponente">Komponente</a></li>
-            <li><a href="/shop.html?cat=sas">SAS</a></li>
-            <li><a href="/shop.html?cat=caddy">Caddy</a></li>
-            <li><a href="/shop.html?cat=raid-controller">RAID Controller</a></li>
-            <li><a href="/shop.html?cat=karta-rrjeti">Karta Rrjeti</a></li>
-            <li><a href="/shop.html?cat=ups">UPS</a></li>
             <li><a href="/shop.html">Të gjitha produktet</a></li>
           </ul>
         </li>
@@ -931,22 +925,27 @@
 
     // Swipe / drag-to-scroll for carousels — works for touch and mouse
     function enableDragScroll(grid) {
-      let down = false, startX = 0, startScroll = 0, moved = false;
+      let down = false, startX = 0, startScroll = 0, moved = false, captured = false, pid = 0;
       let lastX = 0, lastT = 0, velocity = 0, raf = 0;
       grid.addEventListener('pointerdown', (e) => {
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         cancelAnimationFrame(raf);
-        down = true; moved = false;
+        down = true; moved = false; captured = false; pid = e.pointerId;
         startX = lastX = e.clientX;
         startScroll = grid.scrollLeft;
         lastT = e.timeStamp; velocity = 0;
-        grid.classList.add('dragging');
-        try { grid.setPointerCapture(e.pointerId); } catch {}
       });
       grid.addEventListener('pointermove', (e) => {
         if (!down) return;
         const dx = e.clientX - startX;
-        if (Math.abs(dx) > 5) moved = true;
+        if (!moved && Math.abs(dx) > 5) {
+          moved = true;
+          grid.classList.add('dragging');
+          // Capture only once a real drag begins, so a stationary click
+          // still fires on the inner <a> and navigates normally.
+          try { grid.setPointerCapture(pid); captured = true; } catch {}
+        }
+        if (!moved) return;
         grid.scrollLeft = startScroll - dx;
         const dt = e.timeStamp - lastT;
         if (dt > 0) velocity = (e.clientX - lastX) / dt;
@@ -956,7 +955,7 @@
         if (!down) return;
         down = false;
         grid.classList.remove('dragging');
-        try { grid.releasePointerCapture(e.pointerId); } catch {}
+        if (captured) { try { grid.releasePointerCapture(e.pointerId); } catch {} captured = false; }
         if (glide && Math.abs(velocity) > 0.06) {
           let v = velocity, prev = performance.now();
           const step = (now) => {

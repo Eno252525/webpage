@@ -364,12 +364,6 @@
             <li><a href="/shop.html?cat=workstation">Workstation</a></li>
             <li><a href="/shop.html?cat=macbook">MacBook</a></li>
             <li><a href="/shop.html?cat=networking">Networking</a></li>
-            <li><a href="/shop.html?cat=komponente">Komponente</a></li>
-            <li><a href="/shop.html?cat=sas">SAS</a></li>
-            <li><a href="/shop.html?cat=caddy">Caddy</a></li>
-            <li><a href="/shop.html?cat=raid-controller">RAID Controller</a></li>
-            <li><a href="/shop.html?cat=karta-rrjeti">Karta Rrjeti</a></li>
-            <li><a href="/shop.html?cat=ups">UPS</a></li>
             <li><a href="/shop.html">Të gjitha produktet</a></li>
           </ul>
         </li>
@@ -546,8 +540,11 @@
       const priceHTML = !hasPrice ? '' : p.sale_price
         ? `<span class="detail-price-main price-sale">${fmtLek(p.sale_price)}</span><span class="detail-price-was">${fmtLek(p.price)}</span>`
         : `<span class="detail-price-main">${fmtLek(p.price)}</span>`;
-      const waMsg = 'Përshëndetje, dua të porosis produktin: ' + p.name + (hasPrice ? ' — ' + fmtLek(p.sale_price || p.price) : '');
-      const waURL = 'https://wa.me/' + (window.__WA_NUMBER__ || '') + '?text=' + encodeURIComponent(waMsg);
+      const productURL = location.origin + '/product/' + (p.slug || '');
+      const waMsg = 'Përshëndetje, dua të porosis produktin: ' + p.name
+        + (hasPrice ? ' — ' + fmtLek(p.sale_price || p.price) : '')
+        + '\n' + productURL;
+      const waURL = 'https://wa.me/' + (window.__WA_NUMBER__ || '355693181062') + '?text=' + encodeURIComponent(waMsg);
 
       document.getElementById('product-page').innerHTML = `
         <nav class="breadcrumb">

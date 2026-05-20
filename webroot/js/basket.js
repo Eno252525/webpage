@@ -51,8 +51,13 @@ export function clearBasket() { save([]); updateBadge(); }
 
 export function buildWhatsAppURL() {
   const items = load();
-  const phone = window.__WA_NUMBER__ || '';
-  const lines = items.map(i => `- ${i.name} × ${i.qty} — ${Math.round(i.price).toLocaleString('en-US')} L`).join('\n');
+  const phone = window.__WA_NUMBER__ || '355693181062';
+  const origin = (typeof location !== 'undefined' && location.origin) ? location.origin : '';
+  const lines = items.map(i => {
+    const price = Math.round(i.price).toLocaleString('en-US');
+    const link = i.slug ? `${origin}/product/${i.slug}` : '';
+    return `- ${i.name} × ${i.qty} — ${price} L${link ? `\n  ${link}` : ''}`;
+  }).join('\n');
   const total = Math.round(Number(getTotal())).toLocaleString('en-US');
   const msg = `Përshëndetje, dua të porosis:\n${lines}\nTotali: ${total} L`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;

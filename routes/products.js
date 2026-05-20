@@ -1,5 +1,5 @@
 import express from 'express';
-import { getProducts, getProduct, getProductBySlug, getBrands, getFormFactors } from '../database.js';
+import { getProducts, getProduct, getProductBySlug, getBrands, getFormFactors, incrementProductViews } from '../database.js';
 
 const router = express.Router();
 
@@ -37,6 +37,7 @@ router.get('/slug/:slug', (req, res) => {
   try {
     const product = getProductBySlug(req.params.slug);
     if (!product) return res.status(404).json({ error: 'Produkti nuk u gjet' });
+    incrementProductViews(product.id);
     res.json(product);
   } catch (err) {
     fail(res, 'detail-slug', err);
@@ -47,6 +48,7 @@ router.get('/:id', (req, res) => {
   try {
     const product = getProduct(Number(req.params.id));
     if (!product) return res.status(404).json({ error: 'Produkti nuk u gjet' });
+    incrementProductViews(product.id);
     res.json(product);
   } catch (err) {
     fail(res, 'detail', err);

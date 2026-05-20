@@ -45,6 +45,13 @@ try {
   // column already exists
 }
 
+// ── Migration: add view_count column if missing ──────────────────────────────
+try {
+  db.exec(`ALTER TABLE products ADD COLUMN view_count INTEGER DEFAULT 0`);
+} catch {
+  // column already exists
+}
+
 // ── Migration: add laptop subcategories if missing ───────────────────────────
 {
   const laptopCat = db.prepare("SELECT id FROM categories WHERE slug = 'laptop'").get();
@@ -170,6 +177,7 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
     price_desc: 'COALESCE(NULLIF(p.sale_price, 0), p.price) DESC',
     newest: 'p.created_at DESC',
     featured: 'p.featured DESC, p.created_at DESC',
+    popularity: 'p.view_count DESC, p.featured DESC, p.created_at DESC',
   };
   const order = orderMap[orderby] || 'p.created_at DESC';
 
@@ -224,6 +232,11 @@ export function getProduct(id) {
 export function getProductBySlug(slug) {
   const row = db.prepare('SELECT id FROM products WHERE slug = ?').get(slug);
   return row ? getProduct(row.id) : null;
+}
+
+const incrementViewStmt = db.prepare('UPDATE products SET view_count = COALESCE(view_count, 0) + 1 WHERE id = ?');
+export function incrementProductViews(id) {
+  try { incrementViewStmt.run(Number(id)); } catch { /* non-critical */ }
 }
 
 export function createProduct(data) {
