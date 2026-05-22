@@ -78,23 +78,27 @@ try {
   }
 }
 
-// ── Migration: SAS as a top-level category with HDD/SSD/NVMe subcategories ────
+// ── Migration: SAS under Komponente, with HDD/SSD/NVMe subcategories ──────────
 {
-  db.prepare(
-    "INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES ('SAS', 'sas', NULL, 5)"
-  ).run();
-  const sasCat = db.prepare("SELECT id, parent_id FROM categories WHERE slug = 'sas'").get();
-  if (sasCat) {
-    // Promote SAS out of Komponente to a top-level category
-    if (sasCat.parent_id !== null) {
-      db.prepare("UPDATE categories SET parent_id = NULL, sort_order = 5 WHERE slug = 'sas'").run();
+  const komponenteCat = db.prepare("SELECT id FROM categories WHERE slug = 'komponente'").get();
+  if (komponenteCat) {
+    db.prepare(
+      "INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES ('SAS', 'sas', ?, 5)"
+    ).run(komponenteCat.id);
+    const sasCat = db.prepare("SELECT id, parent_id FROM categories WHERE slug = 'sas'").get();
+    if (sasCat) {
+      // Nest SAS under Komponente (it may previously have been a top-level category)
+      if (sasCat.parent_id !== komponenteCat.id) {
+        db.prepare("UPDATE categories SET parent_id = ?, sort_order = 5 WHERE slug = 'sas'")
+          .run(komponenteCat.id);
+      }
+      const insertSub = db.prepare(
+        'INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES (?, ?, ?, ?)'
+      );
+      insertSub.run('SAS HDD', 'sas-hdd', sasCat.id, 1);
+      insertSub.run('SAS SSD', 'sas-ssd', sasCat.id, 2);
+      insertSub.run('SAS NVMe', 'sas-nvme', sasCat.id, 3);
     }
-    const insertSub = db.prepare(
-      'INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES (?, ?, ?, ?)'
-    );
-    insertSub.run('SAS HDD', 'sas-hdd', sasCat.id, 1);
-    insertSub.run('SAS SSD', 'sas-ssd', sasCat.id, 2);
-    insertSub.run('SAS NVMe', 'sas-nvme', sasCat.id, 3);
   }
 }
 
@@ -130,6 +134,18 @@ function parseProduct(row) {
   };
 }
 
+// SQL fragment: matches a product whose category is `:catId` or any descendant
+// of it, at any depth — so a parent-category filter includes nested subcategories
+// (e.g. Komponente → SAS → SAS HDD).
+const CATEGORY_SUBTREE = `p.category_id IN (
+    WITH RECURSIVE subtree(id) AS (
+      SELECT :catId
+      UNION ALL
+      SELECT c.id FROM categories c JOIN subtree ON c.parent_id = subtree.id
+    )
+    SELECT id FROM subtree
+  )`;
+
 export function getFormFactors({ category, brand } = {}) {
   const conditions = ["json_extract(p.attributes, '$.Form Factor') IS NOT NULL"];
   const params = {};
@@ -137,7 +153,7 @@ export function getFormFactors({ category, brand } = {}) {
   if (category) {
     const cat = db.prepare('SELECT id FROM categories WHERE slug = ?').get(category);
     if (cat) {
-      conditions.push('p.category_id IN (SELECT id FROM categories WHERE id = :catId OR parent_id = :catId)');
+      conditions.push(CATEGORY_SUBTREE);
       params.catId = cat.id;
     }
   }
@@ -158,7 +174,7 @@ export function getBrands({ category } = {}) {
   if (category) {
     const cat = db.prepare('SELECT id FROM categories WHERE slug = ?').get(category);
     if (cat) {
-      conditions.push('p.category_id IN (SELECT id FROM categories WHERE id = :catId OR parent_id = :catId)');
+      conditions.push(CATEGORY_SUBTREE);
       params.catId = cat.id;
     }
   }
@@ -177,8 +193,8 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
   if (category) {
     const cat = db.prepare('SELECT id FROM categories WHERE slug = ?').get(category);
     if (cat) {
-      // Include products from this category AND all direct subcategories
-      conditions.push('p.category_id IN (SELECT id FROM categories WHERE id = :catId OR parent_id = :catId)');
+      // Include products from this category AND all subcategories (any depth)
+      conditions.push(CATEGORY_SUBTREE);
       params.catId = cat.id;
     }
   }

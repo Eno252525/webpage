@@ -866,15 +866,17 @@
       const minPct = (curMin / PRICE_MAX * 100).toFixed(3);
       const maxPct = (curMax / PRICE_MAX * 100).toFixed(3);
 
-      const catItems = [
-        `<li><span class="cat-link ${!state.cat ? 'active' : ''}" data-slug="">Të gjitha produktet</span></li>`,
-        ...allCategories.map(cat => {
-          if (!cat.children?.length) {
-            return `<li><span class="cat-link ${state.cat === cat.slug ? 'active' : ''}" data-slug="${cat.slug}">${cat.name}</span></li>`;
-          }
-          const isChildActive = cat.children.some(ch => ch.slug === state.cat);
-          const isOpen = isChildActive || state.cat === cat.slug;
-          return `<li class="cat-accordion">
+      // True if `cat` or any descendant is the currently-selected category.
+      const subtreeHasActive = cat =>
+        cat.slug === state.cat || (cat.children || []).some(subtreeHasActive);
+
+      // Render a category and its subcategories (any depth) as sidebar list items.
+      const renderCatNode = cat => {
+        if (!cat.children?.length) {
+          return `<li><span class="cat-link ${state.cat === cat.slug ? 'active' : ''}" data-slug="${cat.slug}">${cat.name}</span></li>`;
+        }
+        const isOpen = subtreeHasActive(cat);
+        return `<li class="cat-accordion">
             <div class="cat-parent-row">
               <span class="cat-link ${state.cat === cat.slug ? 'active' : ''}" data-slug="${cat.slug}">${cat.name}</span>
               <button class="cat-toggle" aria-expanded="${isOpen}">
@@ -882,11 +884,14 @@
               </button>
             </div>
             <ul class="cat-children ${isOpen ? 'open' : ''}">
-              ${cat.children.map(ch => `
-                <li><span class="cat-link ${state.cat === ch.slug ? 'active' : ''}" data-slug="${ch.slug}">${ch.name}</span></li>`).join('')}
+              ${cat.children.map(renderCatNode).join('')}
             </ul>
           </li>`;
-        })
+      };
+
+      const catItems = [
+        `<li><span class="cat-link ${!state.cat ? 'active' : ''}" data-slug="">Të gjitha produktet</span></li>`,
+        ...allCategories.map(renderCatNode),
       ].join('');
 
       const brandItems = allBrands.length ? `
@@ -1106,8 +1111,15 @@
         chips.push({ label: 'Sale', clear: () => { state.sale = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
       }
       if (state.cat) {
-        const cat = allCategories.find(c => c.slug === state.cat) ||
-          allCategories.flatMap(c => c.children || []).find(c => c.slug === state.cat);
+        const findCat = cats => {
+          for (const c of cats) {
+            if (c.slug === state.cat) return c;
+            const nested = c.children && findCat(c.children);
+            if (nested) return nested;
+          }
+          return null;
+        };
+        const cat = findCat(allCategories);
         chips.push({ label: cat?.name || state.cat, clear: () => { state.cat = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
       }
       if (state.brand) {
