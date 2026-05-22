@@ -264,28 +264,74 @@
     .view-btn.active { background: var(--color-amber); color: #141414; }
     .view-btn + .view-btn { border-left: 1px solid rgba(0,0,0,0.1); }
 
-    /* ─── List View ─────────────────────────────────────────────────────── */
-    .product-list { display: flex; flex-direction: column; gap: 2px; }
-    .product-list-item {
-      display: grid; grid-template-columns: 160px 1fr auto;
-      background: var(--color-bg2); overflow: hidden; align-items: stretch;
+    /* ─── Grid View polish ──────────────────────────────────────────────── */
+    .product-grid { gap: 14px; }
+    .product-card {
+      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.22s cubic-bezier(0.4,0,0.2,1),
+                  border-color 0.18s ease;
     }
-    .list-img-link { display: block; }
+    .product-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(240,160,32,0.55);
+      box-shadow: 0 14px 30px -16px rgba(20,20,20,0.32),
+                  0 4px 10px -6px rgba(20,20,20,0.14);
+      z-index: 1;
+    }
+    /* Crisp seam between the white photo panel and the beige info block */
+    .product-card .product-img-wrap { border-bottom: 1px solid rgba(0,0,0,0.06); }
+    @media (max-width: 640px) {
+      .product-grid { gap: 10px; }
+    }
+
+    /* ─── List View ─────────────────────────────────────────────────────── */
+    .product-list { display: flex; flex-direction: column; gap: 14px; }
+    .product-list-item {
+      display: grid; grid-template-columns: 210px 1fr 212px;
+      background: #fff; overflow: hidden; align-items: stretch;
+      border: 1.5px solid rgba(20,20,20,0.1);
+      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.22s cubic-bezier(0.4,0,0.2,1),
+                  border-color 0.18s ease;
+    }
+    .product-list-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(240,160,32,0.55);
+      box-shadow: 0 12px 28px -14px rgba(20,20,20,0.3),
+                  0 3px 9px -5px rgba(20,20,20,0.14);
+    }
+    .product-list-item.out-of-stock { opacity: 0.72; }
+    /* Image — a white panel that fills the full row height, artwork centered.
+       Fixes the old fixed-square thumbnail that left dead space below it. */
+    .list-img-link {
+      display: block; background: #fff;
+      border-right: 1px solid rgba(0,0,0,0.07);
+    }
     .list-img-wrap {
-      width: 160px; height: 160px;
-      overflow: hidden; background: #ffffff; position: relative;
+      width: 100%; height: 100%; min-height: 192px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; position: relative; padding: 14px;
     }
     .list-img-wrap img {
-      width: 100%; height: 100%; object-fit: contain; display: block;
-      padding: 8px;
+      max-width: 100%; max-height: 100%;
+      object-fit: contain; display: block;
       transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
     }
-    .product-list-item:hover .list-img-wrap img { transform: scale(1.05); }
+    .product-list-item:hover .list-img-wrap img { transform: scale(1.06); }
     .list-info {
-      padding: 18px 22px; flex: 1;
-      border-left: 1px solid rgba(0,0,0,0.06);
-      display: flex; flex-direction: column; gap: 8px;
+      padding: 18px 24px; flex: 1; min-width: 0;
+      display: flex; flex-direction: column; gap: 7px;
     }
+    /* Chips/brand must hug their content, not stretch the flex column wide */
+    .list-info .product-brand,
+    .list-info .te-perdorur-tag,
+    .list-info .i-ri-tag { align-self: flex-start; }
+    .list-info .te-perdorur-tag,
+    .list-info .i-ri-tag { margin: 1px 0; }
+    /* Tighter spec rows so list cards stay compact */
+    .list-info .spec-grid { margin-top: 2px; }
+    .list-info .spec-label,
+    .list-info .spec-value { font-size: 1.3rem; padding-top: 3px; padding-bottom: 3px; }
     .list-name {
       font-family: 'Inter', sans-serif;
       font-weight: 900; font-size: 1.55rem;
@@ -295,53 +341,60 @@
     }
     .list-name:hover { color: var(--color-amber); }
     .list-short-desc {
-      font-size: 1.5rem; font-weight: 300;
-      color: rgba(20,20,20,0.5); line-height: 1.55;
+      font-size: 1.35rem; font-weight: 300;
+      color: rgba(20,20,20,0.62); line-height: 1.5;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .list-meta { display: flex; gap: 8px; align-items: center; margin-top: auto; }
+    .list-meta { display: flex; gap: 8px; align-items: center; margin-top: auto; padding-top: 6px; }
     .list-stock-badge {
-      display: inline-block; padding: 3px 9px;
+      display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
       font-family: 'Inter', sans-serif;
       font-weight: 700; font-size: 1.0rem;
       letter-spacing: 0.08em; text-transform: uppercase;
     }
+    .list-stock-badge::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor; flex-shrink: 0;
+    }
     .list-stock-badge.in-stock { background: rgba(34,197,94,0.1); color: #16a34a; border: 1px solid rgba(34,197,94,0.2); }
     .list-stock-badge.out-stock { background: rgba(239,68,68,0.08); color: #dc2626; border: 1px solid rgba(239,68,68,0.15); }
+    /* Right column — a soft beige "buy" panel housing price + CTA */
     .list-right {
-      padding: 18px 22px; display: flex; flex-direction: column;
-      align-items: flex-end; justify-content: center;
-      gap: 14px; min-width: 180px;
-      border-left: 1px solid rgba(0,0,0,0.06);
+      padding: 20px 22px; display: flex; flex-direction: column;
+      align-items: stretch; justify-content: center;
+      gap: 14px; min-width: 0;
+      background: linear-gradient(180deg, rgba(245,242,238,0.45), rgba(245,242,238,0.9));
+      border-left: 1px solid rgba(0,0,0,0.07);
     }
-    .list-price { flex-direction: column; align-items: flex-end; gap: 4px; }
+    .list-price { flex-direction: column; align-items: flex-end; gap: 2px; }
     .list-price .price-main { font-size: 2.2rem; }
-    .list-add-btn { width: auto; padding: 10px 18px; white-space: nowrap; border-top: none; }
+    .list-add-btn { width: 100%; padding: 11px 18px; white-space: nowrap; border-top: none; text-align: center; }
     @media (max-width: 700px) {
       /* Restack list rows: image + info on top, price + action as a
          full-width strip below — nothing gets hidden on mobile */
-      .product-list-item { grid-template-columns: 116px 1fr; }
-      .list-img-wrap { width: 116px; height: 116px; }
+      .product-list { gap: 12px; }
+      .product-list-item { grid-template-columns: 128px 1fr; }
+      .list-img-wrap { min-height: 128px; padding: 12px; }
       .list-info { padding: 14px 16px; }
       .list-name { font-size: 1.4rem; }
-      .list-short-desc { font-size: 1.3rem; }
+      .list-short-desc { font-size: 1.25rem; }
       .list-right {
         grid-column: 1 / -1;
         flex-direction: row; align-items: center; justify-content: space-between;
         flex-wrap: wrap; min-width: 0; padding: 12px 16px; gap: 10px 14px;
-        border-left: none; border-top: 1px solid rgba(0,0,0,0.06);
+        border-left: none; border-top: 1px solid rgba(0,0,0,0.07);
       }
       .list-price { flex-direction: row; align-items: baseline; flex: 0 0 auto; }
       .list-price .price-main { font-size: 2rem; white-space: nowrap; }
-      .list-add-btn { flex: 1 1 150px; }
+      .list-add-btn { flex: 1 1 150px; width: auto; }
       /* The narrow list thumbnail can't host both badges — keep the
          price-driving sale sticker, drop the corner badge */
       .product-list-item .product-badge { display: none; }
     }
     @media (max-width: 380px) {
-      .product-list-item { grid-template-columns: 92px 1fr; }
-      .list-img-wrap { width: 92px; height: 92px; }
+      .product-list-item { grid-template-columns: 104px 1fr; }
+      .list-img-wrap { min-height: 104px; }
     }
   </style>
 </head>
@@ -478,10 +531,6 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="9" cy="12" r="3.5"/><circle cx="9" cy="12" r="1" fill="currentColor"/><path d="M15 15l3-3"/></svg>
                     HDD
                   </a>
-                  <a href="/shop.html?cat=sas" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
-                    SAS
-                  </a>
                   <a href="/shop.html?cat=caddy" class="dropdown-col-link">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
                     Caddy
@@ -493,6 +542,29 @@
                   <a href="/shop.html?cat=karta-rrjeti" class="dropdown-col-link">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M7 17v3M17 17v3"/><rect x="6" y="8" width="4" height="5"/><path d="M14 9h4M14 12h4"/></svg>
                     Karta Rrjeti
+                  </a>
+                  <a href="/shop.html?cat=docking-station" class="dropdown-col-link">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="10" width="20" height="8" rx="2"/><path d="M7 14h2M12 14h2M17 14h.5"/><path d="M12 10V6M8 6h8"/></svg>
+                    Docking Station
+                  </a>
+                </div>
+                <div class="dropdown-col">
+                  <span class="dropdown-col-title">SAS</span>
+                  <a href="/shop.html?cat=sas" class="dropdown-col-link">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                    SAS
+                  </a>
+                  <a href="/shop.html?cat=sas-hdd" class="dropdown-col-link">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="9" cy="12" r="3.5"/><circle cx="9" cy="12" r="1" fill="currentColor"/><path d="M15 15l3-3"/></svg>
+                    SAS HDD
+                  </a>
+                  <a href="/shop.html?cat=sas-ssd" class="dropdown-col-link">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 12h6"/><circle cx="17" cy="12" r="1" fill="currentColor"/></svg>
+                    SAS SSD
+                  </a>
+                  <a href="/shop.html?cat=sas-nvme" class="dropdown-col-link">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="1"/><path d="M6 16v3M10 16v3M14 16v3M18 16v3M7 12h2M11 12h2M15 12h2"/></svg>
+                    SAS NVMe
                   </a>
                 </div>
                 <div class="dropdown-col">

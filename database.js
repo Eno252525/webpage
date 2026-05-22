@@ -74,7 +74,27 @@ try {
     insertSub.run('Caddy', 'caddy', komponenteCat.id, 0);
     insertSub.run('Karta Rrjeti', 'karta-rrjeti', komponenteCat.id, 0);
     insertSub.run('RAID Controller', 'raid-controller', komponenteCat.id, 0);
-    insertSub.run('SAS', 'sas', komponenteCat.id, 0);
+    insertSub.run('Docking Station', 'docking-station', komponenteCat.id, 0);
+  }
+}
+
+// ── Migration: SAS as a top-level category with HDD/SSD/NVMe subcategories ────
+{
+  db.prepare(
+    "INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES ('SAS', 'sas', NULL, 5)"
+  ).run();
+  const sasCat = db.prepare("SELECT id, parent_id FROM categories WHERE slug = 'sas'").get();
+  if (sasCat) {
+    // Promote SAS out of Komponente to a top-level category
+    if (sasCat.parent_id !== null) {
+      db.prepare("UPDATE categories SET parent_id = NULL, sort_order = 5 WHERE slug = 'sas'").run();
+    }
+    const insertSub = db.prepare(
+      'INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES (?, ?, ?, ?)'
+    );
+    insertSub.run('SAS HDD', 'sas-hdd', sasCat.id, 1);
+    insertSub.run('SAS SSD', 'sas-ssd', sasCat.id, 2);
+    insertSub.run('SAS NVMe', 'sas-nvme', sasCat.id, 3);
   }
 }
 

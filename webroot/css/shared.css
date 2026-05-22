@@ -290,7 +290,7 @@ header {
 
 /* ─── Marquee ───────────────────────────────────────────────────────── */
 .marquee-band { background: var(--color-amber); overflow: hidden; padding: 10px 0; white-space: nowrap; }
-.marquee-track { display: inline-flex; gap: 0; animation: marquee 20s linear infinite; }
+.marquee-track { display: inline-flex; gap: 0; animation: marquee 40s linear infinite; }
 .marquee-item {
   font-family: 'Inter', sans-serif;
   font-weight: 800; font-size: 1.2rem;
@@ -592,7 +592,7 @@ footer {
   outline: 2px solid var(--color-amber); outline-offset: 3px; border-radius: 2px;
 }
 .dropdown-secondary-cols {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0 16px;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 0 16px;
 }
 .dropdown-col { display: flex; flex-direction: column; min-width: 0; }
 .dropdown-col + .dropdown-col { border-left: 1px solid rgba(0,0,0,0.06); padding-left: 15px; }
