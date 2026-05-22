@@ -10,7 +10,7 @@ export const t = {
   allCategories: 'Të gjitha',
 
   // Product actions
-  addToBasket: 'Shto në Kërkesë',
+  addToBasket: 'Shto në Shportë',
   addedToBasket: 'U shtua!',
   viewBasket: 'Shiko Kërkesën',
   removeItem: 'Hiq',
