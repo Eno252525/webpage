@@ -78,6 +78,14 @@ try {
   }
 }
 
+// ── Migration: Server is a top-level category (was nested under Networking) ──
+{
+  const serverCat = db.prepare("SELECT id, parent_id FROM categories WHERE slug = 'server'").get();
+  if (serverCat && serverCat.parent_id !== null) {
+    db.prepare("UPDATE categories SET parent_id = NULL, sort_order = 4 WHERE slug = 'server'").run();
+  }
+}
+
 // ── Migration: SAS under Komponente, with HDD/SSD/NVMe subcategories ──────────
 {
   const komponenteCat = db.prepare("SELECT id FROM categories WHERE slug = 'komponente'").get();
@@ -186,6 +194,76 @@ export function getBrands({ category } = {}) {
   `).all(params).map(r => r.brand);
 }
 
+// ── Smart product search ─────────────────────────────────────────────────────
+// Expand a free-text query into tokens that combine CPU family + generation
+// phrases (e.g. "i5 gen9" or "i5 9th gen" → "i5-9", matching CPU "i5-9400").
+function expandSearchTokens(q) {
+  let s = String(q || '').toLowerCase().trim();
+  if (!s) return [];
+  // Normalize generation phrases to canonical "genN".
+  s = s.replace(/(\d+)\s*(?:st|nd|rd|th)\s*gen(?:eration)?\b/g, 'gen$1');
+  s = s.replace(/\bgen(?:eration)?\s*(\d+)/g, 'gen$1');
+
+  const tokens = s.split(/[\s,;/]+/).filter(t => t.length >= 2);
+
+  // Combine i{3,5,7,9} + genN  →  i{x}-{n}  (e.g. "i5-9" matches CPU "i5-9400")
+  const familyRe = /^i([3579])$/;
+  const genRe = /^gen(\d+)$/;
+  const fam = tokens.find(t => familyRe.test(t));
+  const gen = tokens.find(t => genRe.test(t));
+  if (fam && gen) {
+    const fx = familyRe.exec(fam)[1];
+    const gn = genRe.exec(gen)[1];
+    return tokens.filter(t => t !== fam && t !== gen).concat(`i${fx}-${gn}`);
+  }
+  return tokens;
+}
+
+const categoryMatchStmt = db.prepare(`
+  WITH RECURSIVE subtree(id) AS (
+    SELECT id FROM categories WHERE LOWER(name) LIKE ? OR LOWER(slug) LIKE ?
+    UNION ALL
+    SELECT c.id FROM categories c JOIN subtree s ON c.parent_id = s.id
+  )
+  SELECT DISTINCT id FROM subtree
+`);
+
+function buildProductSearch(q) {
+  const tokens = expandSearchTokens(q);
+  const clauses = [];
+  const scoreParts = [];
+  const params = {};
+  tokens.forEach((tok, i) => {
+    const key = `_sq${i}`;
+    const pat = `%${tok}%`;
+    params[key] = pat;
+    const catIds = categoryMatchStmt.all(pat, pat).map(r => r.id);
+    const catInList = catIds.length ? `p.category_id IN (${catIds.join(',')})` : null;
+    const catClause = catInList ? ` OR ${catInList}` : '';
+    clauses.push(`(
+      p.name LIKE :${key}
+      OR p.short_description LIKE :${key}
+      OR p.description LIKE :${key}
+      OR p.brand LIKE :${key}
+      OR p.attributes LIKE :${key}
+      ${catClause}
+    )`);
+    // Per-token relevance: name 5, category 5, brand 3, attrs 2, short 1, desc 1.
+    // Name and category tie at the top so "laptop" surfaces actual laptops
+    // (category match) ahead of docks that merely mention "laptop" in text.
+    scoreParts.push(
+      `(CASE WHEN p.name LIKE :${key} THEN 5 ELSE 0 END)`,
+      catInList ? `(CASE WHEN ${catInList} THEN 5 ELSE 0 END)` : '0',
+      `(CASE WHEN p.brand LIKE :${key} THEN 3 ELSE 0 END)`,
+      `(CASE WHEN p.attributes LIKE :${key} THEN 2 ELSE 0 END)`,
+      `(CASE WHEN p.short_description LIKE :${key} THEN 1 ELSE 0 END)`,
+      `(CASE WHEN p.description LIKE :${key} THEN 1 ELSE 0 END)`,
+    );
+  });
+  const score = scoreParts.length ? scoreParts.join(' + ') : '0';
+  return { clauses, params, score };
+}
+
 export function getProducts({ category, brand, form_factor, min_price, max_price, orderby, page, per_page, search, featured, sale } = {}) {
   const conditions = [];
   const params = {};
@@ -202,7 +280,13 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
   if (form_factor) { conditions.push("json_extract(p.attributes, '$.Form Factor') = :form_factor"); params.form_factor = form_factor; }
   if (min_price) { conditions.push('COALESCE(NULLIF(p.sale_price, 0), p.price) >= :min_price'); params.min_price = Number(min_price); }
   if (max_price) { conditions.push('COALESCE(NULLIF(p.sale_price, 0), p.price) <= :max_price'); params.max_price = Number(max_price); }
-  if (search) { conditions.push("p.name LIKE :search"); params.search = `%${search}%`; }
+  if (search) {
+    const { clauses: searchClauses, params: searchParams } = buildProductSearch(search);
+    if (searchClauses.length) {
+      conditions.push(...searchClauses);
+      Object.assign(params, searchParams);
+    }
+  }
   if (featured === '1' || featured === true) { conditions.push('p.featured = 1'); }
   if (sale === '1') { conditions.push('p.sale_price IS NOT NULL AND p.sale_price > 0'); }
 
@@ -328,16 +412,19 @@ export function deleteProduct(id) {
 }
 
 export function searchProducts(q) {
+  const { clauses, params, score } = buildProductSearch(q);
+  if (!clauses.length) return [];
   return db.prepare(`
-    SELECT p.id, p.name, p.slug, p.price, p.sale_price, p.images
+    SELECT p.id, p.name, p.slug, p.price, p.sale_price, p.images,
+           ${score} AS _score
     FROM products p
-    WHERE p.name LIKE ?
-    ORDER BY p.featured DESC, p.name ASC
+    WHERE ${clauses.join(' AND ')}
+    ORDER BY _score DESC, p.featured DESC, p.name ASC
     LIMIT 6
-  `).all(`%${q}%`).map(r => ({
-    ...r,
-    images: JSON.parse(r.images || '[]'),
-  }));
+  `).all(params).map(r => {
+    const { _score, ...rest } = r;
+    return { ...rest, images: JSON.parse(rest.images || '[]') };
+  });
 }
 
 export function getCategories() {
