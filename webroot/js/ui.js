@@ -1,5 +1,5 @@
 import { t } from './i18n.js';
-import { addItem, getItems, removeItem, setQty, getTotal, buildWhatsAppURL, updateBadge } from './basket.js';
+import { addItem, getItems, removeItemAt, setQtyAt, getTotal, buildWhatsAppURL, updateBadge } from './basket.js';
 
 export function fmtPrice(p) {
   return Math.round(Number(p)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -254,26 +254,33 @@ export function renderDrawerContents() {
     return;
   }
 
-  itemsEl.innerHTML = items.map(item => `
-    <div class="basket-item" data-id="${Number(item.id)}">
+  itemsEl.innerHTML = items.map((item, idx) => {
+    const optsLine = item.options && typeof item.options === 'object'
+      ? Object.entries(item.options).filter(([, v]) => v)
+          .map(([k, v]) => `${escapeHtml(k)}: ${escapeHtml(v)}`).join(' · ')
+      : '';
+    return `
+    <div class="basket-item" data-idx="${idx}">
       <div class="basket-item-img">
         ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` : ''}
       </div>
       <div class="basket-item-info">
         <p class="basket-item-name">${escapeHtml(item.name)}</p>
+        ${optsLine ? `<p class="basket-item-options" style="font-size:1.05rem;color:rgba(20,20,20,0.55);margin:2px 0 4px;">${optsLine}</p>` : ''}
         <p class="basket-item-price">${Number(item.price) > 0 ? fmtPrice(item.price) + ' L' : 'Çmim sipas kërkesës'}</p>
         <div class="basket-item-qty">
-          <button class="qty-btn" data-action="dec" data-id="${item.id}">−</button>
+          <button class="qty-btn" data-action="dec" data-idx="${idx}">−</button>
           <span>${item.qty}</span>
-          <button class="qty-btn" data-action="inc" data-id="${item.id}">+</button>
+          <button class="qty-btn" data-action="inc" data-idx="${idx}">+</button>
         </div>
       </div>
-      <button class="basket-item-remove" data-id="${item.id}" aria-label="${t.removeItem}">
+      <button class="basket-item-remove" data-idx="${idx}" aria-label="${t.removeItem}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
       </button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   footerEl.innerHTML = `
     <div class="basket-total">
@@ -290,16 +297,16 @@ export function renderDrawerContents() {
   // Wire qty/remove buttons
   itemsEl.querySelectorAll('.qty-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const id = Number(btn.dataset.id);
-      const item = getItems().find(i => i.id === id);
+      const idx = Number(btn.dataset.idx);
+      const item = getItems()[idx];
       if (!item) return;
-      setQty(id, item.qty + (btn.dataset.action === 'inc' ? 1 : -1));
+      setQtyAt(idx, item.qty + (btn.dataset.action === 'inc' ? 1 : -1));
       renderDrawerContents();
     });
   });
   itemsEl.querySelectorAll('.basket-item-remove').forEach(btn => {
     btn.addEventListener('click', () => {
-      removeItem(Number(btn.dataset.id));
+      removeItemAt(Number(btn.dataset.idx));
       renderDrawerContents();
     });
   });

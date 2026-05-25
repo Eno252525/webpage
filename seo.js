@@ -190,8 +190,10 @@ function productLd(p) {
   };
   if (images.length) node.image = images;
   if (p.brand) node.brand = { '@type': 'Brand', name: p.brand };
-  // Surface key specs to AI/search as additionalProperty
-  const attrs = Object.entries(p.attributes || {}).filter(([, v]) => v);
+  // Surface key specs to AI/search as additionalProperty. Skip the `options`
+  // and `prices` buckets — their values are arrays / lookup tables, not a
+  // single property value.
+  const attrs = Object.entries(p.attributes || {}).filter(([k, v]) => k !== 'options' && k !== 'prices' && v);
   if (attrs.length) {
     node.additionalProperty = attrs.map(([name, value]) => ({
       '@type': 'PropertyValue', name, value: String(value),
@@ -250,10 +252,23 @@ function inject(html, seo, ssr) {
 // this — but AI/search crawlers that don't run JS get full, readable content.
 function productSsr(p) {
   const price = effectivePrice(p);
+  const hasPrice = Number(price) > 0;
   const onSale = p.sale_price && p.sale_price > 0 && p.sale_price < p.price;
   const img = absImg(p.images && p.images[0]);
-  const specs = Object.entries(p.attributes || {}).filter(([, v]) => v);
+  const rawAttrs = p.attributes || {};
+  const optionsMap = rawAttrs.options && typeof rawAttrs.options === 'object' ? rawAttrs.options : null;
+  const pricesMap = rawAttrs.prices && typeof rawAttrs.prices === 'object' ? rawAttrs.prices : null;
+  const specs = Object.entries(rawAttrs).filter(([k, v]) => k !== 'options' && k !== 'prices' && v);
   const waText = encodeURIComponent(`Përshëndetje, jam i interesuar për: ${p.name}`);
+  const priceLine = hasPrice
+    ? `Çmimi: ${fmtPrice(price)} L${onSale ? ` <span style="opacity:.5;font-weight:400;text-decoration:line-through;">${fmtPrice(p.price)} L</span>` : ''}`
+    : '';
+  const optionsBlock = optionsMap
+    ? `<h2>Konfigurimet e Disponueshme</h2>${Object.entries(optionsMap).map(([k, vs]) =>
+        `<p><strong>${esc(k)}:</strong> ${(Array.isArray(vs) ? vs : []).map(esc).join(', ')}</p>`
+      ).join('')}${pricesMap ? `<h3>Çmimet sipas variantit</h3><ul>${Object.entries(pricesMap)
+        .map(([k, v]) => `<li><strong>${esc(k.replace(/\|/g, ' / '))}:</strong> ${fmtPrice(v)} L</li>`).join('')}</ul>` : ''}`
+    : '';
   return `
     <article class="ssr-product" style="max-width:1100px;margin:0 auto;line-height:1.7;">
       <nav aria-label="breadcrumb" style="font-size:1.2rem;opacity:.7;margin-bottom:14px;">
@@ -261,11 +276,12 @@ function productSsr(p) {
       </nav>
       <h1 style="margin:0 0 12px;">${esc(p.name)}</h1>
       ${img ? `<img src="${esc(img)}" alt="${esc(p.name)}" width="640" style="max-width:100%;height:auto;border-radius:8px;" loading="eager">` : ''}
-      <p style="font-size:1.6rem;font-weight:700;margin:16px 0 4px;">Çmimi: ${fmtPrice(price)} L${onSale ? ` <span style="opacity:.5;font-weight:400;text-decoration:line-through;">${fmtPrice(p.price)} L</span>` : ''}</p>
+      <p style="font-size:1.6rem;font-weight:700;margin:16px 0 4px;">${priceLine}</p>
       <p style="margin:0 0 12px;">${p.in_stock ? 'Në gjendje — gati për dërgesë.' : 'Aktualisht i padisponueshëm.'}</p>
       ${p.brand ? `<p><strong>Markë:</strong> ${esc(p.brand)}</p>` : ''}
       ${p.short_description && stripTags(p.short_description) !== p.name ? `<p>${esc(stripTags(p.short_description))}</p>` : ''}
       ${specs.length ? `<h2>Specifikimet</h2><ul>${specs.map(([k, v]) => `<li><strong>${esc(k)}:</strong> ${esc(v)}</li>`).join('')}</ul>` : ''}
+      ${optionsBlock}
       ${p.description ? `<h2>Përshkrimi</h2><p>${esc(stripTags(p.description))}</p>` : ''}
       <p style="margin-top:20px;"><a href="https://wa.me/${WHATSAPP}?text=${waText}" rel="nofollow">Porosit në WhatsApp →</a></p>
     </article>`;

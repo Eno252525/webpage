@@ -16,7 +16,7 @@ const WCAT_MAP = {
   'Desktop > PC':            { name: 'PC',             slug: 'pc',         parentSlug: 'desktop' },
   'Workstation':             { name: 'Workstation',    slug: 'workstation',parentSlug: null },
   'Networking':              { name: 'Networking',     slug: 'networking', parentSlug: null },
-  'Networking > Server':     { name: 'Server',         slug: 'server',     parentSlug: 'networking' },
+  'Networking > Server':     { name: 'Server',         slug: 'server',     parentSlug: null },
   'Networking > Switch':     { name: 'Switch',         slug: 'switch',     parentSlug: 'networking' },
   'Networking > NAS':        { name: 'NAS',            slug: 'nas',        parentSlug: 'networking' },
   'Networking > KVM':        { name: 'KVM',            slug: 'kvm',        parentSlug: 'networking' },

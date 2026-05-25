@@ -221,6 +221,10 @@ header {
 .price-main { color: #141414; font-weight: 700; font-size: 1.85rem; }
 .price-main.price-sale { color: #dc2626; }
 .price-was { text-decoration: line-through; font-size: 1.15rem; }
+.price-on-request {
+  color: var(--color-amber); font-weight: 700; font-size: 1.25rem;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
 .product-badge {
   position: absolute; top: 12px; left: 12px;
   background: var(--color-amber); color: #141414;
@@ -602,6 +606,15 @@ footer {
   color: var(--color-amber);
   padding: 0 9px 8px; margin-bottom: 4px;
   border-bottom: 1px solid rgba(0,0,0,0.09);
+}
+.dropdown-col-subtitle {
+  font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.78rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--color-amber);
+  padding: 0 9px 8px;
+  margin: 18px 0 4px;
+  border-top: 1px solid rgba(0,0,0,0.09);
+  padding-top: 14px;
 }
 .dropdown-col-link {
   display: flex; align-items: center; gap: 8px;

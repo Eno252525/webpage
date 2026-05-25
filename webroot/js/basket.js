@@ -5,9 +5,17 @@ function load() {
 }
 function save(items) { localStorage.setItem(KEY, JSON.stringify(items)); }
 
-export function addItem(product) {
+export function addItem(product, options) {
   const items = load();
-  const existing = items.find(i => i.id === product.id);
+  const cleanOptions = options && typeof options === 'object'
+    ? Object.fromEntries(Object.entries(options).filter(([, v]) => v))
+    : null;
+  const hasOptions = cleanOptions && Object.keys(cleanOptions).length > 0;
+  // Treat each (product, options) pair as a distinct basket line — picking a
+  // different RAM frequency shouldn't merge into the previous selection.
+  const matches = (i) => i.id === product.id
+    && JSON.stringify(i.options || null) === JSON.stringify(hasOptions ? cleanOptions : null);
+  const existing = items.find(matches);
   if (existing) {
     existing.qty = (existing.qty || 1) + 1;
   } else {
@@ -18,24 +26,30 @@ export function addItem(product) {
       price: product.sale_price ?? product.price,
       image: (product.images || [])[0] || '',
       qty: 1,
+      options: hasOptions ? cleanOptions : null,
     });
   }
   save(items);
   updateBadge();
 }
 
-export function removeItem(id) {
-  save(load().filter(i => i.id !== id));
+// Identify a line by its index so two entries with the same product id but
+// different options (e.g. RAM 8GB vs 16GB) can be edited independently.
+export function removeItemAt(idx) {
+  const items = load();
+  if (idx >= 0 && idx < items.length) {
+    items.splice(idx, 1);
+    save(items);
+  }
   updateBadge();
 }
 
-export function setQty(id, qty) {
+export function setQtyAt(idx, qty) {
   const items = load();
-  const item = items.find(i => i.id === id);
-  if (item) {
-    if (qty < 1) { save(items.filter(i => i.id !== id)); }
-    else { item.qty = qty; save(items); }
-  }
+  if (idx < 0 || idx >= items.length) return;
+  if (qty < 1) { items.splice(idx, 1); }
+  else { items[idx].qty = qty; }
+  save(items);
   updateBadge();
 }
 
@@ -54,9 +68,14 @@ export function buildWhatsAppURL() {
   const phone = window.__WA_NUMBER__ || '355693181062';
   const origin = (typeof location !== 'undefined' && location.origin) ? location.origin : '';
   const lines = items.map(i => {
-    const price = Math.round(i.price).toLocaleString('en-US');
+    const priceLabel = Number(i.price) > 0
+      ? Math.round(i.price).toLocaleString('en-US') + ' L'
+      : 'çmim sipas kërkesës';
     const link = i.slug ? `${origin}/product/${i.slug}` : '';
-    return `- ${i.name} × ${i.qty} — ${price} L${link ? `\n  ${link}` : ''}`;
+    const opts = i.options && typeof i.options === 'object'
+      ? Object.entries(i.options).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(', ')
+      : '';
+    return `- ${i.name}${opts ? ` (${opts})` : ''} × ${i.qty} — ${priceLabel}${link ? `\n  ${link}` : ''}`;
   }).join('\n');
   const total = Math.round(Number(getTotal())).toLocaleString('en-US');
   const msg = `Përshëndetje, dua të porosis:\n${lines}\nTotali: ${total} L`;

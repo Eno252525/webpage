@@ -12,13 +12,13 @@ export const t = {
   // Product actions
   addToBasket: 'Shto në Shportë',
   addedToBasket: 'U shtua!',
-  viewBasket: 'Shiko Kërkesën',
+  viewBasket: 'Shiko Shportën',
   removeItem: 'Hiq',
-  emptyBasket: 'Kërkesa juaj është bosh',
+  emptyBasket: 'Shporta juaj është bosh',
   continueShopping: 'Vazhdo blerjen',
 
   // Basket / inquiry
-  myInquiry: 'Kërkesa ime',
+  myInquiry: 'Shporta ime',
   inquiryItems: (n) => `${n} ${n === 1 ? 'produkt' : 'produkte'}`,
   total: 'Totali',
   sendWhatsApp: 'Dërgo në WhatsApp',

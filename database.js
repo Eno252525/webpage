@@ -265,32 +265,40 @@ function buildProductSearch(q) {
 }
 
 export function getProducts({ category, brand, form_factor, min_price, max_price, orderby, page, per_page, search, featured, sale } = {}) {
-  const conditions = [];
-  const params = {};
+  // Split filters: "base" (non-price) drives the slider range; price-bounds
+  // narrow the visible products on top of that.
+  const baseConditions = [];
+  const baseParams = {};
 
   if (category) {
     const cat = db.prepare('SELECT id FROM categories WHERE slug = ?').get(category);
     if (cat) {
       // Include products from this category AND all subcategories (any depth)
-      conditions.push(CATEGORY_SUBTREE);
-      params.catId = cat.id;
+      baseConditions.push(CATEGORY_SUBTREE);
+      baseParams.catId = cat.id;
     }
   }
-  if (brand) { conditions.push('LOWER(p.brand) = LOWER(:brand)'); params.brand = brand; }
-  if (form_factor) { conditions.push("json_extract(p.attributes, '$.Form Factor') = :form_factor"); params.form_factor = form_factor; }
-  if (min_price) { conditions.push('COALESCE(NULLIF(p.sale_price, 0), p.price) >= :min_price'); params.min_price = Number(min_price); }
-  if (max_price) { conditions.push('COALESCE(NULLIF(p.sale_price, 0), p.price) <= :max_price'); params.max_price = Number(max_price); }
+  if (brand) { baseConditions.push('LOWER(p.brand) = LOWER(:brand)'); baseParams.brand = brand; }
+  if (form_factor) { baseConditions.push("json_extract(p.attributes, '$.Form Factor') = :form_factor"); baseParams.form_factor = form_factor; }
   if (search) {
     const { clauses: searchClauses, params: searchParams } = buildProductSearch(search);
     if (searchClauses.length) {
-      conditions.push(...searchClauses);
-      Object.assign(params, searchParams);
+      baseConditions.push(...searchClauses);
+      Object.assign(baseParams, searchParams);
     }
   }
-  if (featured === '1' || featured === true) { conditions.push('p.featured = 1'); }
-  if (sale === '1') { conditions.push('p.sale_price IS NOT NULL AND p.sale_price > 0'); }
+  if (featured === '1' || featured === true) { baseConditions.push('p.featured = 1'); }
+  if (sale === '1') { baseConditions.push('p.sale_price IS NOT NULL AND p.sale_price > 0'); }
 
-  const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+  const priceConditions = [];
+  const priceParams = {};
+  if (min_price) { priceConditions.push('COALESCE(NULLIF(p.sale_price, 0), p.price) >= :min_price'); priceParams.min_price = Number(min_price); }
+  if (max_price) { priceConditions.push('COALESCE(NULLIF(p.sale_price, 0), p.price) <= :max_price'); priceParams.max_price = Number(max_price); }
+
+  const allConditions = [...baseConditions, ...priceConditions];
+  const allParams = { ...baseParams, ...priceParams };
+  const where = allConditions.length ? 'WHERE ' + allConditions.join(' AND ') : '';
+  const baseWhere = baseConditions.length ? 'WHERE ' + baseConditions.join(' AND ') : '';
 
   const orderMap = {
     price_asc: 'COALESCE(NULLIF(p.sale_price, 0), p.price) ASC',
@@ -304,7 +312,7 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
   const limit = Math.min(Number(per_page) || 12, 100);
   const offset = (Math.max(Number(page) || 1, 1) - 1) * limit;
 
-  const total = db.prepare(`SELECT COUNT(*) as n FROM products p ${where}`).get(params).n;
+  const total = db.prepare(`SELECT COUNT(*) as n FROM products p ${where}`).get(allParams).n;
 
   const rows = db.prepare(`
     SELECT p.*, c.name as category_name, c.slug as category_slug
@@ -313,13 +321,22 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
     ${where}
     ORDER BY ${order}
     LIMIT :limit OFFSET :offset
-  `).all({ ...params, limit, offset });
+  `).all({ ...allParams, limit, offset });
+
+  // Max price across products matching the non-price filters — used by the
+  // sidebar to size the price slider so the track always ends near a real
+  // product price instead of a hard-coded ceiling.
+  const priceMaxRow = db.prepare(`
+    SELECT MAX(COALESCE(NULLIF(p.sale_price, 0), p.price)) AS price_max
+    FROM products p ${baseWhere}
+  `).get(baseParams);
 
   return {
     products: rows.map(parseProduct),
     total,
     pages: Math.ceil(total / limit),
     page: Math.max(Number(page) || 1, 1),
+    price_max: priceMaxRow?.price_max || 0,
   };
 }
 

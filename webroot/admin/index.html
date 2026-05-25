@@ -120,6 +120,32 @@
     .admin-toast.show { opacity: 1; transform: none; }
     .admin-toast.success { border-color: rgba(240,160,32,0.4); color: #F0A020; }
     .admin-toast.error { border-color: rgba(239,68,68,0.4); color: #ef4444; }
+    /* Most-viewed panel */
+    .topviews-card { background: #141414; border: 1px solid rgba(255,255,255,0.07); padding: 24px 28px; margin-bottom: 28px; }
+    .topviews-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+    .topviews-title { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.4rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+    .topviews-empty { color: rgba(255,255,255,0.3); font-size: 1.3rem; }
+    .topviews-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; align-items: stretch; }
+    @media (max-width: 760px) { .topviews-grid { grid-template-columns: 1fr; } }
+    .topviews-hero {
+      display: flex; gap: 16px; align-items: center;
+      background: linear-gradient(135deg, rgba(240,160,32,0.10), rgba(240,160,32,0.02));
+      border: 1px solid rgba(240,160,32,0.25); padding: 16px;
+    }
+    .topviews-hero img, .topviews-hero .ph { width: 88px; height: 88px; object-fit: cover; background: #1a1a1a; flex-shrink: 0; }
+    .topviews-hero-body { min-width: 0; }
+    .topviews-rank { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1rem; letter-spacing: 0.14em; text-transform: uppercase; color: #F0A020; }
+    .topviews-name { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.6rem; letter-spacing: 0.02em; margin: 4px 0 8px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .topviews-count { font-family: 'Inter', sans-serif; font-weight: 700; color: #F0A020; font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+    .topviews-count small { color: rgba(255,255,255,0.4); font-weight: 500; font-size: 1.1rem; margin-left: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .topviews-list { display: flex; flex-direction: column; }
+    .topviews-row { display: grid; grid-template-columns: 22px 36px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.12s; }
+    .topviews-row:last-child { border-bottom: none; }
+    .topviews-row:hover { background: rgba(255,255,255,0.02); }
+    .topviews-row-rank { color: rgba(255,255,255,0.3); font-weight: 700; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+    .topviews-row img, .topviews-row .ph { width: 36px; height: 36px; object-fit: cover; background: #1a1a1a; }
+    .topviews-row-name { font-size: 1.25rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .topviews-row-count { font-weight: 700; color: rgba(255,255,255,0.7); font-variant-numeric: tabular-nums; font-size: 1.25rem; }
     /* Empty */
     .table-empty { padding: 60px; text-align: center; color: rgba(255,255,255,0.3); font-size: 1.5rem; }
     @media (max-width: 900px) { .admin-layout { grid-template-columns: 1fr; } .admin-sidebar { display: none; } .admin-main { padding: 24px 20px; } }
@@ -164,6 +190,15 @@
         </a>
       </div>
 
+      <!-- Most viewed -->
+      <section class="topviews-card" id="topviews-card" style="display:none;">
+        <div class="topviews-head">
+          <span class="topviews-title">Më të shikuarit</span>
+          <span class="results-label" id="topviews-total"></span>
+        </div>
+        <div id="topviews-body"></div>
+      </section>
+
       <div class="table-toolbar">
         <input type="text" class="admin-search" id="table-search" placeholder="Kërko produkte…">
         <button id="filter-no-img" class="btn-add-cat" style="white-space:nowrap;padding:9px 16px;font-size:1.1rem;" title="Trego vetëm produktet pa foto reale">📷 Pa foto</button>
@@ -180,6 +215,7 @@
               <th>Çmimi</th>
               <th>Statusi</th>
               <th>Stoku</th>
+              <th style="width:90px;cursor:pointer;user-select:none;" id="th-views" title="Klikoni për të renditur">Shikime</th>
               <th style="width:120px;"></th>
             </tr>
           </thead>
@@ -273,7 +309,58 @@
     async function loadProducts() {
       const res = await fetch('/api/admin/products', { credentials: 'include' });
       allProducts = await res.json();
+      renderTopViews(allProducts);
       renderTable(allProducts);
+    }
+
+    function renderTopViews(products) {
+      const card = document.getElementById('topviews-card');
+      const body = document.getElementById('topviews-body');
+      const totalEl = document.getElementById('topviews-total');
+      const ranked = [...products]
+        .filter(p => (p.view_count || 0) > 0)
+        .sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+
+      if (!ranked.length) {
+        card.style.display = 'block';
+        totalEl.textContent = '';
+        body.innerHTML = '<p class="topviews-empty">Ende pa shikime të regjistruara.</p>';
+        return;
+      }
+      card.style.display = 'block';
+      const totalViews = ranked.reduce((s, p) => s + (p.view_count || 0), 0);
+      totalEl.textContent = `${totalViews.toLocaleString('en-US')} shikime gjithsej`;
+
+      const top = ranked[0];
+      const rest = ranked.slice(1, 5);
+      const fmt = n => Number(n || 0).toLocaleString('en-US');
+      const thumb = (p, cls) => {
+        const src = p.images?.[0] || '';
+        return src ? `<img class="${cls}" src="${esc(src)}" alt="">` : `<div class="ph ${cls}"></div>`;
+      };
+      body.innerHTML = `
+        <div class="topviews-grid">
+          <a class="topviews-hero" href="/admin/product?id=${Number(top.id)}" title="Ndrysho produktin">
+            ${thumb(top, '')}
+            <div class="topviews-hero-body">
+              <div class="topviews-rank">★ #1 më i shikuar</div>
+              <div class="topviews-name">${esc(top.name)}</div>
+              <div class="topviews-count">${fmt(top.view_count)} <small>shikime</small></div>
+            </div>
+          </a>
+          <div class="topviews-list">
+            ${rest.length ? rest.map((p, i) => `
+              <div class="topviews-row" data-id="${Number(p.id)}">
+                <span class="topviews-row-rank">#${i + 2}</span>
+                ${thumb(p, '')}
+                <span class="topviews-row-name">${esc(p.name)}</span>
+                <span class="topviews-row-count">${fmt(p.view_count)}</span>
+              </div>`).join('') : '<p class="topviews-empty">—</p>'}
+          </div>
+        </div>`;
+      body.querySelectorAll('.topviews-row').forEach(row => {
+        row.addEventListener('click', () => window.location.href = `/admin/product?id=${row.dataset.id}`);
+      });
     }
 
     function renderTable(products) {
@@ -313,6 +400,7 @@
               <span class="toggle-slider"></span>
             </label>
           </td>
+          <td style="font-variant-numeric:tabular-nums;font-weight:700;color:${(p.view_count || 0) > 0 ? '#F0A020' : 'rgba(255,255,255,0.3)'};">${Number(p.view_count || 0).toLocaleString('en-US')}</td>
           <td>
             <button class="action-btn btn-edit" data-id="${Number(p.id)}">Ndrysho</button>
             <button class="action-btn btn-delete" data-id="${Number(p.id)}">Fshi</button>
@@ -349,13 +437,21 @@
 
     // Table search
     let showingNoImgOnly = false;
+    let sortByViews = false; // false = default order, true = views DESC
     function applyFilters() {
       const q = document.getElementById('table-search').value.toLowerCase();
       let list = allProducts;
       if (showingNoImgOnly) list = list.filter(p => (p.images?.[0] || '').includes('placehold.co'));
       if (q) list = list.filter(p => p.name.toLowerCase().includes(q) || (p.category_name || '').toLowerCase().includes(q));
+      if (sortByViews) list = [...list].sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
       renderTable(list);
     }
+    document.getElementById('th-views').addEventListener('click', function() {
+      sortByViews = !sortByViews;
+      this.style.color = sortByViews ? '#F0A020' : '';
+      this.textContent = sortByViews ? 'Shikime ↓' : 'Shikime';
+      applyFilters();
+    });
     document.getElementById('table-search').addEventListener('input', applyFilters);
     document.getElementById('filter-no-img').addEventListener('click', function() {
       showingNoImgOnly = !showingNoImgOnly;
