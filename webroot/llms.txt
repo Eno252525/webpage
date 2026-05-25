@@ -20,6 +20,13 @@ IT Store is a computer shop in Tirana, Albania specialising in refurbished busin
 - [Të gjitha produktet / Shop](https://itstore.al/shop.html): Katalogu i plotë i kompjuterave dhe pajisjeve IT, me filtrim sipas kategorisë, markës dhe çmimit.
 - [Rreth Nesh / About](https://itstore.al/rreth-nesh.html): Informacion mbi IT Store.
 - [Na Kontaktoni / Contact](https://itstore.al/na-kontaktoni.html): Kontakte, adresa dhe harta.
+- [Pyetje të Shpeshta / FAQ](https://itstore.al/pyetje-te-shpeshta.html): Përgjigje për pyetjet më të zakonshme — garanci, dërgesë, pagesa, refurbished vs i ri, porosi biznesi.
+
+## Udhëzues & përmbajtje e thelluar
+
+- [Ku të Blesh Kompjuter në Tiranë — Udhëzues 2026 / Where to buy a PC in Tirana](https://itstore.al/udhezues/ku-te-blesh-kompjuter-ne-tirane.html): Udhëzues bilingual për blerjen e kompjuterëve në Tiranë dhe Shqipëri — tipet e dyqaneve, çmimet tipike, çfarë të kontrollosh.
+- [Refurbished vs i Ri / Refurbished vs new](https://itstore.al/udhezues/refurbished-vs-i-ri.html): Krahasim i detajuar mes pajisjeve të rinovuara dhe atyre të reja — çmim, cilësi, garanci, rastet ku secili fiton.
+- [Si të Zgjedhësh Laptopin për Punë / How to choose a business laptop](https://itstore.al/udhezues/si-te-zgjedhesh-laptopin-per-pune.html): Specifikimet që kanë rëndësi (CPU, RAM, SSD, ekran) dhe rekomandime sipas buxhetit €250–€1200.
 
 ## Kategoritë e produkteve
 
