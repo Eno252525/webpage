@@ -264,7 +264,48 @@ function buildProductSearch(q) {
   return { clauses, params, score };
 }
 
-export function getProducts({ category, brand, form_factor, min_price, max_price, orderby, page, per_page, search, featured, sale } = {}) {
+// Switch-only filter expressions. Switch products store networking specs as
+// free-text in `attributes` JSON (Ports / SFP / Uplink / Layer / PoE / PoE Budget),
+// so each filter pattern-matches those fields. Keep these in sync with the
+// sidebar in shop.html.
+const SWITCH_PORTS_SQL = "json_extract(p.attributes, '$.Ports') LIKE :sw_ports_pat";
+const SWITCH_SPEED_SQL = {
+  fast: "json_extract(p.attributes, '$.Ports') LIKE '%10/100 %'"
+        + " AND json_extract(p.attributes, '$.Ports') NOT LIKE '%10/100/1000%'",
+  gigabit: "json_extract(p.attributes, '$.Ports') LIKE '%10/100/1000%'",
+  '10g': "(json_extract(p.attributes, '$.Ports') LIKE '%10G%'"
+         + " OR json_extract(p.attributes, '$.Ports') LIKE '%SFP+%')",
+};
+const SWITCH_UPLINK_SQL = {
+  // No SFP/Uplink attribute at all → access-only switch.
+  none: "json_extract(p.attributes, '$.SFP') IS NULL"
+        + " AND json_extract(p.attributes, '$.Uplink') IS NULL",
+  '1g': "((json_extract(p.attributes, '$.SFP') LIKE '%SFP (1G)%' OR json_extract(p.attributes, '$.SFP') LIKE '%Gigabit%')"
+        + " OR (json_extract(p.attributes, '$.Uplink') LIKE '%SFP (1G)%' OR json_extract(p.attributes, '$.Uplink') LIKE '%Gigabit%'))",
+  '10g': "(json_extract(p.attributes, '$.SFP') LIKE '%SFP+%'"
+         + " OR json_extract(p.attributes, '$.Uplink') LIKE '%SFP+%'"
+         + " OR json_extract(p.attributes, '$.Uplink') LIKE '%10G%'"
+         + " OR json_extract(p.attributes, '$.Uplink') LIKE '%X2%')",
+  '40g': "(json_extract(p.attributes, '$.SFP') LIKE '%QSFP+%'"
+         + " OR json_extract(p.attributes, '$.Uplink') LIKE '%QSFP+%'"
+         + " OR json_extract(p.attributes, '$.Uplink') LIKE '%40G%')",
+};
+const SWITCH_LAYER_SQL = {
+  l2: "json_extract(p.attributes, '$.Layer') NOT LIKE '%Layer 3%'",
+  l3: "json_extract(p.attributes, '$.Layer') LIKE '%Layer 3%'",
+};
+const SWITCH_POE_SQL = {
+  // No PoE if Ports mentions no PoE *and* (PoE field is explicitly "Jo"/"No" or no PoE field at all).
+  none: "json_extract(p.attributes, '$.Ports') NOT LIKE '%PoE%'"
+        + " AND (json_extract(p.attributes, '$.PoE') IN ('Jo', 'No') OR json_extract(p.attributes, '$.PoE') IS NULL)"
+        + " AND json_extract(p.attributes, '$.PoE Budget') IS NULL",
+  poe: "(json_extract(p.attributes, '$.Ports') LIKE '% PoE %' AND json_extract(p.attributes, '$.Ports') NOT LIKE '%PoE+%')"
+       + " OR (json_extract(p.attributes, '$.PoE Budget') LIKE '%802.3af%' AND json_extract(p.attributes, '$.PoE Budget') NOT LIKE '%802.3at%')",
+  poe_plus: "json_extract(p.attributes, '$.Ports') LIKE '%PoE+%'"
+            + " OR json_extract(p.attributes, '$.PoE Budget') LIKE '%802.3at%'",
+};
+
+export function getProducts({ category, brand, form_factor, min_price, max_price, orderby, page, per_page, search, featured, sale, sw_ports, sw_uplink, sw_speed, sw_layer, sw_poe } = {}) {
   // Split filters: "base" (non-price) drives the slider range; price-bounds
   // narrow the visible products on top of that.
   const baseConditions = [];
@@ -289,6 +330,25 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
   }
   if (featured === '1' || featured === true) { baseConditions.push('p.featured = 1'); }
   if (sale === '1') { baseConditions.push('p.sale_price IS NOT NULL AND p.sale_price > 0'); }
+
+  // Switch-only filters — only meaningful inside the `switch` category (or its
+  // subtree); if applied outside, they simply narrow the result set further.
+  if (sw_ports && /^\d+$/.test(String(sw_ports))) {
+    baseConditions.push(SWITCH_PORTS_SQL);
+    baseParams.sw_ports_pat = `${sw_ports}x %`;
+  }
+  if (sw_speed && SWITCH_SPEED_SQL[sw_speed]) {
+    baseConditions.push(SWITCH_SPEED_SQL[sw_speed]);
+  }
+  if (sw_uplink && SWITCH_UPLINK_SQL[sw_uplink]) {
+    baseConditions.push(SWITCH_UPLINK_SQL[sw_uplink]);
+  }
+  if (sw_layer && SWITCH_LAYER_SQL[sw_layer]) {
+    baseConditions.push(SWITCH_LAYER_SQL[sw_layer]);
+  }
+  if (sw_poe && SWITCH_POE_SQL[sw_poe]) {
+    baseConditions.push(`(${SWITCH_POE_SQL[sw_poe]})`);
+  }
 
   const priceConditions = [];
   const priceParams = {};

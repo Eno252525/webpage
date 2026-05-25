@@ -783,7 +783,9 @@
 
     // ── State ──────────────────────────────────────────────────────────────
     const state = {
-      cat: '', brand: '', form_factor: '', min: '', max: '', sort: 'newest', page: 1, search: '', per_page: 30, sale: ''
+      cat: '', brand: '', form_factor: '', min: '', max: '', sort: 'newest', page: 1, search: '', per_page: 30, sale: '',
+      // Switch-only filters (only rendered when cat === 'switch')
+      sw_ports: '', sw_uplink: '', sw_speed: '', sw_layer: '', sw_poe: ''
     };
 
     // ── Init from URL ──────────────────────────────────────────────────────
@@ -797,6 +799,11 @@
     if (params.has('q')) state.search = params.get('q');
     if (params.has('sale')) state.sale = params.get('sale');
     if (params.has('ff')) state.form_factor = params.get('ff');
+    if (params.has('sw_ports')) state.sw_ports = params.get('sw_ports');
+    if (params.has('sw_uplink')) state.sw_uplink = params.get('sw_uplink');
+    if (params.has('sw_speed')) state.sw_speed = params.get('sw_speed');
+    if (params.has('sw_layer')) state.sw_layer = params.get('sw_layer');
+    if (params.has('sw_poe')) state.sw_poe = params.get('sw_poe');
 
     // ── Mobile & basket init ───────────────────────────────────────────────
     initBasketDrawer();
@@ -900,13 +907,50 @@
       ` : '<li style="color:rgba(20,20,20,0.35);font-size:1.2rem;padding:6px 10px;">Nuk ka markë</li>';
 
       const FF_LABELS = { SFF: 'SFF — Small Form Factor', MT: 'MT — Mini Tower', USFF: 'USFF — Ultra Small', T: 'T — Tower' };
-      const showFF = allFormFactors.length > 0 && (PC_SLUGS.has(state.cat) || allFormFactors.length > 0);
+      const showFF = allFormFactors.length > 0 && state.cat !== 'switch' && (PC_SLUGS.has(state.cat) || allFormFactors.length > 0);
       const ffItems = allFormFactors.map(ff => `
         <li>
           <span class="cat-link ff-link ${state.form_factor === ff ? 'active' : ''}" data-ff="${ff}">
             ${FF_LABELS[ff] || ff}
           </span>
         </li>`).join('');
+
+      // Switch-only filter sections (ports, speed, uplink, layer, PoE).
+      // Each is rendered as a single-select list mirroring the brand/FF lists.
+      const showSwitch = state.cat === 'switch';
+      const swItem = (group, value, label) => `
+        <li>
+          <span class="cat-link sw-link ${state[group] === value ? 'active' : ''}" data-sw-group="${group}" data-sw-value="${value}">
+            ${label}
+          </span>
+        </li>`;
+      const swList = (group, options) => `
+        <ul class="cat-list sw-list">
+          ${swItem(group, '', 'Të gjitha')}
+          ${options.map(([v, l]) => swItem(group, v, l)).join('')}
+        </ul>`;
+      const switchSections = showSwitch ? `
+        <div class="sidebar-section">
+          <div class="sidebar-title">Numri i portave</div>
+          ${swList('sw_ports', [['8','8 porta'],['12','12 porta'],['16','16 porta'],['24','24 porta'],['48','48 porta']])}
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Shpejtësia</div>
+          ${swList('sw_speed', [['fast','Megabit (10/100)'],['gigabit','Gigabit (10/100/1000)'],['10g','10 Gigabit (SFP+)']])}
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Uplink</div>
+          ${swList('sw_uplink', [['none','Pa uplink'],['1g','1G SFP'],['10g','10G SFP+ / X2'],['40g','40G QSFP+']])}
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Layer</div>
+          ${swList('sw_layer', [['l2','Layer 2'],['l3','Layer 3']])}
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">PoE</div>
+          ${swList('sw_poe', [['none','Pa PoE'],['poe','PoE (802.3af)'],['poe_plus','PoE+ (802.3at)']])}
+        </div>
+      ` : '';
 
       return `
         <div class="sidebar-section">
@@ -926,6 +970,7 @@
             ${ffItems}
           </ul>
         </div>` : ''}
+        ${switchSections}
         ${PRICE_MAX > 0 ? `
         <div class="sidebar-section">
           <div class="sidebar-title">Çmimi</div>
@@ -941,7 +986,8 @@
           </div>
           ${state.min || state.max ? `<button class="btn-clear" id="clear-price">Hiq çmimin</button>` : ''}
         </div>` : ''}
-        ${state.cat || state.brand || state.form_factor || state.min || state.max || state.sale ? `
+        ${state.cat || state.brand || state.form_factor || state.min || state.max || state.sale
+            || state.sw_ports || state.sw_uplink || state.sw_speed || state.sw_layer || state.sw_poe ? `
           <button class="btn-clear" id="clear-all-filters" style="border:1px solid rgba(0,0,0,0.12);padding:8px 12px;">
             Pastro të gjithë filtrat
           </button>` : ''}`;
@@ -957,10 +1003,14 @@
     }
 
     function wireSidebarEvents(el) {
-      el.querySelectorAll('.cat-list:not(.brand-list):not(.ff-list) .cat-link').forEach(link => {
+      el.querySelectorAll('.cat-list:not(.brand-list):not(.ff-list):not(.sw-list) .cat-link').forEach(link => {
         link.addEventListener('click', async () => {
           state.cat = link.dataset.slug || '';
           state.page = 1;
+          // Switch-only filters don't apply outside the switch category.
+          if (state.cat !== 'switch') {
+            state.sw_ports = ''; state.sw_uplink = ''; state.sw_speed = ''; state.sw_layer = ''; state.sw_poe = '';
+          }
           const catParam = state.cat ? { category: state.cat } : {};
           [allBrands, allFormFactors] = await Promise.all([
             getBrands(catParam).catch(() => []),
@@ -968,6 +1018,15 @@
           ]);
           if (state.brand && !allBrands.includes(state.brand)) state.brand = '';
           if (state.form_factor && !allFormFactors.includes(state.form_factor)) state.form_factor = '';
+          pushState(); renderSidebar(); loadProducts();
+          closeSidebarSheet();
+        });
+      });
+      el.querySelectorAll('.sw-list .sw-link').forEach(link => {
+        link.addEventListener('click', () => {
+          const group = link.dataset.swGroup;
+          state[group] = link.dataset.swValue || '';
+          state.page = 1;
           pushState(); renderSidebar(); loadProducts();
           closeSidebarSheet();
         });
@@ -1010,6 +1069,7 @@
       });
       el.querySelector('#clear-all-filters')?.addEventListener('click', async () => {
         state.cat = ''; state.brand = ''; state.form_factor = ''; state.min = ''; state.max = ''; state.sale = ''; state.page = 1;
+        state.sw_ports = ''; state.sw_uplink = ''; state.sw_speed = ''; state.sw_layer = ''; state.sw_poe = '';
         [allBrands, allFormFactors] = await Promise.all([getBrands({}).catch(() => []), getFormFactors({}).catch(() => [])]);
         pushState(); renderSidebar(); loadProducts();
       });
@@ -1102,6 +1162,11 @@
       if (state.page > 1) p.set('page', state.page);
       if (state.search) p.set('q', state.search);
       if (state.sale) p.set('sale', state.sale);
+      if (state.sw_ports) p.set('sw_ports', state.sw_ports);
+      if (state.sw_uplink) p.set('sw_uplink', state.sw_uplink);
+      if (state.sw_speed) p.set('sw_speed', state.sw_speed);
+      if (state.sw_layer) p.set('sw_layer', state.sw_layer);
+      if (state.sw_poe) p.set('sw_poe', state.sw_poe);
       const qs = p.toString();
       history.pushState(state, '', '/shop.html' + (qs ? '?' + qs : ''));
     }
@@ -1134,6 +1199,18 @@
       if (state.min || state.max) {
         const label = state.min && state.max ? `${state.min} L – ${state.max} L` : state.min ? `min ${state.min} L` : `max ${state.max} L`;
         chips.push({ label, clear: () => { state.min = ''; state.max = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+      }
+      const SW_LABELS = {
+        sw_ports:  { '8':'8 porta','12':'12 porta','16':'16 porta','24':'24 porta','48':'48 porta' },
+        sw_speed:  { fast:'Megabit', gigabit:'Gigabit', '10g':'10 Gigabit' },
+        sw_uplink: { none:'Pa uplink', '1g':'1G SFP', '10g':'10G SFP+', '40g':'40G QSFP+' },
+        sw_layer:  { l2:'Layer 2', l3:'Layer 3' },
+        sw_poe:    { none:'Pa PoE', poe:'PoE', poe_plus:'PoE+' },
+      };
+      for (const group of ['sw_ports','sw_speed','sw_uplink','sw_layer','sw_poe']) {
+        if (!state[group]) continue;
+        const label = SW_LABELS[group][state[group]] || state[group];
+        chips.push({ label, clear: () => { state[group] = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
       }
       if (state.search) {
         chips.push({ label: `"${state.search}"`, clear: () => { state.search = ''; searchInput.value = ''; state.page = 1; pushState(); renderChips(); loadProducts(); } });
@@ -1291,6 +1368,11 @@
       if (state.max) apiParams.max_price = state.max;
       if (state.search) apiParams.search = state.search;
       if (state.sale) apiParams.sale = state.sale;
+      if (state.sw_ports) apiParams.sw_ports = state.sw_ports;
+      if (state.sw_uplink) apiParams.sw_uplink = state.sw_uplink;
+      if (state.sw_speed) apiParams.sw_speed = state.sw_speed;
+      if (state.sw_layer) apiParams.sw_layer = state.sw_layer;
+      if (state.sw_poe) apiParams.sw_poe = state.sw_poe;
 
       try {
         const { products, total, pages, price_max } = await getProducts(apiParams);
