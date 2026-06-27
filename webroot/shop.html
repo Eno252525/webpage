@@ -785,7 +785,9 @@
     const state = {
       cat: '', brand: '', form_factor: '', min: '', max: '', sort: 'newest', page: 1, search: '', per_page: 30, sale: '',
       // Switch-only filters (only rendered when cat === 'switch')
-      sw_ports: '', sw_uplink: '', sw_speed: '', sw_layer: '', sw_poe: ''
+      sw_ports: '', sw_uplink: '', sw_speed: '', sw_layer: '', sw_poe: '',
+      // PC/Desktop/AIO-only CPU filters (only rendered for those categories)
+      cpu_family: '', cpu_gen: ''
     };
 
     // ── Init from URL ──────────────────────────────────────────────────────
@@ -804,6 +806,8 @@
     if (params.has('sw_speed')) state.sw_speed = params.get('sw_speed');
     if (params.has('sw_layer')) state.sw_layer = params.get('sw_layer');
     if (params.has('sw_poe')) state.sw_poe = params.get('sw_poe');
+    if (params.has('cpu_family')) state.cpu_family = params.get('cpu_family');
+    if (params.has('cpu_gen')) state.cpu_gen = params.get('cpu_gen');
 
     // ── Mobile & basket init ───────────────────────────────────────────────
     initBasketDrawer();
@@ -851,6 +855,8 @@
     }
 
     const PC_SLUGS = new Set(['pc', 'desktop']);
+    // CPU family/generation filters appear only for these categories.
+    const CPU_FILTER_SLUGS = new Set(['pc', 'desktop', 'aio']);
 
     // Slider ceiling — replaced by the API's `price_max` (rounded up to a tidy
     // number) so the track always ends near the priciest product in view.
@@ -952,6 +958,21 @@
         </div>
       ` : '';
 
+      // CPU-only filter sections (processor family + generation), shown for
+      // the PC / Desktop / AIO categories. They reuse the sw-link mechanism:
+      // the group name is the state key it writes to (cpu_family / cpu_gen).
+      const showCpu = CPU_FILTER_SLUGS.has(state.cat);
+      const cpuSections = showCpu ? `
+        <div class="sidebar-section">
+          <div class="sidebar-title">Procesori</div>
+          ${swList('cpu_family', [['i3','Intel Core i3'],['i5','Intel Core i5'],['i7','Intel Core i7'],['i9','Intel Core i9']])}
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Gjenerata e procesorit</div>
+          ${swList('cpu_gen', [['12','Gen 12'],['11','Gen 11'],['10','Gen 10'],['9','Gen 9'],['8','Gen 8'],['7','Gen 7'],['6','Gen 6'],['5','Gen 5'],['4','Gen 4'],['3','Gen 3']])}
+        </div>
+      ` : '';
+
       return `
         <div class="sidebar-section">
           <div class="sidebar-title">Kategoritë</div>
@@ -971,6 +992,7 @@
           </ul>
         </div>` : ''}
         ${switchSections}
+        ${cpuSections}
         ${PRICE_MAX > 0 ? `
         <div class="sidebar-section">
           <div class="sidebar-title">Çmimi</div>
@@ -987,7 +1009,8 @@
           ${state.min || state.max ? `<button class="btn-clear" id="clear-price">Hiq çmimin</button>` : ''}
         </div>` : ''}
         ${state.cat || state.brand || state.form_factor || state.min || state.max || state.sale
-            || state.sw_ports || state.sw_uplink || state.sw_speed || state.sw_layer || state.sw_poe ? `
+            || state.sw_ports || state.sw_uplink || state.sw_speed || state.sw_layer || state.sw_poe
+            || state.cpu_family || state.cpu_gen ? `
           <button class="btn-clear" id="clear-all-filters" style="border:1px solid rgba(0,0,0,0.12);padding:8px 12px;">
             Pastro të gjithë filtrat
           </button>` : ''}`;
@@ -1010,6 +1033,10 @@
           // Switch-only filters don't apply outside the switch category.
           if (state.cat !== 'switch') {
             state.sw_ports = ''; state.sw_uplink = ''; state.sw_speed = ''; state.sw_layer = ''; state.sw_poe = '';
+          }
+          // CPU filters don't apply outside the PC / Desktop / AIO categories.
+          if (!CPU_FILTER_SLUGS.has(state.cat)) {
+            state.cpu_family = ''; state.cpu_gen = '';
           }
           const catParam = state.cat ? { category: state.cat } : {};
           [allBrands, allFormFactors] = await Promise.all([
@@ -1070,6 +1097,7 @@
       el.querySelector('#clear-all-filters')?.addEventListener('click', async () => {
         state.cat = ''; state.brand = ''; state.form_factor = ''; state.min = ''; state.max = ''; state.sale = ''; state.page = 1;
         state.sw_ports = ''; state.sw_uplink = ''; state.sw_speed = ''; state.sw_layer = ''; state.sw_poe = '';
+        state.cpu_family = ''; state.cpu_gen = '';
         [allBrands, allFormFactors] = await Promise.all([getBrands({}).catch(() => []), getFormFactors({}).catch(() => [])]);
         pushState(); renderSidebar(); loadProducts();
       });
@@ -1167,6 +1195,8 @@
       if (state.sw_speed) p.set('sw_speed', state.sw_speed);
       if (state.sw_layer) p.set('sw_layer', state.sw_layer);
       if (state.sw_poe) p.set('sw_poe', state.sw_poe);
+      if (state.cpu_family) p.set('cpu_family', state.cpu_family);
+      if (state.cpu_gen) p.set('cpu_gen', state.cpu_gen);
       const qs = p.toString();
       history.pushState(state, '', '/shop.html' + (qs ? '?' + qs : ''));
     }
@@ -1211,6 +1241,12 @@
         if (!state[group]) continue;
         const label = SW_LABELS[group][state[group]] || state[group];
         chips.push({ label, clear: () => { state[group] = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+      }
+      if (state.cpu_family) {
+        chips.push({ label: `Core ${state.cpu_family}`, clear: () => { state.cpu_family = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+      }
+      if (state.cpu_gen) {
+        chips.push({ label: `Gen ${state.cpu_gen}`, clear: () => { state.cpu_gen = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
       }
       if (state.search) {
         chips.push({ label: `"${state.search}"`, clear: () => { state.search = ''; searchInput.value = ''; state.page = 1; pushState(); renderChips(); loadProducts(); } });
@@ -1373,6 +1409,8 @@
       if (state.sw_speed) apiParams.sw_speed = state.sw_speed;
       if (state.sw_layer) apiParams.sw_layer = state.sw_layer;
       if (state.sw_poe) apiParams.sw_poe = state.sw_poe;
+      if (state.cpu_family) apiParams.cpu_family = state.cpu_family;
+      if (state.cpu_gen) apiParams.cpu_gen = state.cpu_gen;
 
       try {
         const { products, total, pages, price_max } = await getProducts(apiParams);

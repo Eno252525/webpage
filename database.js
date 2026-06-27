@@ -305,7 +305,29 @@ const SWITCH_POE_SQL = {
             + " OR json_extract(p.attributes, '$.PoE Budget') LIKE '%802.3at%'",
 };
 
-export function getProducts({ category, brand, form_factor, min_price, max_price, orderby, page, per_page, search, featured, sale, sw_ports, sw_uplink, sw_speed, sw_layer, sw_poe } = {}) {
+// CPU-only filters — for the PC / Desktop / AIO categories. Products store the
+// processor in `attributes.CPU` as Intel Core strings ("i5-8500", "i5-9500T",
+// "i5-10500", "i5 Gen 6"). Family matches the leading `iN`; generation matches
+// the model-number prefix. Every Core model carries exactly three trailing
+// digits after the generation, so one pattern (`i_-{gen}___%`) covers both
+// single-digit gens (i5-8500 → 8) and two-digit gens (i5-10500 → 10); the
+// trailing `%` absorbs suffix letters (T/K/U/…). The explicit "Gen N" wording
+// is matched too. Keep these in sync with the sidebar in shop.html.
+const CPU_FAMILY_SQL = {
+  i3: "json_extract(p.attributes, '$.CPU') LIKE 'i3%'",
+  i5: "json_extract(p.attributes, '$.CPU') LIKE 'i5%'",
+  i7: "json_extract(p.attributes, '$.CPU') LIKE 'i7%'",
+  i9: "json_extract(p.attributes, '$.CPU') LIKE 'i9%'",
+};
+
+function cpuGenSQL(gen) {
+  const g = String(gen);
+  if (!/^\d{1,2}$/.test(g)) return null; // digits only — safe to interpolate
+  const cpu = "json_extract(p.attributes, '$.CPU')";
+  return `(${cpu} LIKE 'i_-${g}___%' OR ${cpu} LIKE '%Gen ${g}%' OR ${cpu} LIKE '%Gen${g}%')`;
+}
+
+export function getProducts({ category, brand, form_factor, min_price, max_price, orderby, page, per_page, search, featured, sale, sw_ports, sw_uplink, sw_speed, sw_layer, sw_poe, cpu_family, cpu_gen } = {}) {
   // Split filters: "base" (non-price) drives the slider range; price-bounds
   // narrow the visible products on top of that.
   const baseConditions = [];
@@ -350,6 +372,16 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
     baseConditions.push(`(${SWITCH_POE_SQL[sw_poe]})`);
   }
 
+  // CPU-only filters — meaningful inside the PC / Desktop / AIO categories; if
+  // applied elsewhere they simply narrow the result set further.
+  if (cpu_family && CPU_FAMILY_SQL[cpu_family]) {
+    baseConditions.push(CPU_FAMILY_SQL[cpu_family]);
+  }
+  if (cpu_gen) {
+    const genSql = cpuGenSQL(cpu_gen);
+    if (genSql) baseConditions.push(genSql);
+  }
+
   const priceConditions = [];
   const priceParams = {};
   if (min_price) { priceConditions.push('COALESCE(NULLIF(p.sale_price, 0), p.price) >= :min_price'); priceParams.min_price = Number(min_price); }
@@ -361,13 +393,13 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
   const baseWhere = baseConditions.length ? 'WHERE ' + baseConditions.join(' AND ') : '';
 
   const orderMap = {
-    price_asc: 'COALESCE(NULLIF(p.sale_price, 0), p.price) ASC',
-    price_desc: 'COALESCE(NULLIF(p.sale_price, 0), p.price) DESC',
-    newest: 'p.created_at DESC',
+    price_asc: 'p.featured DESC, COALESCE(NULLIF(p.sale_price, 0), p.price) ASC',
+    price_desc: 'p.featured DESC, COALESCE(NULLIF(p.sale_price, 0), p.price) DESC',
+    newest: 'p.featured DESC, p.created_at DESC',
     featured: 'p.featured DESC, p.created_at DESC',
-    popularity: 'p.view_count DESC, p.featured DESC, p.created_at DESC',
+    popularity: 'p.featured DESC, p.view_count DESC, p.created_at DESC',
   };
-  const order = orderMap[orderby] || 'p.created_at DESC';
+  const order = orderMap[orderby] || 'p.featured DESC, p.created_at DESC';
 
   const limit = Math.min(Number(per_page) || 12, 100);
   const offset = (Math.max(Number(page) || 1, 1) - 1) * limit;
