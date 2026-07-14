@@ -10,6 +10,10 @@ node_modules/
 *.db*
 *.sqlite*
 
+# View-count sidecar — live data, kept on the server so it survives a DB swap
+view-counts.json
+view-counts.json.tmp
+
 # User uploads — live data, managed on the server
 uploads/
 
@@ -23,6 +27,9 @@ deploy/
 /*.webp
 /*.avif
 
+# Raw product-photo working folders (source material for import scripts)
+SSD/
+
 # Build / debug artifacts
 temporary screenshots/
 _dbg.mjs
@@ -30,6 +37,7 @@ _test_script.js
 
 # Data exports / backups
 *.csv
+*.xls
 *.xlsx
 products-data.json
 products-final.json

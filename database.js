@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync, renameSync, existsSync } from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const db = new Database(path.join(__dirname, 'products.db'));
@@ -51,6 +52,68 @@ try {
 } catch {
   // column already exists
 }
+
+// ── Migration: add sku column if missing ─────────────────────────────────────
+try {
+  db.exec(`ALTER TABLE products ADD COLUMN sku TEXT DEFAULT ''`);
+} catch {
+  // column already exists
+}
+
+// ── View counts: persisted to a sidecar file so they survive a DB swap ───────
+// Live view counts are mirrored (keyed by slug) into view-counts.json, which is
+// git-ignored and NOT part of products.db. So replacing products.db — e.g.
+// pasting in a locally-edited copy — never wipes the counts: on startup we fold
+// the saved counts back into whatever products.db is present, keeping the higher
+// of the two so a count is never lowered. Just paste the DB and restart.
+const viewCountsFile = path.join(__dirname, 'view-counts.json');
+
+function restoreViewCounts() {
+  if (!existsSync(viewCountsFile)) return;
+  let saved;
+  try {
+    saved = JSON.parse(readFileSync(viewCountsFile, 'utf8'));
+  } catch {
+    return; // missing/corrupt — ignore; it gets rewritten on the next snapshot
+  }
+  const stmt = db.prepare(
+    'UPDATE products SET view_count = MAX(COALESCE(view_count, 0), ?) WHERE slug = ?'
+  );
+  const apply = db.transaction((entries) => {
+    for (const [slug, count] of entries) stmt.run(Number(count) || 0, slug);
+  });
+  apply(Object.entries(saved));
+}
+
+function persistViewCounts() {
+  const rows = db.prepare('SELECT slug, view_count FROM products').all();
+  const out = {};
+  for (const r of rows) out[r.slug] = r.view_count || 0;
+  const tmp = viewCountsFile + '.tmp';
+  writeFileSync(tmp, JSON.stringify(out));
+  renameSync(tmp, viewCountsFile); // atomic replace, never a half-written file
+}
+
+// Debounce: an increment schedules one snapshot a few seconds later, so a burst
+// of views is a single file write rather than one write per request.
+let persistTimer = null;
+function schedulePersist() {
+  if (persistTimer) return;
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    try { persistViewCounts(); } catch { /* non-critical */ }
+  }, 5000);
+  if (persistTimer.unref) persistTimer.unref(); // don't keep the process alive
+}
+
+// Flush on shutdown so the last few views aren't lost. SIGINT/SIGTERM (Passenger
+// stop, Ctrl+C) exit explicitly, which fires the 'exit' handler.
+process.once('exit', () => { try { persistViewCounts(); } catch { /* ignore */ } });
+for (const sig of ['SIGINT', 'SIGTERM']) {
+  process.once(sig, () => process.exit(0));
+}
+
+restoreViewCounts();
 
 // ── Migration: add laptop subcategories if missing ───────────────────────────
 {
@@ -242,16 +305,19 @@ function buildProductSearch(q) {
     const catClause = catInList ? ` OR ${catInList}` : '';
     clauses.push(`(
       p.name LIKE :${key}
+      OR p.sku LIKE :${key}
       OR p.short_description LIKE :${key}
       OR p.description LIKE :${key}
       OR p.brand LIKE :${key}
       OR p.attributes LIKE :${key}
       ${catClause}
     )`);
-    // Per-token relevance: name 5, category 5, brand 3, attrs 2, short 1, desc 1.
-    // Name and category tie at the top so "laptop" surfaces actual laptops
+    // Per-token relevance: sku 6, name 5, category 5, brand 3, attrs 2, short 1, desc 1.
+    // SKU tops the list so an exact part-number query surfaces that product first.
+    // Name and category tie next so "laptop" surfaces actual laptops
     // (category match) ahead of docks that merely mention "laptop" in text.
     scoreParts.push(
+      `(CASE WHEN p.sku LIKE :${key} THEN 6 ELSE 0 END)`,
       `(CASE WHEN p.name LIKE :${key} THEN 5 ELSE 0 END)`,
       catInList ? `(CASE WHEN ${catInList} THEN 5 ELSE 0 END)` : '0',
       `(CASE WHEN p.brand LIKE :${key} THEN 3 ELSE 0 END)`,
@@ -465,15 +531,15 @@ export function getProductBySlug(slug) {
 
 const incrementViewStmt = db.prepare('UPDATE products SET view_count = COALESCE(view_count, 0) + 1 WHERE id = ?');
 export function incrementProductViews(id) {
-  try { incrementViewStmt.run(Number(id)); } catch { /* non-critical */ }
+  try { incrementViewStmt.run(Number(id)); schedulePersist(); } catch { /* non-critical */ }
 }
 
 export function createProduct(data) {
   const stmt = db.prepare(`
     INSERT INTO products (name, slug, short_description, description, price, sale_price,
-      category_id, images, attributes, badge, featured, in_stock, brand)
+      category_id, images, attributes, badge, featured, in_stock, brand, sku)
     VALUES (:name, :slug, :short_description, :description, :price, :sale_price,
-      :category_id, :images, :attributes, :badge, :featured, :in_stock, :brand)
+      :category_id, :images, :attributes, :badge, :featured, :in_stock, :brand, :sku)
   `);
   const result = stmt.run({
     name: data.name,
@@ -489,6 +555,7 @@ export function createProduct(data) {
     featured: data.featured ? 1 : 0,
     in_stock: data.in_stock !== false ? 1 : 0,
     brand: data.brand || '',
+    sku: data.sku || '',
   });
   return getProduct(result.lastInsertRowid);
 }
@@ -498,7 +565,7 @@ export function updateProduct(id, data) {
   const params = { id };
 
   const allowed = ['name', 'slug', 'short_description', 'description', 'price', 'sale_price',
-    'category_id', 'badge', 'featured', 'in_stock', 'brand'];
+    'category_id', 'badge', 'featured', 'in_stock', 'brand', 'sku'];
   for (const key of allowed) {
     if (data[key] !== undefined) {
       fields.push(`${key} = :${key}`);
