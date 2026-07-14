@@ -2,7 +2,9 @@
 <html lang="sq">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Produkt — IT Store</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,6 +90,11 @@
     .detail-price-main.price-sale { color: #dc2626; }
     .detail-price-was { font-size: 1.8rem; font-weight: 300; color: rgba(20,20,20,0.35); text-decoration: line-through; }
     .detail-short-desc { font-size: 2.2rem; font-weight: 300; color: rgba(20,20,20,0.6); line-height: 1.7; }
+    .detail-sku {
+      font-family: 'Inter', sans-serif; font-size: 1.2rem; font-weight: 500;
+      letter-spacing: 0.06em; color: rgba(20,20,20,0.45); margin-top: -6px;
+    }
+    .detail-sku span { color: rgba(20,20,20,0.75); font-weight: 600; letter-spacing: 0.04em; }
     .stock-badge {
       display: inline-flex; align-items: center; gap: 6px;
       font-family: 'Inter', sans-serif; font-weight: 700;
@@ -412,7 +419,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg>
         +355 69 318 1062
       </a>
-      <button class="nav-icon-btn" onclick="history.back()" aria-label="Kthehu">
+      <button class="nav-icon-btn" id="nav-back" aria-label="Kthehu">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
       </button>
       <button class="nav-icon-btn cart-icon-btn" aria-label="Shporta">
@@ -572,6 +579,7 @@
     });
     initBasketDrawer();
     updateBadge();
+    document.getElementById('nav-back')?.addEventListener('click', () => history.back());
     document.querySelector('.cart-icon-btn').addEventListener('click', openBasket);
     document.getElementById('hamburger').addEventListener('click', () => document.getElementById('mobile-nav').classList.add('open'));
     document.getElementById('mobile-nav-close').addEventListener('click', () => document.getElementById('mobile-nav').classList.remove('open'));
@@ -735,6 +743,7 @@
                 ${p.in_stock ? 'Në stok' : 'Pa stok'}
               </span>
             </div>
+            ${p.sku ? `<p class="detail-sku">SKU: <span>${escapeHtml(p.sku)}</span></p>` : ''}
             ${optionsBlock}
             ${specsRows ? `
               <div class="specs-section">

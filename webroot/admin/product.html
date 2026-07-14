@@ -2,7 +2,9 @@
 <html lang="sq">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shto/Ndrysho Produkt — IT Store</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -106,7 +108,7 @@
 
     <main class="admin-main">
       <div class="admin-header">
-        <button class="back-btn" onclick="history.back()">
+        <button class="back-btn" id="back-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
         </button>
         <h1 class="admin-title" id="page-title">Shto Produkt</h1>
@@ -131,6 +133,10 @@
           <div class="form-group">
             <label class="form-label">Marka (Brand)</label>
             <input type="text" class="form-input" id="brand" name="brand" placeholder="p.sh. Apple, Samsung, Lenovo…">
+          </div>
+          <div class="form-group">
+            <label class="form-label">SKU</label>
+            <input type="text" class="form-input" id="sku" name="sku" placeholder="Kodi i produktit">
           </div>
           <div class="form-group">
             <label class="form-label">Çmimi (€) <span class="form-required">*</span></label>
@@ -189,7 +195,7 @@
         <!-- Actions -->
         <div class="form-actions">
           <button type="submit" class="btn-save" id="save-btn">Ruaj Produktin</button>
-          <button type="button" class="btn-cancel" onclick="history.back()">Anulo</button>
+          <button type="button" class="btn-cancel" id="cancel-btn">Anulo</button>
         </div>
       </form>
     </main>
@@ -198,6 +204,9 @@
 
   <script>
     fetch('/api/admin/check').then(r => { if (!r.ok) window.location.href = '/admin/login'; }).catch(() => window.location.href = '/admin/login');
+
+    document.getElementById('back-btn')?.addEventListener('click', () => history.back());
+    document.getElementById('cancel-btn')?.addEventListener('click', () => history.back());
 
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
       { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
@@ -311,6 +320,7 @@
         document.getElementById('featured').checked = !!p.featured;
         document.getElementById('in_stock').checked = p.in_stock !== false;
         document.getElementById('brand').value = p.brand || '';
+        document.getElementById('sku').value = p.sku || '';
         document.getElementById('category_id').value = p.category_id || '';
         existingImages = Array.isArray(p.images) ? [...p.images] : [];
         renderPreviews();
@@ -355,6 +365,7 @@
       formData.append('description', document.getElementById('description').value);
       formData.append('category_id', document.getElementById('category_id').value);
       formData.append('brand', document.getElementById('brand').value);
+      formData.append('sku', document.getElementById('sku').value);
       formData.append('badge', document.getElementById('badge').value);
       formData.append('featured', document.getElementById('featured').checked);
       formData.append('in_stock', document.getElementById('in_stock').checked);

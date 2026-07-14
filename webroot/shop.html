@@ -2,7 +2,9 @@
 <html lang="sq">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Produktet — IT Store</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -191,11 +193,37 @@
     .sidebar-overlay.open { display: block; }
     .sidebar-sheet {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 301;
-      background: var(--color-bg2); max-height: 80vh; overflow-y: auto;
-      padding: 28px 24px; border-radius: 16px 16px 0 0;
+      background: var(--color-bg2); max-height: 85vh; overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 24px 28px; border-radius: 16px 16px 0 0;
       transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
     }
     .sidebar-overlay.open .sidebar-sheet { transform: none; }
+    /* Sticky sheet header with an always-visible close button */
+    .sheet-header {
+      position: sticky; top: 0; z-index: 5;
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 0 -24px 18px; padding: 16px 24px;
+      background: var(--color-bg2);
+      border-bottom: 1px solid rgba(0,0,0,0.09);
+    }
+    .sheet-title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800; font-size: 1.15rem;
+      letter-spacing: 0.14em; text-transform: uppercase; color: #141414;
+    }
+    .sheet-close {
+      display: flex; align-items: center; justify-content: center;
+      width: 42px; height: 42px; flex-shrink: 0;
+      border: none; background: rgba(0,0,0,0.05); border-radius: 50%;
+      color: #141414; cursor: pointer;
+      transition: background 0.15s, color 0.15s, transform 0.15s;
+    }
+    .sheet-close:hover { background: rgba(240,160,32,0.16); color: var(--color-amber-dark); }
+    .sheet-close:active { transform: scale(0.92); }
+    .sheet-close:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 2px; }
+    /* Lock background scroll while the sheet is open (root element scrolls on mobile) */
+    html:has(.sidebar-overlay.open), body:has(.sidebar-overlay.open) { overflow: hidden; }
     @media (max-width: 900px) {
       .shop-layout { grid-template-columns: 1fr; }
       .shop-sidebar { display: none; }
@@ -610,13 +638,47 @@
             <svg class="mobile-shop-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <ul class="mobile-shop-children" id="mobile-shop-children">
+            <li class="mobile-shop-group-title">Kryesore</li>
             <li><a href="/shop.html?cat=laptop">Laptop</a></li>
             <li><a href="/shop.html?cat=monitore">Monitor</a></li>
             <li><a href="/shop.html?cat=pc">PC & Desktop</a></li>
             <li><a href="/shop.html?cat=workstation">Workstation</a></li>
+
+            <li class="mobile-shop-group-title">Laptop</li>
             <li><a href="/shop.html?cat=macbook">MacBook</a></li>
+            <li><a href="/shop.html?cat=business-laptops">Business Laptops</a></li>
+            <li><a href="/shop.html?cat=workstation-laptops">Workstation Laptops</a></li>
+
+            <li class="mobile-shop-group-title">Desktop</li>
+            <li><a href="/shop.html?cat=desktop">Desktop</a></li>
+            <li><a href="/shop.html?cat=aio">AIO</a></li>
+
+            <li class="mobile-shop-group-title">Rrjeti & Servera</li>
             <li><a href="/shop.html?cat=networking">Networking</a></li>
-            <li><a href="/shop.html">Të gjitha produktet</a></li>
+            <li><a href="/shop.html?cat=switch">Switch</a></li>
+            <li><a href="/shop.html?cat=mikrotik">MikroTik</a></li>
+            <li><a href="/shop.html?cat=nas">NAS</a></li>
+            <li><a href="/shop.html?cat=kvm">KVM</a></li>
+            <li><a href="/shop.html?cat=server">Server</a></li>
+
+            <li class="mobile-shop-group-title">Komponentë</li>
+            <li><a href="/shop.html?cat=komponente">Komponente</a></li>
+            <li><a href="/shop.html?cat=gpu">GPU</a></li>
+            <li><a href="/shop.html?cat=ram">RAM</a></li>
+            <li><a href="/shop.html?cat=ssd">SSD</a></li>
+            <li><a href="/shop.html?cat=hdd">HDD</a></li>
+            <li><a href="/shop.html?cat=caddy">Caddy</a></li>
+            <li><a href="/shop.html?cat=raid-controller">RAID Controller</a></li>
+            <li><a href="/shop.html?cat=karta-rrjeti">Karta Rrjeti</a></li>
+            <li><a href="/shop.html?cat=docking-station">Docking Station</a></li>
+            <li><a href="/shop.html?cat=sas">SAS</a></li>
+
+            <li class="mobile-shop-group-title">Të tjera</li>
+            <li><a href="/shop.html?cat=gaming">Gaming</a></li>
+            <li><a href="/shop.html?cat=ups">UPS</a></li>
+            <li><a href="/shop.html?cat=licensa">Licensa</a></li>
+
+            <li><a href="/shop.html" class="mobile-shop-all">Të gjitha produktet →</a></li>
           </ul>
         </li>
         <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
@@ -913,7 +975,9 @@
       ` : '<li style="color:rgba(20,20,20,0.35);font-size:1.2rem;padding:6px 10px;">Nuk ka markë</li>';
 
       const FF_LABELS = { SFF: 'SFF — Small Form Factor', MT: 'MT — Mini Tower', USFF: 'USFF — Ultra Small', T: 'T — Tower' };
-      const showFF = allFormFactors.length > 0 && state.cat !== 'switch' && (PC_SLUGS.has(state.cat) || allFormFactors.length > 0);
+      // Only show the Form Factor filter when a specific category is selected —
+      // never on "Të gjitha" (state.cat === '') and never for switches.
+      const showFF = allFormFactors.length > 0 && !!state.cat && state.cat !== 'switch';
       const ffItems = allFormFactors.map(ff => `
         <li>
           <span class="cat-link ff-link ${state.form_factor === ff ? 'active' : ''}" data-ff="${ff}">
@@ -1019,7 +1083,13 @@
     function renderSidebar() {
       const html = buildSidebarHTML();
       document.getElementById('sidebar-content').innerHTML = html;
-      document.getElementById('sidebar-sheet').innerHTML = `<button style="float:right;background:none;border:none;color:white;font-size:2rem;cursor:pointer;" id="close-sheet">×</button><div style="clear:both;"></div>${html}`;
+      document.getElementById('sidebar-sheet').innerHTML =
+        `<div class="sheet-header">
+           <span class="sheet-title">Filtrat</span>
+           <button class="sheet-close" id="close-sheet" aria-label="Mbyll filtrat">
+             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+           </button>
+         </div>${html}`;
       wireSidebarEvents(document.getElementById('sidebar-content'));
       wireSidebarEvents(document.getElementById('sidebar-sheet'));
       document.getElementById('close-sheet')?.addEventListener('click', closeSidebarSheet);

@@ -2,7 +2,9 @@
 <html lang="sq">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IT Store — Information & Technology Resource Specialist</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -490,13 +492,47 @@
             <svg class="mobile-shop-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <ul class="mobile-shop-children" id="mobile-shop-children">
+            <li class="mobile-shop-group-title">Kryesore</li>
             <li><a href="/shop.html?cat=laptop">Laptop</a></li>
             <li><a href="/shop.html?cat=monitore">Monitor</a></li>
             <li><a href="/shop.html?cat=pc">PC & Desktop</a></li>
             <li><a href="/shop.html?cat=workstation">Workstation</a></li>
+
+            <li class="mobile-shop-group-title">Laptop</li>
             <li><a href="/shop.html?cat=macbook">MacBook</a></li>
+            <li><a href="/shop.html?cat=business-laptops">Business Laptops</a></li>
+            <li><a href="/shop.html?cat=workstation-laptops">Workstation Laptops</a></li>
+
+            <li class="mobile-shop-group-title">Desktop</li>
+            <li><a href="/shop.html?cat=desktop">Desktop</a></li>
+            <li><a href="/shop.html?cat=aio">AIO</a></li>
+
+            <li class="mobile-shop-group-title">Rrjeti & Servera</li>
             <li><a href="/shop.html?cat=networking">Networking</a></li>
-            <li><a href="/shop.html">Të gjitha produktet</a></li>
+            <li><a href="/shop.html?cat=switch">Switch</a></li>
+            <li><a href="/shop.html?cat=mikrotik">MikroTik</a></li>
+            <li><a href="/shop.html?cat=nas">NAS</a></li>
+            <li><a href="/shop.html?cat=kvm">KVM</a></li>
+            <li><a href="/shop.html?cat=server">Server</a></li>
+
+            <li class="mobile-shop-group-title">Komponentë</li>
+            <li><a href="/shop.html?cat=komponente">Komponente</a></li>
+            <li><a href="/shop.html?cat=gpu">GPU</a></li>
+            <li><a href="/shop.html?cat=ram">RAM</a></li>
+            <li><a href="/shop.html?cat=ssd">SSD</a></li>
+            <li><a href="/shop.html?cat=hdd">HDD</a></li>
+            <li><a href="/shop.html?cat=caddy">Caddy</a></li>
+            <li><a href="/shop.html?cat=raid-controller">RAID Controller</a></li>
+            <li><a href="/shop.html?cat=karta-rrjeti">Karta Rrjeti</a></li>
+            <li><a href="/shop.html?cat=docking-station">Docking Station</a></li>
+            <li><a href="/shop.html?cat=sas">SAS</a></li>
+
+            <li class="mobile-shop-group-title">Të tjera</li>
+            <li><a href="/shop.html?cat=gaming">Gaming</a></li>
+            <li><a href="/shop.html?cat=ups">UPS</a></li>
+            <li><a href="/shop.html?cat=licensa">Licensa</a></li>
+
+            <li><a href="/shop.html" class="mobile-shop-all">Të gjitha produktet →</a></li>
           </ul>
         </li>
         <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
@@ -513,7 +549,7 @@
       <div class="hero-gradient"></div>
       <div class="hero-content">
         <h1 class="hero-title">TEKNOLOGJIA<br>E SË ARDHMES</h1>
-        <button class="hover-btn" onclick="window.location='/shop.html'">
+        <button class="hover-btn" id="hero-shop-btn">
           Shfleto Produktet
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;position:relative;z-index:2;"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
         </button>
@@ -987,6 +1023,7 @@
     // Set WhatsApp footer link
     const waNum = window.__WA_NUMBER__;
     document.getElementById('footer-wa').href = `https://wa.me/${waNum}`;
+    document.getElementById('hero-shop-btn')?.addEventListener('click', () => { window.location = '/shop.html'; });
   </script>
 
   <script>
