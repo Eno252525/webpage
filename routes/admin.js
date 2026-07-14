@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
+import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -37,6 +38,27 @@ const upload = multer({
   },
 });
 
+// Image formats sharp must be able to decode for an upload to be accepted.
+const SHARP_FORMATS = new Set(['jpeg', 'png', 'webp', 'gif', 'avif']);
+
+// Content-based validation: multer's fileFilter only trusts the client-supplied
+// extension + MIME. Decode each stored file with sharp to confirm it's really an
+// image of an allowed type; if any file fails, delete every file in the request
+// and throw so the route returns 400 (nothing partial is persisted).
+async function validateUploads(files) {
+  for (const f of files || []) {
+    let ok = false;
+    try {
+      const meta = await sharp(f.path).metadata();
+      ok = SHARP_FORMATS.has(meta.format);
+    } catch { ok = false; }
+    if (!ok) {
+      for (const g of files) { try { fs.unlinkSync(g.path); } catch { /* already gone */ } }
+      throw new Error('Skedari i ngarkuar nuk është një imazh i vlefshëm.');
+    }
+  }
+}
+
 // Resolve a stored "/uploads/..." path to a real file inside uploadsDir only.
 function resolveUpload(imgPath) {
   if (typeof imgPath !== 'string' || !imgPath.startsWith('/uploads/')) return null;
@@ -67,7 +89,7 @@ router.post('/login', loginLimiter, async (req, res) => {
   const ok = await bcrypt.compare(password, hash);
   if (!ok) return res.status(401).json({ error: 'Fjalëkalim i gabuar' });
 
-  const token = jwt.sign({ admin: true }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  const token = jwt.sign({ admin: true }, process.env.JWT_SECRET, { algorithm: 'HS256', expiresIn: '7d' });
   res.cookie('adminToken', token, {
     httpOnly: true,
     sameSite: 'strict',
@@ -90,8 +112,9 @@ router.get('/products', requireAuth, (req, res) => {
   res.json(getAllProductsAdmin());
 });
 
-router.post('/products', requireAuth, upload.array('images', 10), (req, res) => {
+router.post('/products', requireAuth, upload.array('images', 10), async (req, res) => {
   try {
+    await validateUploads(req.files);
     const data = { ...req.body };
     // Handle attribute pairs sent as attributes[RAM]=16GB
     if (typeof data.attributes === 'string') {
@@ -110,8 +133,9 @@ router.post('/products', requireAuth, upload.array('images', 10), (req, res) => 
   }
 });
 
-router.put('/products/:id', requireAuth, upload.array('images', 10), (req, res) => {
+router.put('/products/:id', requireAuth, upload.array('images', 10), async (req, res) => {
   try {
+    await validateUploads(req.files);
     const data = { ...req.body };
     if (typeof data.attributes === 'string') {
       try { data.attributes = JSON.parse(data.attributes); } catch { data.attributes = {}; }

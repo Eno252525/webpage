@@ -4,7 +4,7 @@ export function requireAuth(req, res, next) {
   const token = req.cookies?.adminToken;
   if (!token) return res.status(401).json({ error: 'Jo i autorizuar' });
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
+    jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     next();
   } catch {
     res.status(401).json({ error: 'Sesioni ka skaduar' });

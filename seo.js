@@ -171,7 +171,7 @@ function productLd(p) {
     '@id': `${url}#product`,
     name: p.name,
     description: clip(p.description || p.short_description || p.name, 500),
-    sku: String(p.id),
+    sku: p.sku || String(p.id),
     mpn: p.slug,
     itemCondition: 'https://schema.org/RefurbishedCondition',
     category: p.category_name || undefined,
@@ -237,14 +237,25 @@ function buildHeadTags(seo) {
   return lines.filter(Boolean).join('\n');
 }
 
-function inject(html, seo, ssr) {
+// Stamp a CSP nonce onto every executable inline <script> so a nonce-based
+// script-src (no 'unsafe-inline') still runs our first-party JS. Data blocks
+// (type="application/ld+json") are not executed, so they're left alone.
+export function addScriptNonce(html, nonce) {
+  if (!nonce) return html;
+  return html.replace(
+    /<script\b(?![^>]*\btype\s*=\s*["']application\/ld\+json["'])/gi,
+    `<script nonce="${nonce}"`,
+  );
+}
+
+function inject(html, seo, ssr, nonce) {
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(seo.title)}</title>`);
   html = html.replace('</head>', `${buildHeadTags(seo)}\n</head>`);
   if (ssr) {
     const anchor = '<div class="product-page" id="product-page">';
     html = html.replace(anchor, anchor + ssr);
   }
-  return html;
+  return addScriptNonce(html, nonce);
 }
 
 // ── Server-rendered product content (for non-JS crawlers) ────────────────────
@@ -278,6 +289,7 @@ function productSsr(p) {
       ${img ? `<img src="${esc(img)}" alt="${esc(p.name)}" width="640" style="max-width:100%;height:auto;border-radius:8px;" loading="eager">` : ''}
       <p style="font-size:1.6rem;font-weight:700;margin:16px 0 4px;">${priceLine}</p>
       <p style="margin:0 0 12px;">${p.in_stock ? 'Në gjendje — gati për dërgesë.' : 'Aktualisht i padisponueshëm.'}</p>
+      ${p.sku ? `<p><strong>SKU:</strong> ${esc(p.sku)}</p>` : ''}
       ${p.brand ? `<p><strong>Markë:</strong> ${esc(p.brand)}</p>` : ''}
       ${p.short_description && stripTags(p.short_description) !== p.name ? `<p>${esc(stripTags(p.short_description))}</p>` : ''}
       ${specs.length ? `<h2>Specifikimet</h2><ul>${specs.map(([k, v]) => `<li><strong>${esc(k)}:</strong> ${esc(v)}</li>`).join('')}</ul>` : ''}
@@ -289,7 +301,7 @@ function productSsr(p) {
 
 // ── Per-page renderer ────────────────────────────────────────────────────────
 // Returns { status, html } for an HTML page request.
-export function renderPage(pageKey, { query = {}, slug = '' } = {}) {
+export function renderPage(pageKey, { query = {}, slug = '', nonce = '' } = {}) {
   const base = [organizationLd(), websiteLd()];
 
   if (pageKey === 'home') {
@@ -302,7 +314,7 @@ export function renderPage(pageKey, { query = {}, slug = '' } = {}) {
       ogType: 'website',
       jsonLd: base,
     };
-    return { status: 200, html: inject(readPage('index.html'), seo) };
+    return { status: 200, html: inject(readPage('index.html'), seo, null, nonce) };
   }
 
   if (pageKey === 'shop') {
@@ -334,7 +346,7 @@ export function renderPage(pageKey, { query = {}, slug = '' } = {}) {
         breadcrumbLd(crumbs),
       ],
     };
-    return { status: 200, html: inject(readPage('shop.html'), seo) };
+    return { status: 200, html: inject(readPage('shop.html'), seo, null, nonce) };
   }
 
   if (pageKey === 'about') {
@@ -351,7 +363,7 @@ export function renderPage(pageKey, { query = {}, slug = '' } = {}) {
         breadcrumbLd([{ name: 'Kreu', url: `${SITE_URL}/` }, { name: 'Rreth Nesh', url: canonical }]),
       ],
     };
-    return { status: 200, html: inject(readPage('rreth-nesh.html'), seo) };
+    return { status: 200, html: inject(readPage('rreth-nesh.html'), seo, null, nonce) };
   }
 
   if (pageKey === 'contact') {
@@ -368,7 +380,7 @@ export function renderPage(pageKey, { query = {}, slug = '' } = {}) {
         breadcrumbLd([{ name: 'Kreu', url: `${SITE_URL}/` }, { name: 'Na Kontaktoni', url: canonical }]),
       ],
     };
-    return { status: 200, html: inject(readPage('na-kontaktoni.html'), seo) };
+    return { status: 200, html: inject(readPage('na-kontaktoni.html'), seo, null, nonce) };
   }
 
   if (pageKey === 'product') {
@@ -382,7 +394,7 @@ export function renderPage(pageKey, { query = {}, slug = '' } = {}) {
         image: LOGO,
         jsonLd: base,
       };
-      return { status: 404, html: inject(readPage('product.html'), seo) };
+      return { status: 404, html: inject(readPage('product.html'), seo, null, nonce) };
     }
     const url = `${SITE_URL}/product/${p.slug}`;
     const price = effectivePrice(p);
@@ -416,7 +428,7 @@ export function renderPage(pageKey, { query = {}, slug = '' } = {}) {
         ]),
       ],
     };
-    return { status: 200, html: inject(readPage('product.html'), seo, productSsr(p)) };
+    return { status: 200, html: inject(readPage('product.html'), seo, productSsr(p), nonce) };
   }
 
   return { status: 404, html: '' };

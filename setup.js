@@ -9,8 +9,8 @@ const ask = (q) => new Promise(r => rl.question(q, r));
 console.log('\n=== IT Store Setup ===\n');
 
 const password = await ask('Vendos fjalëkalimin e adminit: ');
-if (!password || password.length < 6) {
-  console.error('Fjalëkalimi duhet të ketë të paktën 6 karaktere.');
+if (!password || password.length < 12) {
+  console.error('Fjalëkalimi duhet të ketë të paktën 12 karaktere.');
   process.exit(1);
 }
 

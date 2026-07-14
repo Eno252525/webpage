@@ -247,9 +247,9 @@ export function renderDrawerContents() {
           <path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
         <p>${t.emptyBasket}</p>
-        <a href="/shop.html" class="btn-primary" style="display:inline-block;margin-top:16px;font-size:1.1rem;"
-           onclick="closeBasket && closeBasket()">${t.continueShopping}</a>
+        <a href="/shop.html" class="btn-primary" id="basket-continue" style="display:inline-block;margin-top:16px;font-size:1.1rem;">${t.continueShopping}</a>
       </div>`;
+    itemsEl.querySelector('#basket-continue')?.addEventListener('click', () => closeBasket());
     footerEl.innerHTML = '';
     return;
   }
