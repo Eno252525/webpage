@@ -166,15 +166,15 @@
     /* Related carousel */
     #related-grid {
       display: flex; overflow-x: auto;
-      scroll-snap-type: x proximity;
-      overscroll-behavior-x: contain; touch-action: pan-y;
+      overscroll-behavior-x: contain; touch-action: pan-x;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: none; -ms-overflow-style: none; cursor: grab;
     }
     #related-grid::-webkit-scrollbar { display: none; }
     #related-grid.dragging {
-      scroll-snap-type: none; cursor: grabbing; user-select: none;
+      cursor: grabbing; user-select: none;
     }
-    #related-grid .product-card { flex: 0 0 calc(25% - 1.5px); scroll-snap-align: start; }
+    #related-grid .product-card { flex: 0 0 calc(25% - 1.5px); }
     .carousel-wrap { position: relative; }
     .carousel-nav-arrow {
       position: absolute; top: 50%; transform: translateY(-50%);
@@ -197,7 +197,7 @@
     .carousel-nav-arrow:active { transform: translateY(-50%) scale(0.96); }
     .carousel-nav-arrow:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
     .carousel-see-more {
-      flex: 0 0 calc(25% - 1.5px); scroll-snap-align: start;
+      flex: 0 0 calc(25% - 1.5px);
       display: flex; align-items: center; justify-content: center;
       background: var(--color-bg2); position: relative; overflow: hidden;
       transition: background 0.2s; text-decoration: none;
@@ -328,10 +328,6 @@
                   <a href="/shop.html?cat=switch" class="dropdown-col-link">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01"/></svg>
                     Switch
-                  </a>
-                  <a href="/shop.html?cat=mikrotik" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="13" width="20" height="7" rx="2"/><path d="M6 16.5h.01"/><path d="M12 13V8M12 8 9 5M12 8l3-3"/></svg>
-                    MikroTik
                   </a>
                   <a href="/shop.html?cat=nas" class="dropdown-col-link">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
@@ -864,6 +860,9 @@
         let down = false, startX = 0, startScroll = 0, moved = false;
         let lastX = 0, lastT = 0, velocity = 0, raf = 0;
         relatedGrid.addEventListener('pointerdown', (e) => {
+          // Touch uses native momentum scrolling (smoother, no snap lock);
+          // only mouse drag is JS-driven.
+          if (e.pointerType === 'touch') return;
           if (e.pointerType === 'mouse' && e.button !== 0) return;
           cancelAnimationFrame(raf);
           down = true; moved = false;

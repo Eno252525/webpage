@@ -255,23 +255,23 @@
     #laptop-grid, #pc-grid, #sale-grid {
       display: flex;
       overflow-x: auto;
-      scroll-snap-type: x proximity;
       overscroll-behavior-x: contain;
-      touch-action: pan-y;
+      touch-action: pan-x;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       -ms-overflow-style: none;
       cursor: grab;
     }
     #laptop-grid::-webkit-scrollbar, #pc-grid::-webkit-scrollbar, #sale-grid::-webkit-scrollbar { display: none; }
     #laptop-grid.dragging, #pc-grid.dragging, #sale-grid.dragging {
-      scroll-snap-type: none; cursor: grabbing; user-select: none;
+      cursor: grabbing; user-select: none;
     }
     #laptop-grid .product-card, #pc-grid .product-card, #sale-grid .product-card,
     #laptop-grid .skeleton-card, #pc-grid .skeleton-card, #sale-grid .skeleton-card {
-      flex: 0 0 calc(25% - 1.5px); scroll-snap-align: start;
+      flex: 0 0 calc(25% - 1.5px);
     }
     .carousel-see-more {
-      flex: 0 0 calc(25% - 1.5px); scroll-snap-align: start;
+      flex: 0 0 calc(25% - 1.5px);
       display: flex; align-items: center; justify-content: center;
       background: var(--color-bg2); position: relative; overflow: hidden;
       transition: background 0.2s; text-decoration: none;
@@ -1385,6 +1385,9 @@
       let down = false, startX = 0, startScroll = 0, moved = false, captured = false, pid = 0;
       let lastX = 0, lastT = 0, velocity = 0, raf = 0;
       grid.addEventListener('pointerdown', (e) => {
+        // Touch uses the browser's native momentum scrolling (smoother, no snap
+        // lock); only mouse drag is JS-driven.
+        if (e.pointerType === 'touch') return;
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         cancelAnimationFrame(raf);
         down = true; moved = false; captured = false; pid = e.pointerId;
