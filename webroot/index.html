@@ -9,7 +9,7 @@
   <title>IT Store — Information & Technology Resource Specialist</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/shared.css">
   <style>
     /* Homepage: expand header for search row */
@@ -61,61 +61,360 @@
     /* Scroll hide/show */
     header.header-hidden { transform: translateY(-100%); }
 
-    /* Homepage-specific styles */
-    .hero-banner { position: relative; width: 100%; overflow: hidden; }
-    .hero-banner img { width: 100%; height: 65vh; min-height: 440px; object-fit: cover; display: block; }
-    .hero-gradient {
-      position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(20,20,20,0.88) 0%, rgba(20,20,20,0.4) 45%, transparent 100%);
+    /* ═══════════════════════════════════════════════════════════════════
+       HOMEPAGE 2.0 — technical-catalog rhythm
+       Tokens layered on top of shared.css brand vars.
+       ═══════════════════════════════════════════════════════════════════ */
+    :root {
+      --ink: #0E0F11;
+      --ink-2: #17191C;
+      --ink-line: rgba(255,255,255,0.10);
+      --mono: 'Space Mono', ui-monospace, 'SFMono-Regular', monospace;
+      --wrap: 1360px;
+      --sale-red: #E23838;
     }
-    .hero-content { position: absolute; bottom: 44px; left: var(--site-px); }
-    .hero-label {
-      font-family: 'Inter', sans-serif; font-weight: 700;
-      font-size: 1.1rem; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--color-amber); margin-bottom: 12px;
+
+    /* ── Shared utilities ─────────────────────────────────────────────── */
+    .wrap { max-width: var(--wrap); margin: 0 auto; }
+    .eyebrow {
+      font-family: var(--mono); font-weight: 700;
+      font-size: 1.15rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--color-amber-dark);
+      display: inline-flex; align-items: center; gap: 11px;
     }
-    .hero-title { font-size: clamp(3.6rem, 6vw, 8rem); line-height: 1.15; color: white; margin-bottom: 24px; }
-    .feature-band { position: relative; width: 100%; overflow: hidden; }
-    .feature-band img { width: 100%; height: 52vh; min-height: 360px; object-fit: cover; display: block; }
-    .feature-band-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to right, rgba(20,20,20,0.88) 30%, rgba(20,20,20,0.3) 70%, transparent 100%);
-      display: flex; align-items: center;
+    .eyebrow::before {
+      content: ''; width: 22px; height: 2px;
+      background: var(--color-amber); display: inline-block; flex-shrink: 0;
     }
-    .feature-band-content { padding: 0 var(--site-px); }
-    .feature-tag {
-      font-family: 'Inter', sans-serif; font-weight: 700;
-      font-size: 1.1rem; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--color-amber); margin-bottom: 10px;
+    .eyebrow.on-dark { color: var(--color-amber); }
+
+    /* HUD corner ticks — a schematic bounding frame */
+    .hud { position: relative; }
+    .hud::before, .hud::after {
+      content: ''; position: absolute; width: 14px; height: 14px;
+      border: 2px solid var(--color-amber); pointer-events: none; z-index: 3;
     }
-    .feature-title { font-size: clamp(3rem, 5vw, 6.5rem); color: white; margin-bottom: 24px; }
-    .promo-banner {
-      background: var(--color-bg2); padding: 72px var(--site-px);
-      text-align: center; position: relative; overflow: hidden;
+    .hud::before { top: 9px; left: 9px; border-right: 0; border-bottom: 0; }
+    .hud::after { bottom: 9px; right: 9px; border-left: 0; border-top: 0; }
+
+    /* Scroll reveal */
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1); }
+    .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
     }
-    .promo-banner::before {
-      content: ''; position: absolute; top: -80px; left: 50%;
-      transform: translateX(-50%); width: 600px; height: 300px;
-      background: radial-gradient(ellipse, rgba(240,160,32,0.12) 0%, transparent 70%);
+
+    /* Spec chips + price used by custom (non-card) product blocks */
+    .chip {
+      font-family: var(--mono); font-weight: 700; font-size: 1.02rem;
+      letter-spacing: 0.03em; text-transform: uppercase;
+      padding: 4px 9px; white-space: nowrap;
+    }
+    .chip.on-dark { color: rgba(255,255,255,0.82); border: 1px solid var(--ink-line); }
+    .chip.on-light { color: rgba(20,20,20,0.7); border: 1px solid rgba(20,20,20,0.14); }
+    .p-block { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .p-now { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 2.4rem; line-height: 1; }
+    .p-now .cur { font-size: 1.3rem; color: var(--color-amber); font-weight: 700; }
+    .p-was { text-decoration: line-through; font-size: 1.35rem; opacity: 0.5; font-weight: 400; }
+    .p-req { font-family: var(--mono); font-weight: 700; font-size: 1.25rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-amber); }
+
+    /* ── SECTION 1 · HERO ─────────────────────────────────────────────── */
+    .hero {
+      position: relative; overflow: hidden;
+      background: var(--ink); color: #fff;
+      padding: clamp(44px,6vw,88px) var(--site-px) clamp(52px,6vw,80px);
+    }
+    .hero-grid-bg {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 58px 58px;
+      -webkit-mask-image: radial-gradient(ellipse 85% 75% at 28% 30%, #000, transparent 76%);
+      mask-image: radial-gradient(ellipse 85% 75% at 28% 30%, #000, transparent 76%);
+    }
+    .hero-glow {
+      position: absolute; top: -25%; right: -12%;
+      width: 68vw; height: 68vw; max-width: 900px; max-height: 900px;
+      background: radial-gradient(circle, rgba(240,160,32,0.17) 0%, transparent 60%);
       pointer-events: none;
     }
-    .promo-number {
-      font-family: 'Inter', sans-serif; font-weight: 900;
-      font-size: clamp(8rem, 18vw, 22rem); color: rgba(0,0,0,0.04);
-      line-height: 0.85; position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%); white-space: nowrap;
-      pointer-events: none; user-select: none;
+    .hero-inner {
+      position: relative; z-index: 2;
+      max-width: var(--wrap); margin: 0 auto;
+      display: grid; grid-template-columns: 1.02fr 0.98fr;
+      gap: clamp(28px,4.5vw,68px); align-items: center;
     }
-    .promo-label {
-      font-family: 'Inter', sans-serif; font-weight: 700;
-      font-size: 1.1rem; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--color-amber); margin-bottom: 12px; position: relative;
+    .hero-title {
+      font-size: clamp(3.9rem, 6.2vw, 8.2rem); font-weight: 900;
+      line-height: 0.92; letter-spacing: -0.015em; text-transform: uppercase;
+      margin: 22px 0 22px;
     }
-    .promo-title { font-size: clamp(3rem, 5vw, 6rem); color: #141414; margin-bottom: 20px; position: relative; }
-    .promo-title em { font-style: normal; color: var(--color-amber); }
-    .promo-desc {
-      font-size: 1.4rem; font-weight: 300; color: rgba(20,20,20,0.55);
-      max-width: 480px; margin: 0 auto 32px; line-height: 1.7; position: relative;
+    .hero-title .amber { color: var(--color-amber); }
+    .hero-sub {
+      font-size: clamp(1.5rem, 1.75vw, 1.9rem); font-weight: 300;
+      color: rgba(255,255,255,0.62); max-width: 46ch;
+      line-height: 1.62; margin-bottom: 32px;
+    }
+    .hero-cta-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 40px; }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 14px 28px; border-radius: 100px;
+      border: 1px solid rgba(255,255,255,0.24); background: transparent;
+      color: #fff; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1.4rem; letter-spacing: 0.02em;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--color-amber); color: var(--color-amber); background: rgba(240,160,32,0.06); }
+    .btn-ghost:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
+    .hero-stats { display: flex; gap: clamp(22px,3vw,44px); flex-wrap: wrap; border-top: 1px solid var(--ink-line); padding-top: 22px; }
+    .hero-stat-num { font-family: var(--mono); font-weight: 700; font-size: 2.4rem; color: #fff; line-height: 1; }
+    .hero-stat-num .u { color: var(--color-amber); }
+    .hero-stat-label { font-family: var(--mono); font-size: 1.02rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.42); margin-top: 6px; }
+
+    /* Hero product deck */
+    .hero-deck { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hf-card {
+      grid-column: 1 / -1; position: relative;
+      display: flex; gap: 18px; padding: 18px;
+      background: var(--ink-2); border: 1px solid var(--ink-line);
+      color: #fff; text-decoration: none;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .hf-card:hover { border-color: rgba(240,160,32,0.55); transform: translateY(-2px); }
+    .hf-card:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
+    .hf-disc {
+      position: absolute; top: 0; right: 0; z-index: 4;
+      background: var(--sale-red); color: #fff;
+      font-family: var(--mono); font-weight: 700; font-size: 1.15rem; letter-spacing: 0.04em;
+      padding: 5px 11px;
+    }
+    .hf-stage {
+      width: 42%; flex-shrink: 0; aspect-ratio: 1; background: #fff;
+      display: flex; align-items: center; justify-content: center; padding: 12px; overflow: hidden;
+    }
+    .hf-stage img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .hf-card:hover .hf-stage img { transform: scale(1.06); }
+    .hf-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .hf-brand { font-family: var(--mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-amber); }
+    .hf-name { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 1.55rem; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.14; margin: 6px 0 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .hf-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: auto; }
+    .hf-price { margin-top: 14px; }
+    .hf-go { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; font-family: var(--mono); font-weight: 700; font-size: 1.1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-amber); }
+    .hf-go svg { transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+    .hf-card:hover .hf-go svg { transform: translateX(4px); }
+    .hm-card {
+      display: flex; flex-direction: column;
+      background: var(--ink-2); border: 1px solid var(--ink-line);
+      color: #fff; text-decoration: none; padding: 12px;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .hm-card:hover { border-color: rgba(240,160,32,0.55); transform: translateY(-2px); }
+    .hm-card:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
+    .hm-stage { aspect-ratio: 16/10; background: #fff; display: flex; align-items: center; justify-content: center; padding: 10px; overflow: hidden; margin-bottom: 10px; }
+    .hm-stage img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .hm-name { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.12rem; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.16; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .hm-price { font-family: var(--mono); font-weight: 700; font-size: 1.3rem; color: var(--color-amber); margin-top: auto; }
+    .deck-skel { background: var(--ink-2); border: 1px solid var(--ink-line); }
+
+    /* ── SECTION 2 · CATEGORY BENTO ───────────────────────────────────── */
+    .bento-section { background: var(--color-bg2); padding: clamp(46px,5.5vw,80px) var(--site-px); }
+    .sec-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 26px; }
+    .sec-title { font-family: 'Inter', sans-serif; font-weight: 900; font-size: clamp(2.6rem,4vw,4.6rem); letter-spacing: -0.01em; text-transform: uppercase; line-height: 0.95; color: #141414; margin-top: 12px; }
+    .sec-title.on-dark { color: #fff; }
+    .sec-link { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 700; font-size: 1.12rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-amber-dark); white-space: nowrap; transition: color 0.15s; }
+    .sec-link svg { transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+    .sec-link:hover svg { transform: translateX(4px); }
+    .sec-link.on-dark { color: var(--color-amber); }
+    .sec-link:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
+
+    .bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 154px; gap: 10px; }
+    .bento-tile {
+      position: relative; overflow: hidden; display: block; text-decoration: none;
+      background: linear-gradient(135deg, #1c1e22, #0e0f11);
+    }
+    .bento-tile img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6); transition: transform 0.6s cubic-bezier(0.4,0,0.2,1), filter 0.6s; }
+    .bento-tile:hover img { transform: scale(1.06); filter: brightness(0.42); }
+    .bento-tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(6,6,6,0.9) 0%, rgba(6,6,6,0.15) 55%, rgba(6,6,6,0.05) 100%); }
+    .bento-tile:focus-visible { outline: 3px solid var(--color-amber); outline-offset: -3px; }
+    .bt-body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 16px 18px; display: flex; flex-direction: column; gap: 3px; }
+    .bt-tag { font-family: var(--mono); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-amber); }
+    .bt-name { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; line-height: 1.08; display: flex; align-items: center; gap: 8px; }
+    .bt-arrow { opacity: 0; transform: translateX(-6px); color: var(--color-amber); transition: opacity 0.22s, transform 0.28s cubic-bezier(0.34,1.56,0.64,1); flex-shrink: 0; }
+    .bento-tile:hover .bt-arrow { opacity: 1; transform: none; }
+    .bento-tile::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--color-amber); transform: scaleX(0); transform-origin: left; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); z-index: 3; }
+    .bento-tile:hover::before { transform: scaleX(1); }
+    .tile-lg { grid-column: span 2; grid-row: span 2; }
+    .tile-wide { grid-column: span 2; }
+    .tile-lg .bt-name { font-size: clamp(2rem, 2.6vw, 3rem); }
+    .tile-lg .bt-tag { font-size: 1.05rem; }
+
+    /* ── Product section shell + carousels ────────────────────────────── */
+    .psec { padding: clamp(46px,5.5vw,78px) var(--site-px); }
+    .psec.on-cream { background: var(--color-bg2); }
+    #laptop-grid, #pc-grid, #sale-grid {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      overscroll-behavior-x: contain;
+      touch-action: pan-y;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      cursor: grab;
+    }
+    #laptop-grid::-webkit-scrollbar, #pc-grid::-webkit-scrollbar, #sale-grid::-webkit-scrollbar { display: none; }
+    #laptop-grid.dragging, #pc-grid.dragging, #sale-grid.dragging {
+      scroll-snap-type: none; cursor: grabbing; user-select: none;
+    }
+    #laptop-grid .product-card, #pc-grid .product-card, #sale-grid .product-card,
+    #laptop-grid .skeleton-card, #pc-grid .skeleton-card, #sale-grid .skeleton-card {
+      flex: 0 0 calc(25% - 1.5px); scroll-snap-align: start;
+    }
+    .carousel-see-more {
+      flex: 0 0 calc(25% - 1.5px); scroll-snap-align: start;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--color-bg2); position: relative; overflow: hidden;
+      transition: background 0.2s; text-decoration: none;
+      border: 1.5px solid rgba(20,20,20,0.1);
+    }
+    .carousel-see-more::after {
+      content: ''; position: absolute; inset: 0;
+      border: 1.5px solid rgba(240,160,32,0.15); pointer-events: none;
+    }
+    .carousel-see-more:hover { background: rgba(240,160,32,0.05); }
+    .carousel-see-more:hover .csm-circle { background: var(--color-amber); color: #141414; transform: scale(1.08); }
+    .csm-inner { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 48px 24px; text-align: center; }
+    .csm-circle {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 1.5px solid var(--color-amber);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-amber);
+      transition: background 0.2s, color 0.2s, transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .csm-text {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800; font-size: 1.7rem; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--color-amber); line-height: 1.15;
+    }
+    .carousel-wrap { position: relative; }
+    .carousel-nav-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 1px solid rgba(20,20,20,0.1); cursor: pointer; z-index: 3;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.92); color: rgba(20,20,20,0.6);
+      box-shadow: 0 3px 10px rgba(20,20,20,0.12), 0 1px 3px rgba(20,20,20,0.08);
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.22s ease;
+    }
+    .carousel-nav-arrow svg { width: 22px; height: 22px; }
+    .carousel-nav-arrow.arrow-right { right: 14px; }
+    .carousel-nav-arrow.arrow-left { left: 14px; opacity: 0; pointer-events: none; }
+    .carousel-nav-arrow.arrow-left.visible { opacity: 1; pointer-events: auto; }
+    .carousel-nav-arrow:hover {
+      background: #fff; color: var(--color-amber);
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: 0 5px 14px rgba(20,20,20,0.16), 0 1px 4px rgba(20,20,20,0.1);
+    }
+    .carousel-nav-arrow:active { transform: translateY(-50%) scale(0.96); }
+    .carousel-nav-arrow:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
+    @media (max-width: 1100px) {
+      #laptop-grid .product-card, #pc-grid .product-card, #sale-grid .product-card,
+      #laptop-grid .skeleton-card, #pc-grid .skeleton-card, #sale-grid .skeleton-card,
+      .carousel-see-more { flex: 0 0 calc(33.333% - 2px); }
+    }
+    @media (max-width: 700px) {
+      #laptop-grid .product-card, #pc-grid .product-card, #sale-grid .product-card,
+      #laptop-grid .skeleton-card, #pc-grid .skeleton-card, #sale-grid .skeleton-card,
+      .carousel-see-more { flex: 0 0 calc(70% - 2px); }
+      .carousel-nav-arrow { display: none; }
+    }
+
+    /* ── SECTION 4 · SPOTLIGHT (single product) ───────────────────────── */
+    .spotlight { position: relative; overflow: hidden; background: var(--ink); color: #fff; padding: clamp(52px,6.5vw,96px) var(--site-px); }
+    .spotlight .hero-glow { top: auto; bottom: -30%; left: -12%; right: auto; }
+    .spot-inner { position: relative; z-index: 2; max-width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: 1.02fr 0.98fr; gap: clamp(28px,4.5vw,72px); align-items: center; }
+    .spot-stage { position: relative; aspect-ratio: 4/3; background: radial-gradient(circle at 50% 38%, #23262b 0%, #0e0f11 72%); display: flex; align-items: center; justify-content: center; padding: 7%; border: 1px solid var(--ink-line); }
+    .spot-stage img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 32px 46px rgba(0,0,0,0.6)); }
+    .spot-disc { position: absolute; top: 0; left: 0; z-index: 4; background: var(--sale-red); color: #fff; font-family: var(--mono); font-weight: 700; font-size: 1.4rem; letter-spacing: 0.04em; padding: 7px 15px; }
+    .spot-body .eyebrow { margin-bottom: 16px; }
+    .spot-brand { font-family: var(--mono); font-weight: 700; font-size: 1.2rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-amber); display: block; margin-bottom: 8px; }
+    .spot-name { font-family: 'Inter', sans-serif; font-weight: 900; font-size: clamp(2.6rem,3.6vw,4.4rem); letter-spacing: -0.005em; text-transform: uppercase; line-height: 0.98; margin-bottom: 20px; }
+    .spot-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 26px; }
+    .spot-price { margin-bottom: 30px; }
+    .spot-price .p-now { font-size: 3.4rem; }
+    .spot-price .p-now .cur { font-size: 1.7rem; }
+    .spot-cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+    .spot-cta .btn-add-to-basket { width: auto; border: 1px solid rgba(255,255,255,0.24); border-top: 1px solid rgba(255,255,255,0.24); background: transparent; color: #fff; padding: 15px 28px; letter-spacing: 0.08em; }
+    .spot-cta .btn-add-to-basket:hover { background: var(--color-amber); color: #141414; border-color: var(--color-amber); }
+
+    /* ── SECTION 5 · WORKSTATION SHOWCASE (bento) ─────────────────────── */
+    .showcase { display: grid; grid-template-columns: 1.12fr 1fr 1fr; grid-template-rows: repeat(2, 1fr); gap: 2px; }
+    .wsf-card { grid-row: span 2; position: relative; display: flex; flex-direction: column; background: var(--ink); color: #fff; text-decoration: none; overflow: hidden; border: 1.5px solid rgba(20,20,20,0.1); transition: transform 0.25s; }
+    .wsf-card:hover { transform: translateY(-2px); }
+    .wsf-card:focus-visible { outline: 3px solid var(--color-amber); outline-offset: -3px; }
+    .wsf-stage { flex: 1; min-height: 220px; background: #fff; display: flex; align-items: center; justify-content: center; padding: 26px; overflow: hidden; }
+    .wsf-stage img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .wsf-card:hover .wsf-stage img { transform: scale(1.05); }
+    .wsf-body { padding: 22px 24px 26px; position: relative; }
+    .wsf-tag { font-family: var(--mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-amber); }
+    .wsf-name { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 1.95rem; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.12; margin: 8px 0 12px; }
+    .wsf-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .wsf-disc { position: absolute; top: 12px; left: 12px; z-index: 4; background: var(--sale-red); color: #fff; font-family: var(--mono); font-weight: 700; font-size: 1.15rem; padding: 4px 10px; }
+
+    /* ── SECTION 6 · SALE (dark, urgent) ──────────────────────────────── */
+    .sale-dark { position: relative; overflow: hidden; background: linear-gradient(155deg, #1e120c 0%, #0e0f11 58%); color: #fff; padding: clamp(46px,5.5vw,78px) var(--site-px); }
+    .sale-dark .sec-head { align-items: center; }
+    .sale-flag { display: inline-flex; align-items: center; gap: 10px; }
+    .sale-badge { background: var(--sale-red); color: #fff; font-family: var(--mono); font-weight: 700; font-size: 1.1rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 12px; }
+    .sale-pct { font-family: var(--mono); font-weight: 700; font-size: 1.3rem; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.66); display: inline-flex; align-items: center; gap: 8px; }
+    .sale-pct strong { color: var(--color-amber); font-size: 1.7rem; }
+
+    /* ── SECTION 7 · VALUE PROPS ──────────────────────────────────────── */
+    .values { background: #fff; border-top: 1px solid rgba(0,0,0,0.08); padding: clamp(40px,4.5vw,58px) var(--site-px); }
+    .values-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(20px,2.5vw,40px); }
+    .value { display: flex; gap: 15px; align-items: flex-start; }
+    .value-ic { flex-shrink: 0; width: 46px; height: 46px; border: 1.5px solid rgba(240,160,32,0.4); display: flex; align-items: center; justify-content: center; color: var(--color-amber); }
+    .value-t { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.3rem; letter-spacing: 0.05em; text-transform: uppercase; color: #141414; margin-bottom: 4px; }
+    .value-d { font-size: 1.2rem; font-weight: 300; color: rgba(20,20,20,0.55); line-height: 1.5; }
+
+    /* ── SECTION 8 · CLOSING CTA ──────────────────────────────────────── */
+    .closing { position: relative; overflow: hidden; background: var(--ink); color: #fff; padding: clamp(58px,7vw,104px) var(--site-px); text-align: center; }
+    .closing .hero-glow { top: 50%; left: 50%; right: auto; transform: translate(-50%,-50%); width: 900px; height: 500px; max-width: 120vw; }
+    .closing-inner { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; }
+    .closing-title { font-family: 'Inter', sans-serif; font-weight: 900; font-size: clamp(3rem,5vw,5.6rem); letter-spacing: -0.01em; text-transform: uppercase; line-height: 0.96; margin: 20px 0 18px; }
+    .closing-title .amber { color: var(--color-amber); }
+    .closing-sub { font-size: clamp(1.4rem,1.6vw,1.7rem); font-weight: 300; color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 34px; max-width: 52ch; margin-left: auto; margin-right: auto; }
+    .closing-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── Responsive ───────────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+      .spot-inner { grid-template-columns: 1fr; gap: 34px; }
+      .spot-stage { max-width: 560px; }
+      .values-grid { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+    }
+    @media (max-width: 860px) {
+      .bento { grid-auto-rows: 128px; }
+      .showcase { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+      .wsf-card { grid-column: span 2; grid-row: auto; flex-direction: row; }
+      .wsf-card .wsf-stage { width: 44%; flex: 0 0 44%; min-height: 0; aspect-ratio: 1; }
+      .wsf-card .wsf-body { flex: 1; }
+    }
+    @media (max-width: 640px) {
+      .header-search-row { padding: 8px var(--site-px); }
+      .header-search-btn { padding: 0 14px; }
+      .hero-deck { grid-template-columns: 1fr 1fr; }
+      .hf-card { flex-direction: column; }
+      .hf-stage { width: 100%; aspect-ratio: 16/10; }
+      .hero-stats { gap: 20px 30px; }
+      .bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 130px; }
+      .tile-lg { grid-column: span 2; grid-row: span 2; }
+      .tile-wide { grid-column: span 2; }
+      .showcase { grid-template-columns: 1fr; }
+      .wsf-card { grid-column: auto; flex-direction: column; }
+      .wsf-card .wsf-stage { width: 100%; flex: 1; aspect-ratio: 16/10; }
+      .values-grid { grid-template-columns: 1fr; gap: 20px; }
+      .marquee-item { font-size: 1.1rem; padding: 0 22px; }
     }
 
     /* ─── Hover Button ──────────────────────────────────────────────── */
@@ -151,120 +450,6 @@
     }
     .hover-btn .hb-circle.fade-in { opacity: 0.8; }
     .hover-btn .hb-circle.fade-out { opacity: 0; transition: opacity 1.2s ease; }
-
-    /* ─── Carousel ──────────────────────────────────────────────────── */
-    #featured-grid, #new-grid, #laptops-grid, #sale-grid {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x proximity;
-      overscroll-behavior-x: contain;
-      touch-action: pan-y;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      cursor: grab;
-    }
-    #featured-grid::-webkit-scrollbar, #new-grid::-webkit-scrollbar, #laptops-grid::-webkit-scrollbar, #sale-grid::-webkit-scrollbar { display: none; }
-    #featured-grid.dragging, #new-grid.dragging, #laptops-grid.dragging, #sale-grid.dragging {
-      scroll-snap-type: none; cursor: grabbing; user-select: none;
-    }
-    #featured-grid .product-card, #new-grid .product-card, #laptops-grid .product-card, #sale-grid .product-card,
-    #featured-grid .skeleton-card, #new-grid .skeleton-card, #laptops-grid .skeleton-card, #sale-grid .skeleton-card {
-      flex: 0 0 calc(25% - 1.5px); scroll-snap-align: start;
-    }
-    .carousel-see-more {
-      flex: 0 0 calc(25% - 1.5px); scroll-snap-align: start;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--color-bg2); position: relative; overflow: hidden;
-      transition: background 0.2s; text-decoration: none;
-    }
-    .carousel-see-more::after {
-      content: ''; position: absolute; inset: 0;
-      border: 1.5px solid rgba(240,160,32,0.15); pointer-events: none;
-    }
-    .carousel-see-more:hover { background: rgba(240,160,32,0.05); }
-    .carousel-see-more:hover .csm-circle { background: var(--color-amber); color: #141414; transform: scale(1.08); }
-    .csm-inner { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 48px 24px; text-align: center; }
-    .csm-circle {
-      width: 52px; height: 52px; border-radius: 50%;
-      border: 1.5px solid var(--color-amber);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--color-amber);
-      transition: background 0.2s, color 0.2s, transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .csm-text {
-      font-family: 'Inter', sans-serif;
-      font-weight: 800; font-size: 1.9rem; letter-spacing: 0.06em;
-      text-transform: uppercase; color: var(--color-amber); line-height: 1.15;
-    }
-    .carousel-wrap { position: relative; }
-    .carousel-nav-arrow {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      width: 44px; height: 44px; border-radius: 50%;
-      border: 1px solid rgba(20,20,20,0.1); cursor: pointer; z-index: 3;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.92); color: rgba(20,20,20,0.6);
-      box-shadow: 0 3px 10px rgba(20,20,20,0.12), 0 1px 3px rgba(20,20,20,0.08);
-      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.22s ease;
-    }
-    .carousel-nav-arrow svg { width: 22px; height: 22px; }
-    .carousel-nav-arrow.arrow-right { right: 14px; }
-    .carousel-nav-arrow.arrow-left { left: 14px; opacity: 0; pointer-events: none; }
-    .carousel-nav-arrow.arrow-left.visible { opacity: 1; pointer-events: auto; }
-    .carousel-nav-arrow:hover {
-      background: #fff; color: var(--color-amber);
-      transform: translateY(-50%) scale(1.05);
-      box-shadow: 0 5px 14px rgba(20,20,20,0.16), 0 1px 4px rgba(20,20,20,0.1);
-    }
-    .carousel-nav-arrow:active { transform: translateY(-50%) scale(0.96); }
-    .carousel-nav-arrow:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
-    @media (max-width: 1100px) {
-      #featured-grid .product-card, #new-grid .product-card, #laptops-grid .product-card, #sale-grid .product-card,
-      #featured-grid .skeleton-card, #new-grid .skeleton-card, #laptops-grid .skeleton-card, #sale-grid .skeleton-card,
-      .carousel-see-more { flex: 0 0 calc(33.333% - 2px); }
-    }
-    @media (max-width: 700px) {
-      #featured-grid .product-card, #new-grid .product-card, #laptops-grid .product-card, #sale-grid .product-card,
-      #featured-grid .skeleton-card, #new-grid .skeleton-card, #laptops-grid .skeleton-card, #sale-grid .skeleton-card,
-      .carousel-see-more { flex: 0 0 calc(50% - 2px); }
-    }
-    /* Hide carousel arrows on touch-first widths — swipe is the gesture */
-    @media (max-width: 700px) {
-      .carousel-nav-arrow { display: none; }
-    }
-
-    /* ─── Sale Section ──────────────────────────────────────────────────── */
-    .sale-section { background: var(--color-bg2); }
-    .sale-tag {
-      display: inline-block;
-      background: var(--color-amber); color: #141414;
-      font-family: 'Inter', sans-serif;
-      font-weight: 800; font-size: 1.05rem;
-      letter-spacing: 0.16em; text-transform: uppercase;
-      padding: 4px 11px; margin-bottom: 10px;
-    }
-    .sale-discount-pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      border: 1.5px solid var(--color-amber);
-      padding: 6px 16px; margin-bottom: 10px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 700; font-size: 1.1rem;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: rgba(20,20,20,0.6);
-    }
-    .sale-discount-pill strong {
-      color: var(--color-amber); font-weight: 900; font-size: 1.35rem;
-    }
-
-    /* ─── Phone polish ──────────────────────────────────────────────── */
-    @media (max-width: 640px) {
-      .header-search-row { padding: 8px var(--site-px); }
-      .header-search-btn { padding: 0 14px; }
-      .hero-banner img { height: 56vh; min-height: 380px; }
-      .hero-content { bottom: 28px; }
-      .feature-band img { height: 44vh; min-height: 300px; }
-      .promo-banner { padding: 52px var(--site-px); }
-      .marquee-item { font-size: 1.1rem; padding: 0 22px; }
-    }
   </style>
 </head>
 <body>
@@ -361,10 +546,6 @@
                     <a href="/shop.html?cat=switch" class="dropdown-col-link">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01"/></svg>
                       Switch
-                    </a>
-                    <a href="/shop.html?cat=mikrotik" class="dropdown-col-link">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="13" width="20" height="7" rx="2"/><path d="M6 16.5h.01"/><path d="M12 13V8M12 8 9 5M12 8l3-3"/></svg>
-                      MikroTik
                     </a>
                     <a href="/shop.html?cat=nas" class="dropdown-col-link">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
@@ -510,7 +691,6 @@
             <li class="mobile-shop-group-title">Rrjeti & Servera</li>
             <li><a href="/shop.html?cat=networking">Networking</a></li>
             <li><a href="/shop.html?cat=switch">Switch</a></li>
-            <li><a href="/shop.html?cat=mikrotik">MikroTik</a></li>
             <li><a href="/shop.html?cat=nas">NAS</a></li>
             <li><a href="/shop.html?cat=kvm">KVM</a></li>
             <li><a href="/shop.html?cat=server">Server</a></li>
@@ -543,18 +723,89 @@
   </div>
 
   <main>
-    <!-- HERO BANNER -->
-    <div class="hero-banner">
-      <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1440&h=700&fit=crop&auto=format" alt="IT Store">
-      <div class="hero-gradient"></div>
-      <div class="hero-content">
-        <h1 class="hero-title">TEKNOLOGJIA<br>E SË ARDHMES</h1>
-        <button class="hover-btn" id="hero-shop-btn">
-          Shfleto Produktet
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;position:relative;z-index:2;"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-        </button>
+    <!-- ══ SECTION 1 · HERO ══════════════════════════════════════════ -->
+    <section class="hero">
+      <div class="hero-grid-bg"></div>
+      <div class="hero-glow"></div>
+      <div class="hero-inner">
+        <div class="hero-copy reveal">
+          <span class="eyebrow on-dark">IT Store · Tiranë</span>
+          <h1 class="hero-title">Teknologji<br>që punon<br><span class="amber">për ty.</span></h1>
+          <p class="hero-sub">Laptopë, workstation, servera dhe komponentë — të kontrolluar një nga një, me çmimet më të mira dhe suport që përgjigjet.</p>
+          <div class="hero-cta-row">
+            <a class="hover-btn" href="/shop.html">
+              Shfleto produktet
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;position:relative;z-index:2;"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+            </a>
+            <a class="btn-ghost" href="/shop.html?sale=1">Ofertat</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-num" id="stat-products">460<span class="u">+</span></div>
+              <div class="hero-stat-label">Produkte në stok</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num">24</div>
+              <div class="hero-stat-label">Kategori</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num">1<span class="u">:1</span></div>
+              <div class="hero-stat-label">Suport teknik</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-deck reveal" id="hero-deck" style="transition-delay:.1s;">
+          <div class="hf-card deck-skel" style="min-height:180px;"></div>
+          <div class="hm-card deck-skel" style="min-height:150px;"></div>
+          <div class="hm-card deck-skel" style="min-height:150px;"></div>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <!-- ══ SECTION 2 · CATEGORY BENTO ════════════════════════════════ -->
+    <section class="bento-section">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <div>
+            <span class="eyebrow">Katalogu</span>
+            <h2 class="sec-title">Blej sipas<br>kategorisë</h2>
+          </div>
+          <a class="sec-link" href="/shop.html">Të gjitha produktet
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="bento reveal">
+          <a class="bento-tile tile-lg" href="/shop.html?cat=laptop">
+            <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&h=800&fit=crop&auto=format" alt="Laptop" loading="lazy">
+            <div class="bt-body"><span class="bt-tag">44 produkte</span><span class="bt-name">Laptop <svg class="bt-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div>
+          </a>
+          <a class="bento-tile tile-wide" href="/shop.html?cat=workstation">
+            <img src="https://images.unsplash.com/photo-1593152167544-085d3b9c4938?w=800&h=400&fit=crop&auto=format" alt="Workstation" loading="lazy">
+            <div class="bt-body"><span class="bt-tag">76 produkte</span><span class="bt-name">Workstation <svg class="bt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div>
+          </a>
+          <a class="bento-tile" href="/shop.html?cat=pc">
+            <img src="https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=500&h=400&fit=crop&auto=format" alt="PC & Desktop" loading="lazy">
+            <div class="bt-body"><span class="bt-tag">90 produkte</span><span class="bt-name">PC & Desktop</span></div>
+          </a>
+          <a class="bento-tile" href="/shop.html?cat=monitore">
+            <img src="https://images.unsplash.com/photo-1621288698258-f76aa9fd2186?w=500&h=400&fit=crop&auto=format" alt="Monitor" loading="lazy">
+            <div class="bt-body"><span class="bt-tag">21 produkte</span><span class="bt-name">Monitor</span></div>
+          </a>
+          <a class="bento-tile tile-wide" href="/shop.html?cat=networking">
+            <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&h=400&fit=crop&auto=format" alt="Networking" loading="lazy">
+            <div class="bt-body"><span class="bt-tag">91 produkte</span><span class="bt-name">Rrjet & Server <svg class="bt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div>
+          </a>
+          <a class="bento-tile" href="/shop.html?cat=gpu">
+            <img src="https://images.unsplash.com/photo-1591488320449-011701bb6704?w=500&h=400&fit=crop&auto=format" alt="GPU" loading="lazy">
+            <div class="bt-body"><span class="bt-tag">28 produkte</span><span class="bt-name">GPU</span></div>
+          </a>
+          <a class="bento-tile" href="/shop.html?cat=komponente">
+            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&h=400&fit=crop&auto=format" alt="Komponentë" loading="lazy">
+            <div class="bt-body"><span class="bt-tag">RAM · SSD · HDD</span><span class="bt-name">Komponentë</span></div>
+          </a>
+        </div>
+      </div>
+    </section>
 
     <!-- MARQUEE -->
     <div class="marquee-band">
@@ -578,112 +829,143 @@
       </div>
     </div>
 
-    <!-- FEATURED PRODUCTS (Laptops) -->
-    <section class="collection-section">
-      <div class="collection-header">
-        <h2 class="collection-title">Laptop</h2>
-      </div>
-      <div class="carousel-wrap">
-        <button class="carousel-nav-arrow arrow-left" data-target="featured-grid" aria-label="Kthehu">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div class="product-grid" id="featured-grid"></div>
-        <button class="carousel-nav-arrow arrow-right" data-target="featured-grid" aria-label="Shfaq më shumë">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
+    <!-- ══ SECTION 3 · LAPTOP CAROUSEL ═══════════════════════════════ -->
+    <section class="psec">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <div>
+            <span class="eyebrow">Më të kërkuarat</span>
+            <h2 class="sec-title">Laptop</h2>
+          </div>
+          <a class="sec-link" href="/shop.html?cat=laptop">Shiko të gjitha
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="carousel-wrap reveal">
+          <button class="carousel-nav-arrow arrow-left" data-target="laptop-grid" aria-label="Kthehu">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="product-grid" id="laptop-grid"></div>
+          <button class="carousel-nav-arrow arrow-right" data-target="laptop-grid" aria-label="Shfaq më shumë">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
       </div>
     </section>
 
-    <div class="section-divider"></div>
+    <!-- ══ SECTION 4 · PRODUCT SPOTLIGHT ═════════════════════════════ -->
+    <section class="spotlight" id="spotlight" hidden>
+      <div class="hero-grid-bg"></div>
+      <div class="hero-glow"></div>
+      <div class="spot-inner reveal" id="spot-inner"></div>
+    </section>
 
-    <!-- PC & DESKTOP -->
-    <section class="collection-section">
-      <div class="collection-header">
-        <h2 class="collection-title">PC & Desktop</h2>
-      </div>
-      <div class="carousel-wrap">
-        <button class="carousel-nav-arrow arrow-left" data-target="new-grid" aria-label="Kthehu">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div class="product-grid" id="new-grid"></div>
-        <button class="carousel-nav-arrow arrow-right" data-target="new-grid" aria-label="Shfaq më shumë">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
+    <!-- ══ SECTION 5 · WORKSTATION SHOWCASE ══════════════════════════ -->
+    <section class="psec on-cream">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <div>
+            <span class="eyebrow">Fuqi për profesionistët</span>
+            <h2 class="sec-title">Workstation</h2>
+          </div>
+          <a class="sec-link" href="/shop.html?cat=workstation">Shiko të gjitha
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="showcase reveal" id="ws-showcase"></div>
       </div>
     </section>
 
-    <!-- FEATURE BAND -->
-    <div class="feature-band">
-      <img src="https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=1440&h=560&fit=crop&auto=format" alt="Koleksioni Premium">
-      <div class="feature-band-overlay">
-        <div class="feature-band-content">
-          <p class="feature-tag">Koleksion Ekskluziv</p>
-          <h2 class="feature-title">TEKNOLOGJI<br>PREMIUM</h2>
-          <a href="/shop.html" class="btn-primary">Shfleto Tani</a>
+    <!-- ══ SECTION 6 · PC & DESKTOP CAROUSEL ═════════════════════════ -->
+    <section class="psec">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <div>
+            <span class="eyebrow">Për zyrën & shtëpinë</span>
+            <h2 class="sec-title">PC & Desktop</h2>
+          </div>
+          <a class="sec-link" href="/shop.html?cat=pc">Shiko të gjitha
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
         </div>
-      </div>
-    </div>
-
-    <!-- WORKSTATIONS SECTION -->
-    <section class="collection-section">
-      <div class="collection-header">
-        <h2 class="collection-title">Workstation</h2>
-      </div>
-      <div class="carousel-wrap">
-        <button class="carousel-nav-arrow arrow-left" data-target="laptops-grid" aria-label="Kthehu">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div class="product-grid" id="laptops-grid"></div>
-        <button class="carousel-nav-arrow arrow-right" data-target="laptops-grid" aria-label="Shfaq më shumë">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
+        <div class="carousel-wrap reveal">
+          <button class="carousel-nav-arrow arrow-left" data-target="pc-grid" aria-label="Kthehu">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="product-grid" id="pc-grid"></div>
+          <button class="carousel-nav-arrow arrow-right" data-target="pc-grid" aria-label="Shfaq më shumë">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
       </div>
     </section>
 
-    <div class="section-divider"></div>
-
-    <!-- FEATURE BAND 2 -->
-    <div class="feature-band">
-      <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=1440&h=560&fit=crop&auto=format" alt="Ofertat e Sezonit">
-      <div class="feature-band-overlay" style="background:linear-gradient(to left,rgba(20,20,20,0.88) 30%,rgba(20,20,20,0.3) 70%,transparent 100%);justify-content:flex-end;">
-        <div class="feature-band-content" style="text-align:right;">
-          <p class="feature-tag">Ky Sezon</p>
-          <h2 class="feature-title">OFERTAT<br>MË TË MIRA</h2>
-          <a href="/shop.html?orderby=price_asc" class="btn-primary">Shiko Ofertat</a>
+    <!-- ══ SECTION 7 · SALE (dark) ═══════════════════════════════════ -->
+    <section class="sale-dark">
+      <div class="hero-glow" style="top:-30%;left:-10%;right:auto;background:radial-gradient(circle,rgba(226,56,56,0.18),transparent 62%);"></div>
+      <div class="wrap" style="position:relative;z-index:2;">
+        <div class="sec-head reveal">
+          <div>
+            <span class="sale-flag"><span class="sale-badge">Zbritje</span></span>
+            <h2 class="sec-title on-dark" style="margin-top:14px;">Produkte me çmim<br>të ulur</h2>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:12px;">
+            <span class="sale-pct">Deri në <strong id="sale-max-pct">—%</strong> zbritje</span>
+            <a class="sec-link on-dark" href="/shop.html?sale=1">Shiko të gjitha
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+          </div>
         </div>
-      </div>
-    </div>
-
-    <!-- SALE SECTION -->
-    <section class="collection-section sale-section">
-      <div class="collection-header">
-        <div>
-          <span class="sale-tag">Sale</span>
-          <h2 class="collection-title">Produkte me Zbritje</h2>
+        <div class="carousel-wrap reveal">
+          <button class="carousel-nav-arrow arrow-left" data-target="sale-grid" aria-label="Kthehu">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="product-grid" id="sale-grid"></div>
+          <button class="carousel-nav-arrow arrow-right" data-target="sale-grid" aria-label="Shfaq më shumë">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
         </div>
-        <div style="display:flex;align-items:center;gap:20px;">
-          <span class="sale-discount-pill">Deri në <strong id="sale-max-pct">—%</strong> zbritje</span>
-          <a href="/shop.html?sale=1" class="view-all-link">Shiko të gjitha</a>
-        </div>
-      </div>
-      <div class="carousel-wrap">
-        <button class="carousel-nav-arrow arrow-left" data-target="sale-grid" aria-label="Kthehu">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div class="product-grid" id="sale-grid"></div>
-        <button class="carousel-nav-arrow arrow-right" data-target="sale-grid" aria-label="Shfaq më shumë">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
       </div>
     </section>
 
-    <!-- PROMO / CTA -->
-    <section class="promo-banner">
-      <span class="promo-number">SALE</span>
-      <p class="promo-label">Ofertë me Kohë të Kufizuar</p>
-      <h2 class="promo-title">Pajisjet e se nesermes<br><em>te disponueshme sot</em></h2>
-      <p class="promo-desc">Çmime të pathyeshme për pajisje IT premium. Sasi të kufizuara — veproni shpejt.</p>
-      <a href="/shop.html" class="btn-primary" style="position:relative;">Shfleto Të Gjitha Ofertat</a>
+    <!-- ══ SECTION 8 · VALUE PROPS ═══════════════════════════════════ -->
+    <section class="values">
+      <div class="wrap values-grid reveal">
+        <div class="value">
+          <span class="value-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
+          <div><div class="value-t">Dërgim i shpejtë</div><div class="value-d">Në të gjithë Shqipërinë, brenda pak ditësh.</div></div>
+        </div>
+        <div class="value">
+          <span class="value-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 4v5c0 4-3 7-7 8-4-1-7-4-7-8V7z"/></svg></span>
+          <div><div class="value-t">I testuar & me garanci</div><div class="value-d">Çdo pajisje kontrollohet para se të dalë.</div></div>
+        </div>
+        <div class="value">
+          <span class="value-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg></span>
+          <div><div class="value-t">Suport teknik</div><div class="value-d">Këshillë njerëzore para dhe pas blerjes.</div></div>
+        </div>
+        <div class="value">
+          <span class="value-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
+          <div><div class="value-t">Çmime që kuptohen</div><div class="value-d">Vlerë reale për buxhetin e biznesit tuaj.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ SECTION 9 · CLOSING CTA ═══════════════════════════════════ -->
+    <section class="closing">
+      <div class="hero-grid-bg"></div>
+      <div class="hero-glow"></div>
+      <div class="closing-inner reveal">
+        <span class="eyebrow on-dark" style="justify-content:center;">Pyet, blej, mbaro</span>
+        <h2 class="closing-title">Nuk je i sigurt<br>çfarë të <span class="amber">zgjedhësh?</span></h2>
+        <p class="closing-sub">Na shkruaj në WhatsApp me çfarë të nevojitet — buxhet, përdorim, specifika — dhe të gjejmë pajisjen e duhur.</p>
+        <div class="closing-cta">
+          <a class="hover-btn" href="/shop.html">
+            Shfleto produktet
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;position:relative;z-index:2;"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+          </a>
+          <a class="btn-ghost" href="/na-kontaktoni.html">Na kontakto</a>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -776,7 +1058,7 @@
 
   <script type="module">
     import { getProducts } from '/js/api.js';
-    import { renderProductCard, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, openBasket } from '/js/ui.js';
+    import { renderProductCard, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, openBasket, parseSpecText, escapeHtml, fmtPrice } from '/js/ui.js';
     import { updateBadge } from '/js/basket.js';
     import { loadConfig } from '/js/config.js';
 
@@ -886,6 +1168,35 @@
       return out;
     }
 
+    // ── Shared small helpers for the custom (non-card) product blocks ──────
+    const prodHref = (p) => p.slug ? `/product/${p.slug}` : `/product.html?id=${p.id}`;
+    const prodImg = (p, ph = '600x600/16181B/F0A020') =>
+      (p.images || [])[0] ? escapeHtml(p.images[0]) : `https://placehold.co/${ph}`;
+    const discPct = (p) => (p.sale_price && Number(p.price) > 0)
+      ? Math.round((1 - Number(p.sale_price) / Number(p.price)) * 100) : 0;
+    function specChips(p, n, variant) {
+      const pairs = parseSpecText(p.short_description) || [];
+      let vals = pairs.slice(0, n).map(([, v]) => String(v).slice(0, 22));
+      // Fallback when a listing has no parseable spec sheet: use what we do know
+      // (condition + stock) so the block never reads as empty.
+      if (vals.length === 0) {
+        const cond = (p.badge || '').trim();
+        if (cond) vals.push(cond);
+        vals.push(p.in_stock ? 'Në stok' : 'Me porosi');
+      }
+      return vals
+        .map(v => `<span class="chip ${variant}">${escapeHtml(v)}</span>`)
+        .join('');
+    }
+    function priceBlock(p) {
+      const has = Number(p.price) > 0 || Number(p.sale_price) > 0;
+      if (!has) return `<span class="p-req">Çmim sipas kërkesës</span>`;
+      if (Number(p.sale_price) > 0)
+        return `<span class="p-now">${fmtPrice(p.sale_price)}<span class="cur"> L</span></span> <span class="p-was">${fmtPrice(p.price)} L</span>`;
+      return `<span class="p-now">${fmtPrice(p.price)}<span class="cur"> L</span></span>`;
+    }
+    const arrowSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+
     async function loadSection(gridId, params, shopUrl, opts = {}) {
       const grid = document.getElementById(gridId);
       grid.innerHTML = renderSkeletons(4);
@@ -917,15 +1228,106 @@
       }
     }
 
-    // Load all sections
-    const [laptops, pcs, workstations, saleProducts] = await Promise.all([
-      loadSection('featured-grid', { category: 'laptop', orderby: 'featured' }, '/shop.html?cat=laptop'),
-      loadSection('new-grid', { category: 'pc', orderby: 'featured' }, '/shop.html?cat=pc', { excludeBrands: ['Zotac'], mixBrands: true }),
-      loadSection('laptops-grid', { category: 'workstation', orderby: 'featured' }, '/shop.html?cat=workstation', { excludeBrands: ['Fujitsu'], mixBrands: true }),
+    // ── HERO product deck: one large feature + two minis ───────────────────
+    function renderHeroDeck(list) {
+      const deck = document.getElementById('hero-deck');
+      if (!deck || !list.length) { if (deck) deck.style.display = 'none'; return; }
+      const [f, m1, m2] = list;
+      const mini = (p) => !p ? '' : `
+        <a class="hm-card" href="${prodHref(p)}">
+          <div class="hm-stage"><img src="${prodImg(p)}" alt="${escapeHtml(p.name)}" loading="lazy"></div>
+          <p class="hm-name">${escapeHtml(p.name)}</p>
+          <span class="hm-price">${Number(p.sale_price) > 0 ? fmtPrice(p.sale_price) : (Number(p.price) > 0 ? fmtPrice(p.price) : '—')} L</span>
+        </a>`;
+      const d = discPct(f);
+      deck.innerHTML = `
+        <a class="hf-card hud" href="${prodHref(f)}">
+          ${d > 0 ? `<span class="hf-disc">-${d}%</span>` : ''}
+          <div class="hf-stage"><img src="${prodImg(f)}" alt="${escapeHtml(f.name)}" loading="lazy"></div>
+          <div class="hf-body">
+            <span class="hf-brand">${escapeHtml(f.brand || 'IT Store')}</span>
+            <p class="hf-name">${escapeHtml(f.name)}</p>
+            <div class="hf-chips">${specChips(f, 3, 'on-dark')}</div>
+            <div class="hf-price p-block">${priceBlock(f)}</div>
+            <span class="hf-go">Shiko produktin ${arrowSvg}</span>
+          </div>
+        </a>
+        ${mini(m1)}${mini(m2)}`;
+    }
+
+    // ── SPOTLIGHT: single flagship product, editorial ──────────────────────
+    function renderSpotlight(p) {
+      const sec = document.getElementById('spotlight');
+      const inner = document.getElementById('spot-inner');
+      if (!sec || !inner || !p) return;
+      const d = discPct(p);
+      inner.innerHTML = `
+        <div class="spot-stage hud">
+          ${d > 0 ? `<span class="spot-disc">-${d}%</span>` : ''}
+          <img src="${prodImg(p)}" alt="${escapeHtml(p.name)}" loading="lazy">
+        </div>
+        <div class="spot-body">
+          <span class="eyebrow on-dark">Produkti i zgjedhur</span>
+          <span class="spot-brand">${escapeHtml(p.brand || 'IT Store')}</span>
+          <h2 class="spot-name">${escapeHtml(p.name)}</h2>
+          <div class="spot-chips">${specChips(p, 4, 'on-dark')}</div>
+          <div class="spot-price p-block">${priceBlock(p)}</div>
+          <div class="spot-cta">
+            <a class="hover-btn" href="${prodHref(p)}">Shiko produktin
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;position:relative;z-index:2;"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+            </a>
+            <button class="btn-add-to-basket" data-id="${Number(p.id)}" ${p.in_stock ? '' : 'disabled'}>Shto në shportë</button>
+          </div>
+        </div>`;
+      sec.hidden = false;
+    }
+
+    // ── WORKSTATION showcase: one feature card + a 2×2 grid of cards ────────
+    function renderShowcase(list) {
+      const el = document.getElementById('ws-showcase');
+      if (!el) return;
+      if (!list.length) { el.innerHTML = '<p style="color:rgba(20,20,20,0.4);padding:20px;">Nuk ka produkte ende.</p>'; return; }
+      const [f, ...rest] = list;
+      const d = discPct(f);
+      const feature = `
+        <a class="wsf-card" href="${prodHref(f)}">
+          ${d > 0 ? `<span class="wsf-disc">-${d}%</span>` : ''}
+          <div class="wsf-stage"><img src="${prodImg(f)}" alt="${escapeHtml(f.name)}" loading="lazy"></div>
+          <div class="wsf-body">
+            <span class="wsf-tag">${escapeHtml(f.brand || 'Workstation')}</span>
+            <p class="wsf-name">${escapeHtml(f.name)}</p>
+            <div class="wsf-chips">${specChips(f, 3, 'on-light')}</div>
+            <div class="p-block">${priceBlock(f)}</div>
+          </div>
+        </a>`;
+      el.innerHTML = feature + rest.slice(0, 4).map(renderProductCard).join('');
+    }
+
+    // Load everything in parallel
+    const [heroPool, laptops, workstations, pcs, saleProducts] = await Promise.all([
+      getProducts({ per_page: 12, orderby: 'featured' }).then(r => r.products).catch(() => []),
+      loadSection('laptop-grid', { category: 'laptop', orderby: 'featured' }, '/shop.html?cat=laptop'),
+      getProducts({ per_page: 100, category: 'workstation', orderby: 'featured' })
+        .then(r => pickByBrand([...r.products]
+          .filter(p => (p.brand || '').toLowerCase() !== 'fujitsu')
+          .sort((a, b) => interestScore(b) - interestScore(a)), 5))
+        .catch(() => []),
+      loadSection('pc-grid', { category: 'pc', orderby: 'featured' }, '/shop.html?cat=pc', { excludeBrands: ['Zotac'], mixBrands: true }),
       loadSection('sale-grid', { sale: '1' }, '/shop.html?sale=1'),
     ]);
 
-    const allProducts = [...laptops, ...pcs, ...workstations, ...saleProducts];
+    // Hero deck + spotlight draw from the featured pool (kept distinct products).
+    const heroRanked = [...heroPool].sort((a, b) => interestScore(b) - interestScore(a));
+    const heroThree = heroRanked.slice(0, 3);
+    renderHeroDeck(heroThree);
+    const spotlightProduct = heroRanked.find(p => !heroThree.includes(p) && (Number(p.price) > 0 || Number(p.sale_price) > 0))
+      || heroRanked[3] || heroRanked[0];
+    renderSpotlight(spotlightProduct);
+
+    renderShowcase(workstations);
+
+    const allProducts = [...heroThree, spotlightProduct, ...laptops, ...workstations, ...pcs, ...saleProducts]
+      .filter(Boolean);
     wireAddToBasketButtons(allProducts);
 
     // Update max discount badge
@@ -938,7 +1340,21 @@
     const pctEl = document.getElementById('sale-max-pct');
     if (pctEl && maxDiscount > 0) pctEl.textContent = maxDiscount + '%';
 
+    // ── Scroll-reveal ──────────────────────────────────────────────────────
+    (function () {
+      const items = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        items.forEach(el => el.classList.add('in'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+      items.forEach(el => io.observe(el));
+    })();
+
     // Wire carousel arrows
+    const CAROUSELS = ['laptop-grid', 'pc-grid', 'sale-grid'];
     document.querySelectorAll('.carousel-nav-arrow.arrow-right').forEach(btn => {
       btn.addEventListener('click', () => {
         const grid = document.getElementById(btn.dataset.target);
@@ -957,7 +1373,7 @@
         grid.scrollBy({ left: -amount, behavior: 'smooth' });
       });
     });
-    ['featured-grid', 'new-grid', 'laptops-grid', 'sale-grid'].forEach(id => {
+    CAROUSELS.forEach(id => {
       const grid = document.getElementById(id);
       const leftArrow = document.querySelector(`.carousel-nav-arrow.arrow-left[data-target="${id}"]`);
       if (!grid || !leftArrow) return;
@@ -1015,7 +1431,7 @@
         if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
       }, true);
     }
-    ['featured-grid', 'new-grid', 'laptops-grid', 'sale-grid'].forEach(id => {
+    CAROUSELS.forEach(id => {
       const g = document.getElementById(id);
       if (g) enableDragScroll(g);
     });
@@ -1023,7 +1439,6 @@
     // Set WhatsApp footer link
     const waNum = window.__WA_NUMBER__;
     document.getElementById('footer-wa').href = `https://wa.me/${waNum}`;
-    document.getElementById('hero-shop-btn')?.addEventListener('click', () => { window.location = '/shop.html'; });
   </script>
 
   <script>
