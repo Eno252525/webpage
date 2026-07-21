@@ -59,6 +59,13 @@ const PREFIX_MAP = [
 // Old WooCommerce category slug → new category slug, where they differ.
 const CAT_OVERRIDE = { mouse: 'gaming' };
 
+// Products that were re-slugged on the new site: old product slug → new slug.
+// 301'd to the new canonical product URL so inbound links and rankings survive.
+const PRODUCT_RESLUG = {
+  'hp-z8-g4-ai-server-2x-xeon-platinum-8160-rtx-3090':
+    'hp-z8-g4-ai-server-2x-xeon-gold-6262-rtx-3090',
+};
+
 // Keyword → category slug. Used to route a removed product to the most
 // relevant catalog page. Best-effort and order-sensitive (first match wins).
 const CAT_RULES = [
@@ -101,7 +108,15 @@ export function legacyRedirects(req, res, next) {
   // 1. Exact static-page matches.
   if (PAGE_MAP[p]) return res.redirect(301, PAGE_MAP[p]);
 
-  // 2. Legacy product URLs — always carried a trailing slash in WordPress.
+  // 2. Re-slugged products → new canonical URL. Handles both the new-site form
+  //    (no trailing slash) and the legacy WordPress form (trailing slash).
+  const reslug = p.match(/^\/product\/([^/]+)\/?$/);
+  if (reslug) {
+    const target = PRODUCT_RESLUG[decodeURIComponent(reslug[1])];
+    if (target) return res.redirect(301, `/product/${target}`);
+  }
+
+  // 3. Legacy product URLs — always carried a trailing slash in WordPress.
   //    (New-site URLs have no trailing slash, so they skip this entirely.)
   const prod = p.match(/^\/product\/([^/]+)\/$/);
   if (prod) {
