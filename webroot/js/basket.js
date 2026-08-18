@@ -23,7 +23,9 @@ export function addItem(product, options) {
       id: product.id,
       name: product.name,
       slug: product.slug,
-      price: product.sale_price ?? product.price,
+      // Only a positive sale_price wins: "no sale" has historically been stored
+      // as both NULL and 0, and `??` would let a 0 through as a free item.
+      price: Number(product.sale_price) > 0 ? product.sale_price : product.price,
       image: (product.images || [])[0] || '',
       qty: 1,
       options: hasOptions ? cleanOptions : null,
