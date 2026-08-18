@@ -64,6 +64,39 @@ const CAT_OVERRIDE = { mouse: 'gaming' };
 const PRODUCT_RESLUG = {
   'hp-z8-g4-ai-server-2x-xeon-platinum-8160-rtx-3090':
     'hp-z8-g4-ai-server-2x-xeon-gold-6262-rtx-3090',
+  // "i8-8295U" was a typo for the Core i5-8295U — no such thing as a Core i8.
+  'apple-macbook-pro-2018-13-i8-8295u': 'apple-macbook-pro-2018-13-i5-8295u',
+  // Sold out and removed 2026-08-12 → nearest surviving model, so the retired
+  // product URLs land on something relevant instead of 404ing.
+  'apple-macbook-air-2020': 'apple-macbook-air-2019',
+  'apple-macbook-pro-2020': 'apple-macbook-pro-2020-i5-1038ng7',
+  'apple-macbook-pro-2019': 'apple-macbook-pro-2019-i7',
+
+  // ── 2026-08-18 catalog cleanup ─────────────────────────────────────────────
+  // Fujitsu's line is spelled "Celsius"; every slug carried the misspelling.
+  'fujitsu-celcius-m470':  'fujitsu-celsius-m470',
+  'fujitsu-celcius-m720':  'fujitsu-celsius-m720',
+  'fujitsu-celcius-w280':  'fujitsu-celsius-w280',
+  'fujitsu-celcius-w370':  'fujitsu-celsius-w370',
+  'fujitsu-celcius-w370-2':'fujitsu-celsius-w370-2',
+  'fujitsu-celcius-w380':  'fujitsu-celsius-w380',
+  'fujitsu-celcius-w550':  'fujitsu-celsius-w550',
+  'fujitsu-celcius-j550n': 'fujitsu-celsius-j550n',
+  'fujitsu-celcius-c740':  'fujitsu-celsius-c740',
+  // The three R570s had three different naming styles (and a leftover "-2"
+  // dedupe suffix); they are now distinguished by CPU instead.
+  'fujitsu-celcius-r570':   'fujitsu-celsius-r570-e5645',
+  'fujitsu-celcius-r570-2': 'fujitsu-celsius-r570-2x-e5620',
+  'fujitsu-r570':           'fujitsu-celsius-r570-e5640',
+  // The S20 is a ThinkStation, not a ThinkCentre.
+  'lenovo-thinkcentre-s20':   'lenovo-thinkstation-s20-w3530',
+  'lenovo-thinkcentre-s20-2': 'lenovo-thinkstation-s20-e5640',
+  // Duplicate listings removed → the surviving identical product.
+  'dell-precision-3620-5': 'dell-precision-3620',
+  'zotac-mini-pc-3':       'zotac-mini-pc-2',
+  'dell-latitude-5500-2':  'dell-latitude-5500',
+  // #411 was listed as "Firebridge ... switch"; it is an ATTO FibreBridge.
+  'firebridge-fcbr-7500-dn1': 'atto-fibrebridge-7500n',
 };
 
 // Keyword → category slug. Used to route a removed product to the most
