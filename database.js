@@ -141,6 +141,13 @@ restoreViewCounts();
   }
 }
 
+// ── Migration: Aksesorë top-level category ───────────────────────────────────
+// Home for peripherals (mice, keyboards, cables). Komponente is reserved for
+// parts that go *inside* a machine, so accessories get their own top level.
+db.prepare(
+  "INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES ('Aksesorë', 'aksesore', NULL, 10)"
+).run();
+
 // ── Migration: Server is a top-level category (was nested under Networking) ──
 {
   const serverCat = db.prepare("SELECT id, parent_id FROM categories WHERE slug = 'server'").get();
