@@ -56,7 +56,7 @@ const PHOTOS = {
   'hp-pavilion-g7': 'hp-pavilion-g7.jpg',
   'hp-probook-450': 'hp-probook-450.jpg',
   'hp-probook-950': 'hp-probook-450.jpg',
-  'hp-240-g4': 'hp-probook-450.jpg',
+  // hp-240-g4 removed from the catalog 2026-08-20.
   'lenovo-thinkpad-l440': 'lenovo-thinkpad-l440.jpg',
   'lenovo-thinkpad-l540': 'lenovo-thinkpad-l440.jpg',
   'hp-g62': 'hp-probook-450.jpg',

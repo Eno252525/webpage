@@ -65,7 +65,8 @@ add({ slug: 'hp-probook-950', model: 'HP ProBook 950', brand: 'HP', family: 'pro
 add({ slug: 'hp-probook-4540s', model: 'HP ProBook 4540s', brand: 'HP', family: 'probook', cpu: 'i3-3110M', ram: '8GB', ssd: '128GB', screen: '15.6"', price: 6000, cat: BUSINESS, img: 'hp-probook-4540s' });
 
 // ---------- Gen 4 ----------
-add({ slug: 'hp-240-g4', model: 'HP 240 G4', brand: 'HP', family: 'consumer', cpu: 'i3-4005U', ram: '8GB', ssd: '128GB', screen: '14"', price: 7000, cat: BUSINESS });
+// hp-240-g4 (i3-4005U / 8GB / 128GB, 7000 L) was removed 2026-08-20 — see
+// scripts/remove-hp-240-g4-2026-08-20.mjs. Deliberately not re-added here.
 add({ slug: 'hp-probook-640-g1', model: 'HP ProBook 640 G1', brand: 'HP', family: 'probook', cpu: 'i3-4210M', ram: '8GB', ssd: '128GB', screen: '14"', price: 7000, cat: BUSINESS, img: 'hp-probook-640-g1' });
 add({ slug: 'hp-pro-x2-612-g1', model: 'HP Pro x2 612 G1', brand: 'HP', family: 'probook', cpu: 'i3-4012Y', ram: '4GB', ssd: '128GB', screen: '12"', price: 7000, cat: BUSINESS, img: 'hp-pro-x2-612-g1', touch: true });
 add({ slug: 'dell-latitude-3540', model: 'Dell Latitude 3540', brand: 'Dell', family: 'latitude', cpu: 'i3-4010U', ram: '8GB', ssd: '128GB', screen: '15.6"', price: 7000, cat: BUSINESS, existing: true });
@@ -196,7 +197,7 @@ const DATA_ISSUES = [
 // Models with no trustworthy photo — inserted without an image on purpose.
 const NO_IMAGE_EXPECTED = [
   'lenovo-thinkpad-t520', 'hp-pavilion-g7', 'hp-probook-450', 'hp-probook-950',
-  'hp-240-g4', 'lenovo-thinkpad-l440', 'lenovo-thinkpad-l540', 'hp-g62',
+  'lenovo-thinkpad-l440', 'lenovo-thinkpad-l540', 'hp-g62',
   'hp-probook-850-g2-256', 'hp-probook-850-g2', 'hp-probook-430-g2',
   'apple-macbook-pro-i5-2410m', 'apple-macbook-pro-late-2015',
 ];

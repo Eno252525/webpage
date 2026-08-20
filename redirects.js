@@ -97,6 +97,10 @@ const PRODUCT_RESLUG = {
   'dell-latitude-5500-2':  'dell-latitude-5500',
   // #411 was listed as "Firebridge ... switch"; it is an ATTO FibreBridge.
   'firebridge-fcbr-7500-dn1': 'atto-fibrebridge-7500n',
+
+  // Removed 2026-08-20 → nearest surviving model (same 14" screen, same
+  // 4th-gen i3, same 8GB/128GB, same 7000 Lekë).
+  'hp-240-g4': 'hp-probook-640-g1',
 };
 
 // Keyword → category slug. Used to route a removed product to the most
