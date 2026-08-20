@@ -12,56 +12,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/shared.css">
   <style>
-    /* Homepage: expand header for search row */
-    :root { --header-height: 117px; }
-    header {
-      flex-direction: column;
-      align-items: stretch;
-      height: auto;
-      padding: 0;
-      gap: 0;
-    }
-    .header-nav {
-      display: flex; align-items: center;
-      padding: 0 var(--site-px); gap: 32px;
-      height: 65px; flex-shrink: 0;
-    }
-    .header-search-row {
-      border-top: 1px solid rgba(0,0,0,0.07);
-      padding: 10px var(--site-px);
-      background: var(--color-bg);
-    }
-    .header-search-form {
-      position: relative; max-width: 560px; margin: 0 auto;
-      display: flex; align-items: center;
-    }
-    .header-search-input {
-      width: 100%; background: rgba(0,0,0,0.04);
-      border: 1px solid rgba(0,0,0,0.1); border-right: none;
-      color: #141414; padding: 9px 14px 9px 40px;
-      font-family: 'Inter', sans-serif; font-size: 1.3rem;
-      outline: none; transition: border-color 0.15s;
-    }
-    .header-search-input:focus { border-color: rgba(240,160,32,0.5); }
-    .header-search-input::placeholder { color: rgba(20,20,20,0.4); }
-    .header-search-icon {
-      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-      color: rgba(20,20,20,0.35); pointer-events: none;
-    }
-    .header-search-btn {
-      background: var(--color-amber); border: none; cursor: pointer;
-      padding: 0 20px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 700; font-size: 1.15rem; letter-spacing: 0.1em;
-      text-transform: uppercase; color: #141414;
-      white-space: nowrap; transition: background 0.15s;
-      flex-shrink: 0; align-self: stretch;
-    }
-    .header-search-btn:hover { background: #141414; color: #fff; }
-    /* Scroll hide/show */
-    header.header-hidden { transform: translateY(-100%); }
+    /* Header (two-row nav + search) and its behaviour are shared —
+       see css/shared.css and js/header.js. */
 
     /* ═══════════════════════════════════════════════════════════════════
+
        HOMEPAGE 2.0 — technical-catalog rhythm
        Tokens layered on top of shared.css brand vars.
        ═══════════════════════════════════════════════════════════════════ */
@@ -401,9 +356,8 @@
       .wsf-card .wsf-body { flex: 1; }
     }
     @media (max-width: 640px) {
-      .header-search-row { padding: 8px var(--site-px); }
-      .header-search-btn { padding: 0 14px; }
       .hero-deck { grid-template-columns: 1fr 1fr; }
+
       .hf-card { flex-direction: column; }
       .hf-stage { width: 100%; aspect-ratio: 16/10; }
       .hero-stats { gap: 20px 30px; }
@@ -462,9 +416,10 @@
       </div>
       <nav style="flex:1;">
         <ul class="nav-links">
-          <li><a href="/" class="active">Home</a></li>
+          <li><a href="/" data-nav="home">Home</a></li>
           <li class="has-dropdown" id="shop-nav-item">
-            <a href="/shop.html" class="shop-nav-link">
+            <a href="/shop.html" class="shop-nav-link" data-nav="shop">
+
               Shop
               <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
             </a>
@@ -627,9 +582,10 @@
               </div>
             </div>
           </li>
-          <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
-          <li><a href="/na-kontaktoni.html">Na Kontaktoni</a></li>
-          <li><a href="/shop.html?sale=1" class="nav-sale-link">Sale</a></li>
+          <li><a href="/rreth-nesh.html" data-nav="rreth">Rreth Nesh</a></li>
+          <li><a href="/na-kontaktoni.html" data-nav="kontakt">Na Kontaktoni</a></li>
+          <li><a href="/shop.html?sale=1" class="nav-sale-link" data-nav="sale">Sale</a></li>
+
         </ul>
       </nav>
       <div class="nav-icons">
@@ -653,15 +609,21 @@
       </div>
     </div>
     <div class="header-search-row">
-      <form class="header-search-form" id="header-search-form">
+      <form class="header-search-form" id="header-search-form" role="search">
         <span class="header-search-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
         </span>
-        <input type="search" id="header-search-input" class="header-search-input" placeholder="Kërko laptopë, workstation, periferikë…" autocomplete="off">
+        <input type="search" id="header-search-input" class="header-search-input"
+               placeholder="Kërko laptopë, workstation, periferikë…"
+               aria-label="Kërko produkte" autocomplete="off"
+               role="combobox" aria-expanded="false" aria-autocomplete="list"
+               aria-controls="header-search-suggest">
         <button type="submit" class="header-search-btn">Kërko</button>
+        <div class="header-search-suggest" id="header-search-suggest" role="listbox" aria-label="Sugjerime"></div>
       </form>
+
     </div>
   </header>
 
@@ -670,7 +632,8 @@
     <div class="mobile-nav-panel">
       <button class="mobile-nav-close" id="mobile-nav-close">×</button>
       <ul class="mobile-nav-links">
-        <li><a href="/">Home</a></li>
+        <li><a href="/" data-nav="home">Home</a></li>
+
         <li style="border-bottom:1px solid rgba(0,0,0,0.07);">
           <button class="mobile-shop-toggle" id="mobile-shop-toggle">
             Shop
@@ -720,9 +683,10 @@
             <li><a href="/shop.html" class="mobile-shop-all">Të gjitha produktet →</a></li>
           </ul>
         </li>
-        <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
-        <li><a href="/na-kontaktoni.html">Na Kontaktoni</a></li>
-        <li><a href="/shop.html?sale=1" class="nav-sale-link">Zbritje — Sale</a></li>
+        <li><a href="/rreth-nesh.html" data-nav="rreth">Rreth Nesh</a></li>
+        <li><a href="/na-kontaktoni.html" data-nav="kontakt">Na Kontaktoni</a></li>
+        <li><a href="/shop.html?sale=1" class="nav-sale-link" data-nav="sale">Zbritje — Sale</a></li>
+
       </ul>
     </div>
   </div>
@@ -1063,83 +1027,18 @@
 
   <script type="module">
     import { getProducts } from '/js/api.js';
-    import { renderProductCard, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, openBasket, parseSpecText, escapeHtml, fmtPrice } from '/js/ui.js';
+    import { renderProductCard, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, parseSpecText, escapeHtml, fmtPrice } from '/js/ui.js';
     import { updateBadge } from '/js/basket.js';
     import { loadConfig } from '/js/config.js';
+    import { initHeader } from '/js/header.js';
 
     loadConfig();
-
-    // Mobile nav
-    document.getElementById('hamburger').addEventListener('click', () => {
-      document.getElementById('mobile-nav').classList.add('open');
-    });
-    document.getElementById('mobile-nav-close').addEventListener('click', () => {
-      document.getElementById('mobile-nav').classList.remove('open');
-    });
-    document.getElementById('mobile-nav').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
-    });
-
-    // Shop dropdown
-    (function() {
-      const shopItem = document.getElementById('shop-nav-item');
-      const shopDrop = document.getElementById('shop-dropdown');
-      if (!shopItem || !shopDrop) return;
-      let timer;
-      const show = () => { clearTimeout(timer); shopDrop.classList.add('open'); shopItem.classList.add('dropdown-open'); };
-      const hide = () => { timer = setTimeout(() => { shopDrop.classList.remove('open'); shopItem.classList.remove('dropdown-open'); }, 200); };
-      shopItem.addEventListener('mouseenter', show);
-      shopItem.addEventListener('mouseleave', hide);
-      shopDrop.addEventListener('mouseenter', show);
-      shopDrop.addEventListener('mouseleave', hide);
-      const mobileToggle = document.getElementById('mobile-shop-toggle');
-      const mobileChildren = document.getElementById('mobile-shop-children');
-      if (mobileToggle && mobileChildren) {
-        mobileToggle.addEventListener('click', () => {
-          const isOpen = mobileChildren.classList.contains('open');
-          mobileChildren.classList.toggle('open', !isOpen);
-          mobileToggle.classList.toggle('open', !isOpen);
-        });
-      }
-    })();
-
-    // Header search
-    document.getElementById('header-search-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const q = document.getElementById('header-search-input').value.trim();
-      if (q) window.location.href = `/shop.html?q=${encodeURIComponent(q)}`;
-      else window.location.href = '/shop.html';
-    });
-
-    // Scroll hide/show header
-    (function () {
-      const header = document.getElementById('main-header');
-      let lastY = 0;
-      let ticking = false;
-      window.addEventListener('scroll', () => {
-        if (!ticking) {
-          requestAnimationFrame(() => {
-            const y = window.scrollY;
-            if (y < 10) {
-              header.classList.remove('header-hidden');
-            } else if (y > lastY + 6) {
-              header.classList.add('header-hidden');
-            } else if (y < lastY - 6) {
-              header.classList.remove('header-hidden');
-            }
-            lastY = y;
-            ticking = false;
-          });
-          ticking = true;
-        }
-      }, { passive: true });
-    })();
+    initHeader();
 
     initBasketDrawer();
+
     updateBadge();
 
-    // Wire cart button to open drawer
-    document.querySelector('.cart-icon-btn').addEventListener('click', openBasket);
 
     // Rank products so the most interesting ones lead: admin-featured first,
     // then discounted, in-stock and properly-priced (complete) listings.

@@ -12,58 +12,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/shared.css">
   <style>
-    /* Header with search row */
-    :root { --header-height: 117px; }
-    header {
-      flex-direction: column;
-      align-items: stretch;
-      height: auto;
-      padding: 0;
-      gap: 0;
-    }
-    .header-nav {
-      display: flex; align-items: center;
-      padding: 0 var(--site-px); gap: 32px;
-      height: 65px; flex-shrink: 0;
-    }
-    .header-search-row {
-      border-top: 1px solid rgba(0,0,0,0.07);
-      padding: 10px var(--site-px);
-      background: var(--color-bg);
-    }
-    .header-search-form {
-      position: relative; max-width: 560px; margin: 0 auto;
-      display: flex; align-items: center;
-    }
-    .header-search-input {
-      width: 100%; background: rgba(0,0,0,0.04);
-      border: 1px solid rgba(0,0,0,0.1); border-right: none;
-      color: #141414; padding: 9px 14px 9px 40px;
-      font-family: 'Inter', sans-serif; font-size: 1.3rem;
-      outline: none; transition: border-color 0.15s;
-    }
-    .header-search-input:focus { border-color: rgba(240,160,32,0.5); }
-    .header-search-input::placeholder { color: rgba(20,20,20,0.4); }
-    .header-search-icon {
-      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-      color: rgba(20,20,20,0.35); pointer-events: none;
-    }
-    .header-search-btn {
-      background: var(--color-amber); border: none; cursor: pointer;
-      padding: 0 20px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 700; font-size: 1.15rem; letter-spacing: 0.1em;
-      text-transform: uppercase; color: #141414;
-      white-space: nowrap; transition: background 0.15s;
-      flex-shrink: 0; align-self: stretch;
-    }
-    .header-search-btn:hover { background: #141414; color: #fff; }
-    @media (max-width: 768px) {
-      .header-search-row { padding: 8px var(--site-px); }
-      .header-search-btn { padding: 0 14px; }
-    }
+    /* Header (two-row nav + search) and its behaviour are shared —
+       see css/shared.css and js/header.js. */
 
-    .product-page { padding: 40px var(--site-px); }
+    .product-page {
+ padding: 40px var(--site-px); }
     .breadcrumb { font-size: 1.2rem; color: rgba(20,20,20,0.45); margin-bottom: 32px; display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; }
     .breadcrumb a { color: rgba(20,20,20,0.45); transition: color 0.15s; }
     .breadcrumb a:hover { color: var(--color-amber); }
@@ -239,239 +192,288 @@
 </head>
 <body>
 
+  <!-- HEADER -->
   <header id="main-header">
     <div class="header-nav">
-    <div class="nav-logo"><a href="/"><img src="/IT Store LOGO.png" alt="IT Store"></a></div>
-    <nav style="flex:1;">
-      <ul class="nav-links">
-        <li><a href="/">Home</a></li>
-        <li class="has-dropdown" id="shop-nav-item">
-          <a href="/shop.html" class="shop-nav-link active">
-            Shop
-            <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-          </a>
-          <div class="nav-dropdown" id="shop-dropdown">
-            <div class="nav-dropdown-inner">
-              <div class="dropdown-section-label">Kategorite kryesore</div>
-              <div class="dropdown-featured-grid">
-                <a href="/shop.html?cat=laptop" class="dropdown-cat-card">
-                  <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=225&fit=crop&auto=format" alt="Laptop">
-                  <div class="dropdown-cat-overlay"></div>
-                  <div class="dropdown-cat-content">
-                    <span class="dropdown-cat-tag">Kategoria</span>
-                    <span class="dropdown-cat-name">Laptop <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                  </div>
-                </a>
-                <a href="/shop.html?cat=monitore" class="dropdown-cat-card">
-                  <img src="https://images.unsplash.com/photo-1621288698258-f76aa9fd2186?w=400&h=225&fit=crop&auto=format" alt="Monitor">
-                  <div class="dropdown-cat-overlay"></div>
-                  <div class="dropdown-cat-content">
-                    <span class="dropdown-cat-tag">Kategoria</span>
-                    <span class="dropdown-cat-name">Monitor <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                  </div>
-                </a>
-                <a href="/shop.html?cat=pc" class="dropdown-cat-card">
-                  <img src="https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=400&h=225&fit=crop&auto=format" alt="PC & Desktop">
-                  <div class="dropdown-cat-overlay"></div>
-                  <div class="dropdown-cat-content">
-                    <span class="dropdown-cat-tag">Kategoria</span>
-                    <span class="dropdown-cat-name">PC & Desktop <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                  </div>
-                </a>
-                <a href="/shop.html?cat=workstation" class="dropdown-cat-card">
-                  <img src="https://images.unsplash.com/photo-1593152167544-085d3b9c4938?w=400&h=225&fit=crop&auto=format" alt="Workstation">
-                  <div class="dropdown-cat-overlay"></div>
-                  <div class="dropdown-cat-content">
-                    <span class="dropdown-cat-tag">Kategoria</span>
-                    <span class="dropdown-cat-name">Workstation <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                  </div>
-                </a>
-              </div>
-              <div class="dropdown-secondary-header">
-                <span class="dropdown-secondary-label">Kategori të tjera</span>
-                <span class="dropdown-secondary-line"></span>
-                <a href="/shop.html" class="dropdown-secondary-all">Të gjitha produktet <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
-              </div>
-              <div class="dropdown-secondary-cols">
-                <div class="dropdown-col">
-                  <span class="dropdown-col-title">Laptop</span>
-                  <a href="/shop.html?cat=macbook" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M6 20h12M12 17v3"/></svg>
-                    MacBook
+      <div class="nav-logo">
+        <a href="/"><img src="/IT Store LOGO.png" alt="IT Store"></a>
+      </div>
+      <nav style="flex:1;">
+        <ul class="nav-links">
+          <li><a href="/" data-nav="home">Home</a></li>
+          <li class="has-dropdown" id="shop-nav-item">
+            <a href="/shop.html" class="shop-nav-link" data-nav="shop">
+
+              Shop
+              <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </a>
+            <div class="nav-dropdown" id="shop-dropdown">
+              <div class="nav-dropdown-inner">
+                <div class="dropdown-section-label">Kategorite kryesore</div>
+                <div class="dropdown-featured-grid">
+                  <a href="/shop.html?cat=laptop" class="dropdown-cat-card">
+                    <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=225&fit=crop&auto=format" alt="Laptop">
+                    <div class="dropdown-cat-overlay"></div>
+                    <div class="dropdown-cat-content">
+                      <span class="dropdown-cat-tag">Kategoria</span>
+                      <span class="dropdown-cat-name">Laptop <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                    </div>
                   </a>
-                  <a href="/shop.html?cat=business-laptops" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                    Business Laptops
+                  <a href="/shop.html?cat=monitore" class="dropdown-cat-card">
+                    <img src="https://images.unsplash.com/photo-1621288698258-f76aa9fd2186?w=400&h=225&fit=crop&auto=format" alt="Monitor">
+                    <div class="dropdown-cat-overlay"></div>
+                    <div class="dropdown-cat-content">
+                      <span class="dropdown-cat-tag">Kategoria</span>
+                      <span class="dropdown-cat-name">Monitor <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                    </div>
                   </a>
-                  <a href="/shop.html?cat=workstation-laptops" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="1"/><path d="M2 20h20"/></svg>
-                    Workstation Laptops
+                  <a href="/shop.html?cat=pc" class="dropdown-cat-card">
+                    <img src="https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=400&h=225&fit=crop&auto=format" alt="PC & Desktop">
+                    <div class="dropdown-cat-overlay"></div>
+                    <div class="dropdown-cat-content">
+                      <span class="dropdown-cat-tag">Kategoria</span>
+                      <span class="dropdown-cat-name">PC & Desktop <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                    </div>
+                  </a>
+                  <a href="/shop.html?cat=workstation" class="dropdown-cat-card">
+                    <img src="https://images.unsplash.com/photo-1593152167544-085d3b9c4938?w=400&h=225&fit=crop&auto=format" alt="Workstation">
+                    <div class="dropdown-cat-overlay"></div>
+                    <div class="dropdown-cat-content">
+                      <span class="dropdown-cat-tag">Kategoria</span>
+                      <span class="dropdown-cat-name">Workstation <svg class="dropdown-cat-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                    </div>
                   </a>
                 </div>
-                <div class="dropdown-col">
-                  <span class="dropdown-col-title">Desktop</span>
-                  <a href="/shop.html?cat=desktop" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-                    Desktop
-                  </a>
-                  <a href="/shop.html?cat=aio" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="13" rx="2"/><path d="M12 16v4M9 20h6"/><circle cx="12" cy="9" r="2.5"/></svg>
-                    AIO
-                  </a>
+                <div class="dropdown-secondary-header">
+                  <span class="dropdown-secondary-label">Kategori të tjera</span>
+                  <span class="dropdown-secondary-line"></span>
+                  <a href="/shop.html" class="dropdown-secondary-all">Të gjitha produktet <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
                 </div>
-                <div class="dropdown-col">
-                  <span class="dropdown-col-title">Networking</span>
-                  <a href="/shop.html?cat=networking" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
-                    Networking
-                  </a>
-                  <a href="/shop.html?cat=switch" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01"/></svg>
-                    Switch
-                  </a>
-                  <a href="/shop.html?cat=nas" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
-                    NAS
-                  </a>
-                  <a href="/shop.html?cat=kvm" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M10 16v4M14 16v4"/></svg>
-                    KVM
-                  </a>
-                  <span class="dropdown-col-subtitle">Server</span>
-                  <a href="/shop.html?cat=server" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/></svg>
-                    Server
-                  </a>
-                </div>
-                <div class="dropdown-col">
-                  <span class="dropdown-col-title">Komponente</span>
-                  <a href="/shop.html?cat=komponente" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="4" x2="9" y2="9"/><line x1="15" y1="4" x2="15" y2="9"/><line x1="9" y1="15" x2="9" y2="20"/><line x1="15" y1="15" x2="15" y2="20"/><line x1="4" y1="9" x2="9" y2="9"/><line x1="4" y1="15" x2="9" y2="15"/><line x1="15" y1="9" x2="20" y2="9"/><line x1="15" y1="15" x2="20" y2="15"/></svg>
-                    Komponente
-                  </a>
-                  <a href="/shop.html?cat=gpu" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2.5"/><circle cx="15" cy="12" r="2.5"/><path d="M4 18v3"/></svg>
-                    GPU
-                  </a>
-                  <a href="/shop.html?cat=ram" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="1"/><path d="M6 16v3M10 16v3M14 16v3M18 16v3M7 12h2M11 12h2M15 12h2"/></svg>
-                    RAM
-                  </a>
-                  <a href="/shop.html?cat=ssd" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 12h6"/><circle cx="17" cy="12" r="1" fill="currentColor"/></svg>
-                    SSD
-                  </a>
-                  <a href="/shop.html?cat=hdd" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="9" cy="12" r="3.5"/><circle cx="9" cy="12" r="1" fill="currentColor"/><path d="M15 15l3-3"/></svg>
-                    HDD
-                  </a>
-                  <a href="/shop.html?cat=caddy" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
-                    Caddy
-                  </a>
-                  <a href="/shop.html?cat=raid-controller" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="1"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>
-                    RAID Controller
-                  </a>
-                  <a href="/shop.html?cat=karta-rrjeti" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M7 17v3M17 17v3"/><rect x="6" y="8" width="4" height="5"/><path d="M14 9h4M14 12h4"/></svg>
-                    Karta Rrjeti
-                  </a>
-                  <a href="/shop.html?cat=docking-station" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="10" width="20" height="8" rx="2"/><path d="M7 14h2M12 14h2M17 14h.5"/><path d="M12 10V6M8 6h8"/></svg>
-                    Docking Station
-                  </a>
-                  <a href="/shop.html?cat=sas" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
-                    SAS
-                  </a>
-                </div>
-                <div class="dropdown-col">
-                  <span class="dropdown-col-title">Të tjera</span>
-                  <a href="/shop.html?cat=gaming" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M7 12h4M9 10v4"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1" fill="currentColor"/></svg>
-                    Gaming
-                  </a>
-                  <a href="/shop.html?cat=ups" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    UPS
-                  </a>
-                  <a href="/shop.html?cat=licensa" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M11.4 11.6 21 2"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
-                    Licensa
-                  </a>
-                  <a href="/shop.html?cat=aksesore" class="dropdown-col-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5v10a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z"/><path d="M12 2v6"/></svg>
-                    Aksesorë
-                  </a>
+                <div class="dropdown-secondary-cols">
+                  <div class="dropdown-col">
+                    <span class="dropdown-col-title">Laptop</span>
+                    <a href="/shop.html?cat=macbook" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M6 20h12M12 17v3"/></svg>
+                      MacBook
+                    </a>
+                    <a href="/shop.html?cat=business-laptops" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                      Business Laptops
+                    </a>
+                    <a href="/shop.html?cat=workstation-laptops" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="1"/><path d="M2 20h20"/></svg>
+                      Workstation Laptops
+                    </a>
+                  </div>
+                  <div class="dropdown-col">
+                    <span class="dropdown-col-title">Desktop</span>
+                    <a href="/shop.html?cat=desktop" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                      Desktop
+                    </a>
+                    <a href="/shop.html?cat=aio" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="13" rx="2"/><path d="M12 16v4M9 20h6"/><circle cx="12" cy="9" r="2.5"/></svg>
+                      AIO
+                    </a>
+                  </div>
+                  <div class="dropdown-col">
+                    <span class="dropdown-col-title">Networking</span>
+                    <a href="/shop.html?cat=networking" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+                      Networking
+                    </a>
+                    <a href="/shop.html?cat=switch" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01"/></svg>
+                      Switch
+                    </a>
+                    <a href="/shop.html?cat=nas" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
+                      NAS
+                    </a>
+                    <a href="/shop.html?cat=kvm" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M10 16v4M14 16v4"/></svg>
+                      KVM
+                    </a>
+                    <span class="dropdown-col-subtitle">Server</span>
+                    <a href="/shop.html?cat=server" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/></svg>
+                      Server
+                    </a>
+                  </div>
+                  <div class="dropdown-col">
+                    <span class="dropdown-col-title">Komponente</span>
+                    <a href="/shop.html?cat=komponente" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="4" x2="9" y2="9"/><line x1="15" y1="4" x2="15" y2="9"/><line x1="9" y1="15" x2="9" y2="20"/><line x1="15" y1="15" x2="15" y2="20"/><line x1="4" y1="9" x2="9" y2="9"/><line x1="4" y1="15" x2="9" y2="15"/><line x1="15" y1="9" x2="20" y2="9"/><line x1="15" y1="15" x2="20" y2="15"/></svg>
+                      Komponente
+                    </a>
+                    <a href="/shop.html?cat=gpu" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2.5"/><circle cx="15" cy="12" r="2.5"/><path d="M4 18v3"/></svg>
+                      GPU
+                    </a>
+                    <a href="/shop.html?cat=ram" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="1"/><path d="M6 16v3M10 16v3M14 16v3M18 16v3M7 12h2M11 12h2M15 12h2"/></svg>
+                      RAM
+                    </a>
+                    <a href="/shop.html?cat=ssd" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 12h6"/><circle cx="17" cy="12" r="1" fill="currentColor"/></svg>
+                      SSD
+                    </a>
+                    <a href="/shop.html?cat=hdd" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="9" cy="12" r="3.5"/><circle cx="9" cy="12" r="1" fill="currentColor"/><path d="M15 15l3-3"/></svg>
+                      HDD
+                    </a>
+                    <a href="/shop.html?cat=caddy" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
+                      Caddy
+                    </a>
+                    <a href="/shop.html?cat=raid-controller" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="1"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>
+                      RAID Controller
+                    </a>
+                    <a href="/shop.html?cat=karta-rrjeti" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M7 17v3M17 17v3"/><rect x="6" y="8" width="4" height="5"/><path d="M14 9h4M14 12h4"/></svg>
+                      Karta Rrjeti
+                    </a>
+                    <a href="/shop.html?cat=docking-station" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="10" width="20" height="8" rx="2"/><path d="M7 14h2M12 14h2M17 14h.5"/><path d="M12 10V6M8 6h8"/></svg>
+                      Docking Station
+                    </a>
+                    <a href="/shop.html?cat=sas" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                      SAS
+                    </a>
+                  </div>
+                  <div class="dropdown-col">
+                    <span class="dropdown-col-title">Të tjera</span>
+                    <a href="/shop.html?cat=gaming" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M7 12h4M9 10v4"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1" fill="currentColor"/></svg>
+                      Gaming
+                    </a>
+                    <a href="/shop.html?cat=ups" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                      UPS
+                    </a>
+                    <a href="/shop.html?cat=licensa" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M11.4 11.6 21 2"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                      Licensa
+                    </a>
+                    <a href="/shop.html?cat=aksesore" class="dropdown-col-link">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5v10a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z"/><path d="M12 2v6"/></svg>
+                      Aksesorë
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </li>
-        <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
-        <li><a href="/na-kontaktoni.html">Na Kontaktoni</a></li>
-        <li><a href="/shop.html?sale=1" class="nav-sale-link">Sale</a></li>
-      </ul>
-    </nav>
-    <div class="nav-icons">
-      <a href="tel:+355693181062" class="nav-phone" aria-label="Na telefononi">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg>
-        +355 69 318 1062
-      </a>
-      <button class="nav-icon-btn" id="nav-back" aria-label="Kthehu">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
-      </button>
-      <button class="nav-icon-btn cart-icon-btn" aria-label="Shporta">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-          <line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
-        </svg>
-        <span class="cart-count" style="display:none;">0</span>
-      </button>
-      <button class="nav-icon-btn hamburger" id="hamburger" aria-label="Menu">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
-    </div>
+          </li>
+          <li><a href="/rreth-nesh.html" data-nav="rreth">Rreth Nesh</a></li>
+          <li><a href="/na-kontaktoni.html" data-nav="kontakt">Na Kontaktoni</a></li>
+          <li><a href="/shop.html?sale=1" class="nav-sale-link" data-nav="sale">Sale</a></li>
+
+        </ul>
+      </nav>
+      <div class="nav-icons">
+        <a href="tel:+355693181062" class="nav-phone" aria-label="Na telefononi">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg>
+          +355 69 318 1062
+        </a>
+        <button class="nav-icon-btn" id="nav-back" aria-label="Kthehu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+        </button>
+        <button class="nav-icon-btn cart-icon-btn" aria-label="Shporta">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          <span class="cart-count" style="display:none;">0</span>
+        </button>
+        <button class="nav-icon-btn hamburger" id="hamburger" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="header-search-row">
-      <form class="header-search-form" id="header-search-form">
+      <form class="header-search-form" id="header-search-form" role="search">
         <span class="header-search-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
         </span>
-        <input type="search" id="header-search-input" class="header-search-input" placeholder="Kërko laptopë, workstation, periferikë…" autocomplete="off">
+        <input type="search" id="header-search-input" class="header-search-input"
+               placeholder="Kërko laptopë, workstation, periferikë…"
+               aria-label="Kërko produkte" autocomplete="off"
+               role="combobox" aria-expanded="false" aria-autocomplete="list"
+               aria-controls="header-search-suggest">
         <button type="submit" class="header-search-btn">Kërko</button>
+        <div class="header-search-suggest" id="header-search-suggest" role="listbox" aria-label="Sugjerime"></div>
       </form>
+
     </div>
   </header>
 
+  <!-- MOBILE NAV -->
   <div class="mobile-nav" id="mobile-nav">
     <div class="mobile-nav-panel">
       <button class="mobile-nav-close" id="mobile-nav-close">×</button>
       <ul class="mobile-nav-links">
-        <li><a href="/">Home</a></li>
+        <li><a href="/" data-nav="home">Home</a></li>
+
         <li style="border-bottom:1px solid rgba(0,0,0,0.07);">
           <button class="mobile-shop-toggle" id="mobile-shop-toggle">
             Shop
             <svg class="mobile-shop-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <ul class="mobile-shop-children" id="mobile-shop-children">
+            <li class="mobile-shop-group-title">Kryesore</li>
             <li><a href="/shop.html?cat=laptop">Laptop</a></li>
             <li><a href="/shop.html?cat=monitore">Monitor</a></li>
             <li><a href="/shop.html?cat=pc">PC & Desktop</a></li>
             <li><a href="/shop.html?cat=workstation">Workstation</a></li>
+
+            <li class="mobile-shop-group-title">Laptop</li>
             <li><a href="/shop.html?cat=macbook">MacBook</a></li>
+            <li><a href="/shop.html?cat=business-laptops">Business Laptops</a></li>
+            <li><a href="/shop.html?cat=workstation-laptops">Workstation Laptops</a></li>
+
+            <li class="mobile-shop-group-title">Desktop</li>
+            <li><a href="/shop.html?cat=desktop">Desktop</a></li>
+            <li><a href="/shop.html?cat=aio">AIO</a></li>
+
+            <li class="mobile-shop-group-title">Rrjeti & Servera</li>
             <li><a href="/shop.html?cat=networking">Networking</a></li>
-            <li><a href="/shop.html">Të gjitha produktet</a></li>
+            <li><a href="/shop.html?cat=switch">Switch</a></li>
+            <li><a href="/shop.html?cat=nas">NAS</a></li>
+            <li><a href="/shop.html?cat=kvm">KVM</a></li>
+            <li><a href="/shop.html?cat=server">Server</a></li>
+
+            <li class="mobile-shop-group-title">Komponentë</li>
+            <li><a href="/shop.html?cat=komponente">Komponente</a></li>
+            <li><a href="/shop.html?cat=gpu">GPU</a></li>
+            <li><a href="/shop.html?cat=ram">RAM</a></li>
+            <li><a href="/shop.html?cat=ssd">SSD</a></li>
+            <li><a href="/shop.html?cat=hdd">HDD</a></li>
+            <li><a href="/shop.html?cat=caddy">Caddy</a></li>
+            <li><a href="/shop.html?cat=raid-controller">RAID Controller</a></li>
+            <li><a href="/shop.html?cat=karta-rrjeti">Karta Rrjeti</a></li>
+            <li><a href="/shop.html?cat=docking-station">Docking Station</a></li>
+            <li><a href="/shop.html?cat=sas">SAS</a></li>
+
+            <li class="mobile-shop-group-title">Të tjera</li>
+            <li><a href="/shop.html?cat=gaming">Gaming</a></li>
+            <li><a href="/shop.html?cat=ups">UPS</a></li>
+            <li><a href="/shop.html?cat=licensa">Licensa</a></li>
+            <li><a href="/shop.html?cat=aksesore">Aksesorë</a></li>
+
+            <li><a href="/shop.html" class="mobile-shop-all">Të gjitha produktet →</a></li>
           </ul>
         </li>
-        <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
-        <li><a href="/na-kontaktoni.html">Na Kontaktoni</a></li>
-        <li><a href="/shop.html?sale=1" class="nav-sale-link">Zbritje — Sale</a></li>
+        <li><a href="/rreth-nesh.html" data-nav="rreth">Rreth Nesh</a></li>
+        <li><a href="/na-kontaktoni.html" data-nav="kontakt">Na Kontaktoni</a></li>
+        <li><a href="/shop.html?sale=1" class="nav-sale-link" data-nav="sale">Zbritje — Sale</a></li>
+
       </ul>
     </div>
   </div>
@@ -570,54 +572,22 @@
 
   <script type="module">
     import { getProduct, getProductBySlug, getCategories } from '/js/api.js';
-    import { renderProductCard, initBasketDrawer, wireAddToBasketButtons, openBasket, showToast, parseSpecText, renderSpecGrid, escapeHtml } from '/js/ui.js';
+    import { renderProductCard, initBasketDrawer, wireAddToBasketButtons, showToast, parseSpecText, renderSpecGrid, escapeHtml } from '/js/ui.js';
     import { addItem, updateBadge } from '/js/basket.js';
     import { loadConfig } from '/js/config.js';
+    import { initHeader } from '/js/header.js';
 
     loadConfig().then(() => {
       const wa = document.getElementById('footer-wa');
       if (wa && window.__WA_NUMBER__) wa.href = `https://wa.me/${window.__WA_NUMBER__}`;
     });
+    initHeader();
     initBasketDrawer();
     updateBadge();
     document.getElementById('nav-back')?.addEventListener('click', () => history.back());
-    document.querySelector('.cart-icon-btn').addEventListener('click', openBasket);
-    document.getElementById('hamburger').addEventListener('click', () => document.getElementById('mobile-nav').classList.add('open'));
-    document.getElementById('mobile-nav-close').addEventListener('click', () => document.getElementById('mobile-nav').classList.remove('open'));
-    document.getElementById('mobile-nav').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
-
-    // Header search
-    document.getElementById('header-search-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const q = document.getElementById('header-search-input').value.trim();
-      if (q) window.location.href = `/shop.html?q=${encodeURIComponent(q)}`;
-      else window.location.href = '/shop.html';
-    });
-
-    // Shop dropdown
-    (function() {
-      const shopItem = document.getElementById('shop-nav-item');
-      const shopDrop = document.getElementById('shop-dropdown');
-      if (!shopItem || !shopDrop) return;
-      let timer;
-      const show = () => { clearTimeout(timer); shopDrop.classList.add('open'); shopItem.classList.add('dropdown-open'); };
-      const hide = () => { timer = setTimeout(() => { shopDrop.classList.remove('open'); shopItem.classList.remove('dropdown-open'); }, 200); };
-      shopItem.addEventListener('mouseenter', show);
-      shopItem.addEventListener('mouseleave', hide);
-      shopDrop.addEventListener('mouseenter', show);
-      shopDrop.addEventListener('mouseleave', hide);
-      const mobileToggle = document.getElementById('mobile-shop-toggle');
-      const mobileChildren = document.getElementById('mobile-shop-children');
-      if (mobileToggle && mobileChildren) {
-        mobileToggle.addEventListener('click', () => {
-          const isOpen = mobileChildren.classList.contains('open');
-          mobileChildren.classList.toggle('open', !isOpen);
-          mobileToggle.classList.toggle('open', !isOpen);
-        });
-      }
-    })();
 
     const slugMatch = location.pathname.match(/^\/product\/(.+)$/);
+
     const slug = slugMatch ? decodeURIComponent(slugMatch[1]) : null;
     const id = new URLSearchParams(location.search).get('id');
     if (!slug && !id) { document.getElementById('product-page').innerHTML = '<p style="text-align:center;padding:80px;color:rgba(20,20,20,0.4);">Produkt i panjohur.</p>'; }
