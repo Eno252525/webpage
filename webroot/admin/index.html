@@ -67,6 +67,7 @@
     .badge-sale { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
     .badge-new { background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
     .badge-no-img { background: rgba(99,102,241,0.12); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); cursor: help; }
+    .badge-hidden { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.2); cursor: help; }
     /* Stock toggle */
     .stock-toggle { position: relative; width: 40px; height: 22px; }
     .stock-toggle input { opacity: 0; width: 0; height: 0; }
@@ -386,6 +387,7 @@
           p.featured ? '<span class="badge-pill badge-featured">⭐ E veçuar</span>' : '',
           p.badge ? `<span class="badge-pill badge-${p.badge === 'i ri' ? 'new' : 'sale'}">${esc(p.badge)}</span>` : '',
           isPlaceholder ? '<span class="badge-pill badge-no-img" title="Kjo foto është placeholder — ngarko një foto reale">📷 Pa foto</span>' : '',
+          p.hidden ? '<span class="badge-pill badge-hidden" title="Nuk shfaqet askund në faqe — ruhet vetëm në databazë">🚫 E fshehur</span>' : '',
         ].filter(Boolean).join(' ');
         return `<tr>
           <td>${img}</td>

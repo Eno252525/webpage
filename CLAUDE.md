@@ -40,6 +40,7 @@ Catalog changes (adding products, setting prices/specs, fixing images) are done 
 ### Product data conventions
 - **Price `0` means "price on request"** — the frontend shows *"Çmim sipas kërkesës"* and hides the price when `price` and `sale_price` are both `≤ 0` (`webroot/js/ui.js`, `webroot/index.html`). Use `0`, not null, for unpriced items.
 - **Filterable specs are keyed by exact `attributes` names.** The shop sidebar filters read specific keys, so products only filter correctly if they use them: switches → `Ports` / `SFP` / `Uplink` / `Layer` / `PoE`; PC/Desktop/AIO → `CPU`; and `Form Factor` drives the form-factor facet. The matching SQL (with the accepted value shapes) is in `database.js` — mirror an existing product in the same category when in doubt.
+- **`hidden = 1` takes a product off the site without deleting it** — it is filtered out of every public query in `database.js` (listings, search, brand/form-factor facets, related products, `sitemap.xml`) and `/product/<slug>` returns the 404 page, while the row, its specs and its view count stay in the DB and in the admin list. Reversible: set `hidden = 0`, or untick *"Fshihe nga faqja"* in the admin product form. Do not confuse it with `in_stock = 0`, which still shows the product, marked *"Pa stok"*.
 - **`sku`** has no uniqueness constraint and follows a per-category, zero-padded sequence (e.g. `SW####` switches, `NW####`/`RU####` networking/routers). Check the current max for that prefix before assigning, and avoid colliding with an existing product's SKU.
 
 ### API & admin

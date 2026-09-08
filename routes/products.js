@@ -36,7 +36,8 @@ router.get('/', (req, res) => {
 router.get('/slug/:slug', (req, res) => {
   try {
     const product = getProductBySlug(req.params.slug);
-    if (!product) return res.status(404).json({ error: 'Produkti nuk u gjet' });
+    // hidden = 1 → off the site: the row stays in the DB, the API denies it.
+    if (!product || product.hidden) return res.status(404).json({ error: 'Produkti nuk u gjet' });
     incrementProductViews(product.id);
     res.json(product);
   } catch (err) {
@@ -47,7 +48,7 @@ router.get('/slug/:slug', (req, res) => {
 router.get('/:id', (req, res) => {
   try {
     const product = getProduct(Number(req.params.id));
-    if (!product) return res.status(404).json({ error: 'Produkti nuk u gjet' });
+    if (!product || product.hidden) return res.status(404).json({ error: 'Produkti nuk u gjet' });
     incrementProductViews(product.id);
     res.json(product);
   } catch (err) {

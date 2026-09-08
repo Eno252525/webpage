@@ -62,8 +62,13 @@ const CAT_OVERRIDE = { mouse: 'gaming' };
 // Products that were re-slugged on the new site: old product slug → new slug.
 // 301'd to the new canonical product URL so inbound links and rankings survive.
 const PRODUCT_RESLUG = {
+  // The Z8 G4 AI server's CPUs were listed as Platinum 8160, then Gold 6262;
+  // they are in fact Platinum 8168 (corrected 2026-08-28). Both earlier slugs
+  // point at the current one.
   'hp-z8-g4-ai-server-2x-xeon-platinum-8160-rtx-3090':
-    'hp-z8-g4-ai-server-2x-xeon-gold-6262-rtx-3090',
+    'hp-z8-g4-ai-server-2x-xeon-platinum-8168-rtx-3090',
+  'hp-z8-g4-ai-server-2x-xeon-gold-6262-rtx-3090':
+    'hp-z8-g4-ai-server-2x-xeon-platinum-8168-rtx-3090',
   // "i8-8295U" was a typo for the Core i5-8295U — no such thing as a Core i8.
   'apple-macbook-pro-2018-13-i8-8295u': 'apple-macbook-pro-2018-13-i5-8295u',
   // Sold out and removed 2026-08-12 → nearest surviving model, so the retired
@@ -101,6 +106,23 @@ const PRODUCT_RESLUG = {
   // Removed 2026-08-20 → nearest surviving model (same 14" screen, same
   // 4th-gen i3, same 8GB/128GB, same 7000 Lekë).
   'hp-240-g4': 'hp-probook-640-g1',
+
+  // Both MPG INFINITE X2 towers retired 2026-08-20 -> the INFINITE B904, the
+  // only MSI INFINITE gaming desktop left in the catalog.
+  'msi-msi-mpg-z690-infinite-x2': 'msi-msi-infinite-b904',
+  'msi-msi-mpg-z790-infinite-x2': 'msi-msi-infinite-b904',
+
+  // The 16000 Lekë HDD 6TB was removed 2026-08-24 → the other 6TB drive in the
+  // catalog (12500 Lekë, used).
+  'hdd-6tb': 'hdd-6tb-perdorur',
+
+  // The HP ProBook 4540s was removed 2026-08-31 -> the nearest surviving
+  // laptop (same 14" ProBook, 8GB/128GB SSD).
+  'hp-probook-4540s': 'hp-probook-640-g1',
+
+  // The "HP Z4 G4 - i9-10900X" was really a Dell Precision 5820 (2026-08-28);
+  // same machine, corrected slug.
+  'hp-z4-g4': 'dell-precision-5820-2',
 };
 
 // Keyword → category slug. Used to route a removed product to the most
@@ -158,9 +180,10 @@ export function legacyRedirects(req, res, next) {
   const prod = p.match(/^\/product\/([^/]+)\/$/);
   if (prod) {
     const slug = decodeURIComponent(prod[1]);
-    return getProductBySlug(slug)
+    const found = getProductBySlug(slug);
+    return found && !found.hidden
       ? res.redirect(301, `/product/${slug}`)        // still exists → canonical URL
-      : res.redirect(301, inferProductFallback(slug)); // removed → relevant category
+      : res.redirect(301, inferProductFallback(slug)); // removed/hidden → relevant category
   }
 
   // 3. Legacy category archives — use the last path segment as the slug.

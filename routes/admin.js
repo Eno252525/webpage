@@ -112,6 +112,14 @@ router.get('/products', requireAuth, (req, res) => {
   res.json(getAllProductsAdmin());
 });
 
+// Single product for the edit form. Unlike the public /api/products/:id this
+// also returns products with hidden = 1, so they stay editable (and unhidable).
+router.get('/products/:id', requireAuth, (req, res) => {
+  const product = getProduct(Number(req.params.id));
+  if (!product) return res.status(404).json({ error: 'Produkti nuk u gjet' });
+  res.json(product);
+});
+
 router.post('/products', requireAuth, upload.array('images', 10), async (req, res) => {
   try {
     await validateUploads(req.files);
@@ -125,6 +133,7 @@ router.post('/products', requireAuth, upload.array('images', 10), async (req, re
     data.images = [...existingImages, ...uploadedImages];
     data.featured = data.featured === 'true' || data.featured === '1';
     data.in_stock = data.in_stock !== 'false' && data.in_stock !== '0';
+    data.hidden = data.hidden === 'true' || data.hidden === '1';
     const product = createProduct(data);
     res.status(201).json(product);
   } catch (err) {
@@ -141,10 +150,17 @@ router.put('/products/:id', requireAuth, upload.array('images', 10), async (req,
       try { data.attributes = JSON.parse(data.attributes); } catch { data.attributes = {}; }
     }
     const uploadedImages = (req.files || []).map(f => `/uploads/${f.filename}`);
-    const existingImages = data.existing_images ? JSON.parse(data.existing_images) : [];
-    data.images = [...existingImages, ...uploadedImages];
-    data.featured = data.featured === 'true' || data.featured === '1';
-    data.in_stock = data.in_stock !== 'false' && data.in_stock !== '0';
+    if (data.existing_images !== undefined || uploadedImages.length) {
+      const existingImages = data.existing_images ? JSON.parse(data.existing_images) : [];
+      data.images = [...existingImages, ...uploadedImages];
+    }
+    // Checkboxes arrive as "true"/"false" strings from the edit form; the
+    // product list sends real booleans as JSON. Absent = not submitted = leave
+    // the column alone, so a single-field patch cannot reset the other flags.
+    const bool = (v) => v === true || v === 'true' || v === '1';
+    for (const key of ['featured', 'in_stock', 'hidden']) {
+      if (data[key] !== undefined) data[key] = bool(data[key]);
+    }
     if (data.sale_price === '' || data.sale_price === 'null') data.sale_price = null;
     const product = updateProduct(Number(req.params.id), data);
     if (!product) return res.status(404).json({ error: 'Produkti nuk u gjet' });

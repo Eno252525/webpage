@@ -60,6 +60,17 @@ try {
   // column already exists
 }
 
+// ── Migration: add hidden column if missing ──────────────────────────────────
+// hidden = 1 keeps the row (and its view count / history) in the DB but takes
+// the product off the site completely: it is absent from listings, search,
+// filters and the sitemap, and /product/<slug> 404s. That is deliberately
+// stronger than in_stock = 0, which still shows the product, marked "Pa stok".
+try {
+  db.exec(`ALTER TABLE products ADD COLUMN hidden INTEGER DEFAULT 0`);
+} catch {
+  // column already exists
+}
+
 // ── View counts: persisted to a sidecar file so they survive a DB swap ───────
 // Live view counts are mirrored (keyed by slug) into view-counts.json, which is
 // git-ignored and NOT part of products.db. So replacing products.db — e.g.
@@ -138,6 +149,7 @@ restoreViewCounts();
     insertSub.run('Karta Rrjeti', 'karta-rrjeti', komponenteCat.id, 0);
     insertSub.run('RAID Controller', 'raid-controller', komponenteCat.id, 0);
     insertSub.run('Docking Station', 'docking-station', komponenteCat.id, 0);
+    insertSub.run('Procesor', 'procesor', komponenteCat.id, 0);
   }
 }
 
@@ -208,6 +220,7 @@ function parseProduct(row) {
     attributes: JSON.parse(row.attributes || '{}'),
     featured: row.featured === 1,
     in_stock: row.in_stock === 1,
+    hidden: row.hidden === 1,
     sale_price: row.sale_price ?? null,
   };
 }
@@ -224,8 +237,13 @@ const CATEGORY_SUBTREE = `p.category_id IN (
     SELECT id FROM subtree
   )`;
 
+// SQL fragment: only products that are live on the storefront. Every public
+// query carries it; the admin list (getAllProductsAdmin) deliberately does not,
+// so a hidden product stays editable and can be put back.
+const VISIBLE_ONLY = 'COALESCE(p.hidden, 0) = 0';
+
 export function getFormFactors({ category, brand } = {}) {
-  const conditions = ["json_extract(p.attributes, '$.Form Factor') IS NOT NULL"];
+  const conditions = [VISIBLE_ONLY, "json_extract(p.attributes, '$.Form Factor') IS NOT NULL"];
   const params = {};
 
   if (category) {
@@ -246,7 +264,7 @@ export function getFormFactors({ category, brand } = {}) {
 }
 
 export function getBrands({ category } = {}) {
-  const conditions = ["p.brand IS NOT NULL AND p.brand != ''"];
+  const conditions = [VISIBLE_ONLY, "p.brand IS NOT NULL AND p.brand != ''"];
   const params = {};
 
   if (category) {
@@ -403,7 +421,7 @@ function cpuGenSQL(gen) {
 export function getProducts({ category, brand, form_factor, min_price, max_price, orderby, page, per_page, search, featured, sale, sw_ports, sw_uplink, sw_speed, sw_layer, sw_poe, cpu_family, cpu_gen } = {}) {
   // Split filters: "base" (non-price) drives the slider range; price-bounds
   // narrow the visible products on top of that.
-  const baseConditions = [];
+  const baseConditions = [VISIBLE_ONLY];
   const baseParams = {};
 
   if (category) {
@@ -521,7 +539,7 @@ export function getProduct(id) {
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.category_id = ? AND p.id != ?
+      WHERE p.category_id = ? AND p.id != ? AND ${VISIBLE_ONLY}
       ORDER BY p.created_at DESC LIMIT 8
     `).all(product.category_id, product.id);
     product.related = related.map(parseProduct);
@@ -544,9 +562,9 @@ export function incrementProductViews(id) {
 export function createProduct(data) {
   const stmt = db.prepare(`
     INSERT INTO products (name, slug, short_description, description, price, sale_price,
-      category_id, images, attributes, badge, featured, in_stock, brand, sku)
+      category_id, images, attributes, badge, featured, in_stock, brand, sku, hidden)
     VALUES (:name, :slug, :short_description, :description, :price, :sale_price,
-      :category_id, :images, :attributes, :badge, :featured, :in_stock, :brand, :sku)
+      :category_id, :images, :attributes, :badge, :featured, :in_stock, :brand, :sku, :hidden)
   `);
   const result = stmt.run({
     name: data.name,
@@ -563,6 +581,7 @@ export function createProduct(data) {
     in_stock: data.in_stock !== false ? 1 : 0,
     brand: data.brand || '',
     sku: data.sku || '',
+    hidden: data.hidden ? 1 : 0,
   });
   return getProduct(result.lastInsertRowid);
 }
@@ -572,11 +591,13 @@ export function updateProduct(id, data) {
   const params = { id };
 
   const allowed = ['name', 'slug', 'short_description', 'description', 'price', 'sale_price',
-    'category_id', 'badge', 'featured', 'in_stock', 'brand', 'sku'];
+    'category_id', 'badge', 'featured', 'in_stock', 'brand', 'sku', 'hidden'];
+  // better-sqlite3 refuses to bind a boolean, so the flag columns are coerced.
+  const flags = new Set(['featured', 'in_stock', 'hidden']);
   for (const key of allowed) {
     if (data[key] !== undefined) {
       fields.push(`${key} = :${key}`);
-      params[key] = data[key];
+      params[key] = flags.has(key) ? (data[key] ? 1 : 0) : data[key];
     }
   }
   if (data.images !== undefined) { fields.push('images = :images'); params.images = JSON.stringify(data.images); }
@@ -601,7 +622,7 @@ export function searchProducts(q) {
     SELECT p.id, p.name, p.slug, p.price, p.sale_price, p.images,
            ${score} AS _score
     FROM products p
-    WHERE ${clauses.join(' AND ')}
+    WHERE ${VISIBLE_ONLY} AND ${clauses.join(' AND ')}
     ORDER BY _score DESC, p.featured DESC, p.name ASC
     LIMIT 6
   `).all(params).map(r => {
@@ -628,7 +649,9 @@ export function deleteCategory(id) {
 }
 
 export function getProductsForSitemap() {
-  return db.prepare('SELECT slug, updated_at, images FROM products ORDER BY updated_at DESC').all();
+  return db.prepare(
+    'SELECT slug, updated_at, images FROM products WHERE COALESCE(hidden, 0) = 0 ORDER BY updated_at DESC'
+  ).all();
 }
 
 export function getAllProductsAdmin() {

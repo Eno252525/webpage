@@ -173,6 +173,10 @@
                 <input type="checkbox" id="in_stock" name="in_stock" value="true" checked>
                 <span class="form-check-label">Në stok</span>
               </label>
+              <label class="form-check">
+                <input type="checkbox" id="hidden" name="hidden" value="true">
+                <span class="form-check-label">Fshihe nga faqja (ruhet në databazë)</span>
+              </label>
             </div>
           </div>
         </div>
@@ -309,7 +313,7 @@
     const editId = new URLSearchParams(location.search).get('id');
     if (editId) {
       document.getElementById('page-title').textContent = 'Ndrysho Produktin';
-      fetch(`/api/products/${editId}`).then(r => r.json()).then(p => {
+      fetch(`/api/admin/products/${editId}`).then(r => r.json()).then(p => {
         document.getElementById('name').value = p.name || '';
         document.getElementById('slug').value = p.slug || '';
         document.getElementById('price').value = p.price || '';
@@ -319,6 +323,7 @@
         document.getElementById('badge').value = p.badge || '';
         document.getElementById('featured').checked = !!p.featured;
         document.getElementById('in_stock').checked = p.in_stock !== false;
+        document.getElementById('hidden').checked = !!p.hidden;
         document.getElementById('brand').value = p.brand || '';
         document.getElementById('sku').value = p.sku || '';
         document.getElementById('category_id').value = p.category_id || '';
@@ -337,7 +342,7 @@
     loadCats().then(() => {
       if (editId) document.getElementById('category_id').value = /* set after load */ '';
       // Re-apply after cats load
-      if (editId) fetch(`/api/products/${editId}`).then(r => r.json()).then(p => {
+      if (editId) fetch(`/api/admin/products/${editId}`).then(r => r.json()).then(p => {
         document.getElementById('category_id').value = p.category_id || '';
       });
     });
@@ -369,6 +374,7 @@
       formData.append('badge', document.getElementById('badge').value);
       formData.append('featured', document.getElementById('featured').checked);
       formData.append('in_stock', document.getElementById('in_stock').checked);
+      formData.append('hidden', document.getElementById('hidden').checked);
       formData.append('attributes', JSON.stringify(attrs));
       formData.append('existing_images', JSON.stringify(existingImages));
       newFiles.forEach(f => formData.append('images', f));

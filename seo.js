@@ -385,7 +385,7 @@ export function renderPage(pageKey, { query = {}, slug = '', nonce = '' } = {}) 
 
   if (pageKey === 'product') {
     const p = getProductBySlug(slug);
-    if (!p) {
+    if (!p || p.hidden) {
       const seo = {
         title: 'Produkti nuk u gjet — IT Store',
         description: 'Ky produkt nuk është më i disponueshëm. Shfletoni produktet e tjera te IT Store, Tiranë.',
