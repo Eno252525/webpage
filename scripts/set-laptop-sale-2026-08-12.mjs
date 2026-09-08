@@ -54,9 +54,9 @@ const SALES = {
   'hp-elitebook-850-g6': [27000, 22000],
   'lenovo-thinkpad-x13-gen-1-i5-10210u': [26500, 22000],
   'lenovo-thinkpad-t460s': [24000, 20000],
-  'hp-probook-640-g5': [21000, 17000],
+  'hp-probook-640-g5': [21000, 18000],  // sale price raised 17000 -> 18000 on 2026-08-26
   'lenovo-thinkpad-x1-yoga': [18500, 15000],
-  'dell-latitude-7390': [18000, 15000],
+  'dell-latitude-7390': [22000, 18000],  // sale price raised 15000 -> 18000 on 2026-08-26
   // Entry level
   'hp-probook-450-g2': [13500, 11000],
   'lenovo-thinkpad-x240': [12500, 10000],

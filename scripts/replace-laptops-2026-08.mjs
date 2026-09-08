@@ -110,8 +110,8 @@ add({ slug: 'lenovo-thinkpad-t470s', model: 'Lenovo ThinkPad T470s', brand: 'Len
 add({ slug: 'lenovo-thinkpad-t460s', model: 'Lenovo ThinkPad T460s', brand: 'Lenovo', family: 'thinkpad', cpu: 'i7-7600U', ram: '8GB', ssd: '256GB', screen: '14"', price: 20000, cat: BUSINESS, img: 'lenovo-thinkpad-t460s' });
 
 // ---------- Gen 8 ----------
-add({ slug: 'hp-probook-640-g5', model: 'HP ProBook 640 G5', brand: 'HP', family: 'probook', cpu: 'i5-8365U', ram: '8GB', ssd: '256GB', screen: '14"', price: 17000, cat: BUSINESS, img: 'hp-probook-640-g5' });
-add({ slug: 'dell-latitude-5400', model: 'Dell Latitude 5400', brand: 'Dell', family: 'latitude', cpu: 'i5-8365U', ram: '8GB', ssd: '256GB', screen: '14"', price: 17000, cat: BUSINESS, existing: true });
+add({ slug: 'hp-probook-640-g5', model: 'HP ProBook 640 G5', brand: 'HP', family: 'probook', cpu: 'i5-8365U', ram: '8GB', ssd: '256GB', screen: '14"', price: 18000, cat: BUSINESS, img: 'hp-probook-640-g5' }); // 17000 -> 18000 (2026-08-26: i5 gen-8 floor)
+add({ slug: 'dell-latitude-5400', model: 'Dell Latitude 5400', brand: 'Dell', family: 'latitude', cpu: 'i5-8365U', ram: '8GB', ssd: '256GB', screen: '14"', price: 18000, cat: BUSINESS, existing: true }); // 17000 -> 18000 (2026-08-26: i5 gen-8 floor)
 add({ slug: 'dell-precision-7530', model: 'Dell Precision 7530', brand: 'Dell', family: 'precision', cpu: 'i5-8400H', ram: '16GB', ssd: '512GB', screen: '15.6"', gpu: 'Quadro P1000', price: 33000, cat: WORKSTATION, existing: true });
 add({ slug: 'dell-latitude-5500', model: 'Dell Latitude 5500', brand: 'Dell', family: 'latitude', cpu: 'i5-8365U', ram: '8GB', ssd: '256GB', screen: '15.6"', price: 20000, cat: BUSINESS, existing: true });
 add({ slug: 'hp-elitebook-850-g5', model: 'HP EliteBook 850 G5', brand: 'HP', family: 'elitebook', cpu: 'i5-8250U', ram: '8GB', ssd: '256GB', screen: '15.6"', price: 20000, cat: BUSINESS, img: 'hp-elitebook-850-g5' });
@@ -121,7 +121,7 @@ add({ slug: 'dell-latitude-5590', model: 'Dell Latitude 5590', brand: 'Dell', fa
 add({ slug: 'hp-probook-640-g4-i5-8350u', model: 'HP ProBook 640 G4', brand: 'HP', family: 'probook', cpu: 'i5-8350U', ram: '8GB', ssd: '256GB', screen: '14"', price: 18000, cat: BUSINESS, img: 'hp-probook-640-g4' });
 add({ slug: 'dell-latitude-5580', model: 'Dell Latitude 5580', brand: 'Dell', family: 'latitude', cpu: 'i5-8500U', ram: '8GB', ssd: '256GB', screen: '15.6"', price: 18000, cat: BUSINESS, existing: true });
 add({ slug: 'lenovo-v130-15ikb', model: 'Lenovo V130-15IKB', brand: 'Lenovo', family: 'consumer', cpu: 'i5-8250U', ram: '8GB', ssd: '256GB', screen: '15.6"', price: 18000, cat: BUSINESS, img: 'lenovo-v130-15' });
-add({ slug: 'dell-latitude-7390', model: 'Dell Latitude 7390', brand: 'Dell', family: 'latitude', cpu: 'i5-8350U', ram: '8GB', ssd: '256GB', screen: '13.3"', price: 15000, cat: BUSINESS, existing: true });
+add({ slug: 'dell-latitude-7390', model: 'Dell Latitude 7390', brand: 'Dell', family: 'latitude', cpu: 'i5-8350U', ram: '8GB', ssd: '256GB', screen: '13.3"', price: 18000, cat: BUSINESS, existing: true }); // 15000 -> 18000 (2026-08-26: i5 gen-8 floor)
 add({ slug: 'lenovo-miix-520-12ikb', model: 'Lenovo ideapad Miix 520-12IKB', brand: 'Lenovo', family: 'surface', cpu: 'i5-8250U', ram: '8GB', ssd: '256GB', screen: '12.2"', price: 20000, cat: BUSINESS, img: 'lenovo-miix-520', touch: true });
 add({ slug: 'hp-elitebook-650-g6', model: 'HP EliteBook 650 G6', brand: 'HP', family: 'elitebook', cpu: 'i5-8365U', ram: '8GB', ssd: '256GB', screen: '15.6"', price: 19000, cat: BUSINESS, img: 'hp-probook-650-g5' });
 add({ slug: 'microsoft-surface', model: 'Microsoft Surface', brand: 'Microsoft', family: 'surface', cpu: 'i5-8350U', ram: '8GB', ssd: '128GB', screen: '12.3"', price: 20000, cat: BUSINESS, existing: true, touch: true });
