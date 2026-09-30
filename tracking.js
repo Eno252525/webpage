@@ -1,5 +1,6 @@
 // ── Meta Pixel + Google Analytics 4 ──────────────────────────────────────────
-// Both are opt-in via .env (META_PIXEL_ID, GA_MEASUREMENT_ID); with neither set
+// Both are opt-in via .env (META_PIXEL_ID, GA_MEASUREMENT_ID) and gated on the
+// cookie banner (webroot/js/consent.js); with neither ID set
 // the site ships no third-party tags and the CSP stays first-party only.
 //
 // The head snippet also defines `window.itTrack(event, params)` — the single
@@ -39,14 +40,18 @@ const META_EVENT = { view_item: 'ViewContent', add_to_cart: 'AddToCart', generat
 
 function buildHead() {
   if (!trackingEnabled) return '';
-  let out = '\n<!-- Analytics -->';
+  // Consent first: both tags start denied/revoked unless the visitor already
+  // accepted in the banner (webroot/js/consent.js, localStorage itstore_consent).
+  let out = `\n<!-- Analytics -->
+<script>window.__ccOk=(function(){try{return localStorage.getItem('itstore_consent')==='granted'}catch(e){return false}})();</script>`;
   if (gaId) {
-    out += `\n<script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');</script>`;
+    out += `\n<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}(function(g){gtag('consent','default',{ad_storage:g,ad_user_data:g,ad_personalization:g,analytics_storage:g});})(window.__ccOk?'granted':'denied');gtag('js',new Date());gtag('config','${gaId}');</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>`;
   }
   if (pixelId) {
-    out += `\n<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${pixelId}');fbq('track','PageView');</script>`;
+    out += `\n<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('consent',window.__ccOk?'grant':'revoke');fbq('init','${pixelId}');fbq('track','PageView');</script>`;
   }
+  out += `\n<script type="module" src="/js/consent.js"></script>`;
   out += `\n<script>(function(){var M=${JSON.stringify(META_EVENT)};
 window.itTrack=function(ev,p){p=p||{};try{
 if(window.gtag)gtag('event',ev,p);
