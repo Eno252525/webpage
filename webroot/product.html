@@ -603,6 +603,11 @@
         // Upgrade legacy ?id= links to the SEO-friendly slug URL
         if (!slug && product.slug) history.replaceState(null, '', `/product/${product.slug}`);
         renderProduct(product);
+        const price = Number(product.sale_price) > 0 ? Number(product.sale_price) : Number(product.price) || 0;
+        window.itTrack?.('view_item', {
+          currency: 'ALL', value: price,
+          items: [{ item_id: product.slug, item_name: product.name, item_brand: product.brand, price }],
+        });
       } catch {
         document.getElementById('product-page').innerHTML = '<p style="text-align:center;padding:80px;color:rgba(20,20,20,0.4);">Produkti nuk u gjet.</p>';
       }

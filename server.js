@@ -12,6 +12,7 @@ import categoriesRouter from './routes/categories.js';
 import searchRouter from './routes/search.js';
 import adminRouter from './routes/admin.js';
 import { renderPage, buildSitemapXml, addScriptNonce } from './seo.js';
+import { injectTracking, trackingCsp } from './tracking.js';
 import { legacyRedirects } from './redirects.js';
 import { rateLimit } from './middleware/rateLimit.js';
 
@@ -23,9 +24,12 @@ const PORT = process.env.PORT || 3000;
 // Read an HTML template and stamp the request's CSP nonce onto its inline
 // <script> tags before sending, so no-JS crawlers and browsers both get pages
 // whose scripts satisfy the nonce-based CSP (no 'unsafe-inline' needed).
+// Analytics tags go on every public page but never on the admin shells.
 function sendHtmlFile(res, filePath, status = 200) {
+  const isAdmin = filePath.startsWith(path.join(webrootDir, 'admin') + path.sep);
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) return res.status(404).send('404 - Not Found');
+    if (!isAdmin) data = injectTracking(data);
     res.status(status).type('html').send(addScriptNonce(data, res.locals.cspNonce));
   });
 }
@@ -52,11 +56,11 @@ app.disable('x-powered-by');
 function buildCsp(nonce) {
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}'`,
+    ["script-src 'self'", `'nonce-${nonce}'`, ...trackingCsp.script].join(' '),
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: https://placehold.co https://images.unsplash.com",
-    "connect-src 'self'",
+    ["img-src 'self' data: https://placehold.co https://images.unsplash.com", ...trackingCsp.img].join(' '),
+    ["connect-src 'self'", ...trackingCsp.connect].join(' '),
     "frame-src https://www.google.com https://maps.google.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",

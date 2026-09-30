@@ -17,6 +17,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getProductBySlug, getCategories, getProductsForSitemap } from './database.js';
+import { injectTracking } from './tracking.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // HTML page templates live in webroot/; Node reads them and injects SEO tags.
@@ -251,6 +252,7 @@ export function addScriptNonce(html, nonce) {
 function inject(html, seo, ssr, nonce) {
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(seo.title)}</title>`);
   html = html.replace('</head>', `${buildHeadTags(seo)}\n</head>`);
+  html = injectTracking(html);
   if (ssr) {
     const anchor = '<div class="product-page" id="product-page">';
     html = html.replace(anchor, anchor + ssr);

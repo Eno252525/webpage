@@ -33,6 +33,11 @@ export function addItem(product, options) {
   }
   save(items);
   updateBadge();
+  const price = Number(product.sale_price) > 0 ? Number(product.sale_price) : Number(product.price) || 0;
+  window.itTrack?.('add_to_cart', {
+    currency: 'ALL', value: price,
+    items: [{ item_id: product.slug || product.id, item_name: product.name, price, quantity: 1 }],
+  });
 }
 
 // Identify a line by its index so two entries with the same product id but
