@@ -11,7 +11,7 @@ import productsRouter from './routes/products.js';
 import categoriesRouter from './routes/categories.js';
 import searchRouter from './routes/search.js';
 import adminRouter from './routes/admin.js';
-import { renderPage, buildSitemapXml, addScriptNonce } from './seo.js';
+import { renderPage, buildSitemapXml, buildMetaFeedXml, addScriptNonce } from './seo.js';
 import { injectTracking, trackingCsp } from './tracking.js';
 import { legacyRedirects } from './redirects.js';
 import { rateLimit } from './middleware/rateLimit.js';
@@ -122,6 +122,15 @@ app.get('/product/:slug', seoRoute('product'));
 app.get('/sitemap.xml', (req, res, next) => {
   try {
     res.type('application/xml').send(buildSitemapXml());
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Product catalog for Meta Commerce Manager (scheduled feed → catalog ads).
+app.get('/meta-feed.xml', (req, res, next) => {
+  try {
+    res.type('application/xml').send(buildMetaFeedXml());
   } catch (err) {
     next(err);
   }

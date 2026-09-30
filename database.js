@@ -654,6 +654,21 @@ export function getProductsForSitemap() {
   ).all();
 }
 
+// Meta catalog feed: only priced products (Meta rejects items without a price,
+// so "price on request" rows are left out).
+export function getProductsForFeed() {
+  return db.prepare(`
+    SELECT p.slug, p.name, p.short_description, p.description, p.price, p.sale_price,
+           p.images, p.attributes, p.badge, p.brand, p.in_stock,
+           c.name AS category_name, pc.name AS parent_category_name
+    FROM products p
+    LEFT JOIN categories c  ON c.id = p.category_id
+    LEFT JOIN categories pc ON pc.id = c.parent_id
+    WHERE COALESCE(p.hidden, 0) = 0 AND p.price > 0
+    ORDER BY p.id
+  `).all();
+}
+
 export function getAllProductsAdmin() {
   return db.prepare(`
     SELECT p.*, c.name as category_name

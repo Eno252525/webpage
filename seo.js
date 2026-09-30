@@ -16,7 +16,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getProductBySlug, getCategories, getProductsForSitemap } from './database.js';
+import { getProductBySlug, getCategories, getProductsForSitemap, getProductsForFeed } from './database.js';
 import { injectTracking } from './tracking.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -479,5 +479,60 @@ export function buildSitemapXml() {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${body}
 </urlset>
+`;
+}
+
+// ── Meta (Facebook/Instagram) catalog feed ───────────────────────────────────
+// RSS 2.0 + Google product namespace, which Meta Commerce Manager reads as a
+// scheduled data feed. <g:id> is the product slug — the same value the pixel
+// sends as content_ids (view_item / add_to_cart), so retargeting ads can show
+// each visitor the exact product they looked at.
+function feedCondition(p, attrs) {
+  const g = String(attrs['Gjendja'] || attrs['Condition'] || p.badge || '').toLowerCase();
+  if (/^i ri\b/.test(g)) return 'new';
+  if (/rinovuar/.test(g)) return 'refurbished';
+  return 'used';
+}
+
+export function buildMetaFeedXml() {
+  const items = getProductsForFeed().map(p => {
+    let images = [], attrs = {};
+    try { images = JSON.parse(p.images || '[]'); } catch { /* ignore */ }
+    try { attrs = JSON.parse(p.attributes || '{}'); } catch { /* ignore */ }
+    if (!images[0]) return '';
+
+    const specs = Object.entries(attrs)
+      .filter(([k]) => !/^(Gjendja|Condition)$/.test(k))
+      .map(([k, v]) => `${k}: ${v}`).join(' · ');
+    const description = clip(stripTags(p.description) || [stripTags(p.short_description) || p.name, specs].filter(Boolean).join(' — '), 5000);
+    const onSale = p.sale_price > 0 && p.sale_price < p.price;
+    const productType = [p.parent_category_name, p.category_name].filter(Boolean).join(' > ');
+    const extraImages = images.slice(1, 11).map(i => `
+      <g:additional_image_link>${xmlEsc(absImg(i))}</g:additional_image_link>`).join('');
+
+    return `    <item>
+      <g:id>${xmlEsc(p.slug)}</g:id>
+      <g:title>${xmlEsc(clip(p.name, 150))}</g:title>
+      <g:description>${xmlEsc(description)}</g:description>
+      <g:link>${xmlEsc(`${SITE_URL}/product/${encodeURIComponent(p.slug)}`)}</g:link>
+      <g:image_link>${xmlEsc(absImg(images[0]))}</g:image_link>${extraImages}
+      <g:brand>${xmlEsc(p.brand || 'IT Store')}</g:brand>
+      <g:condition>${feedCondition(p, attrs)}</g:condition>
+      <g:availability>${p.in_stock ? 'in stock' : 'out of stock'}</g:availability>
+      <g:price>${Math.round(p.price)} ALL</g:price>${onSale ? `
+      <g:sale_price>${Math.round(p.sale_price)} ALL</g:sale_price>` : ''}${productType ? `
+      <g:product_type>${xmlEsc(productType)}</g:product_type>` : ''}
+    </item>`;
+  }).filter(Boolean).join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
+  <channel>
+    <title>IT Store</title>
+    <link>${SITE_URL}/</link>
+    <description>IT Store — kompjutera të rinovuar në Tiranë</description>
+${items}
+  </channel>
+</rss>
 `;
 }
