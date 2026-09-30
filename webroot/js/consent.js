@@ -4,7 +4,7 @@
 // stores the answer, and flips both to granted on "Pranoj".
 // The choice lives in localStorage['itstore_consent'] = 'granted' | 'denied'.
 // Any element with [data-cookie-settings] reopens the banner; a link is also
-// appended to .footer-bottom on pages that have one.
+// appended to .footer-bottom / .footer-mini on pages that have one.
 
 const KEY = 'itstore_consent';
 
@@ -44,6 +44,7 @@ const CSS = `
 .cc-btn:active{transform:translateY(1px)}
 .cc-accept{background:#F0A020;border-color:#F0A020}
 .cc-accept:hover{background:#141414;border-color:#141414;color:#fff}
+.cc-more{color:#C07810;font-weight:600}.cc-more:hover{color:#141414}
 .cc-link{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;opacity:.7}
 .cc-link:hover{opacity:1}
 @media (max-width:640px){.cc-banner{flex-direction:column;align-items:stretch;left:12px;right:12px;bottom:12px;padding:18px}
@@ -66,7 +67,8 @@ function build() {
   banner.innerHTML = `
     <p class="cc-text"><strong>Cookies</strong>
       Përdorim cookies (Google Analytics, Meta Pixel) për të matur vizitat dhe për të përmirësuar reklamat tona.
-      Faqja funksionon njësoj edhe nëse i refuzoni.</p>
+      Faqja funksionon njësoj edhe nëse i refuzoni.
+      <a class="cc-more" href="/politika-e-privatesise.html">Më shumë</a></p>
     <div class="cc-actions">
       <button type="button" class="cc-btn cc-deny">Refuzoj</button>
       <button type="button" class="cc-btn cc-accept">Pranoj</button>
@@ -81,6 +83,8 @@ function build() {
     p.innerHTML = '<button type="button" class="cc-link" data-cookie-settings>Cilësimet e cookies</button>';
     footer.appendChild(p);
   }
+  const mini = document.querySelector('.footer-mini');
+  if (mini) mini.insertAdjacentHTML('beforeend', ' · <button type="button" class="cc-link" data-cookie-settings>Cookies</button>');
   document.addEventListener('click', e => {
     if (e.target.closest?.('[data-cookie-settings]')) show();
   });

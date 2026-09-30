@@ -443,6 +443,7 @@ export function buildSitemapXml() {
     { loc: `${SITE_URL}/`,                  changefreq: 'daily',   priority: '1.0', lastmod: today },
     { loc: `${SITE_URL}/shop.html`,         changefreq: 'daily',   priority: '0.9', lastmod: today },
     { loc: `${SITE_URL}/pyetje-te-shpeshta.html`,                          changefreq: 'monthly', priority: '0.7', lastmod: today },
+    { loc: `${SITE_URL}/politika-e-privatesise.html`,                      changefreq: 'yearly',  priority: '0.2', lastmod: today },
     { loc: `${SITE_URL}/udhezues/ku-te-blesh-kompjuter-ne-tirane.html`,    changefreq: 'monthly', priority: '0.7', lastmod: today },
     { loc: `${SITE_URL}/udhezues/refurbished-vs-i-ri.html`,                changefreq: 'monthly', priority: '0.6', lastmod: today },
     { loc: `${SITE_URL}/udhezues/si-te-zgjedhesh-laptopin-per-pune.html`,  changefreq: 'monthly', priority: '0.6', lastmod: today },
