@@ -160,6 +160,12 @@ db.prepare(
   "INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES ('Aksesorë', 'aksesore', NULL, 10)"
 ).run();
 
+// ── Migration: Printerë top-level category ───────────────────────────────────
+// Office printers and multifunction devices (laser, MFP, receipt printers).
+db.prepare(
+  "INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES ('Printerë', 'printere', NULL, 11)"
+).run();
+
 // ── Migration: Server is a top-level category (was nested under Networking) ──
 {
   const serverCat = db.prepare("SELECT id, parent_id FROM categories WHERE slug = 'server'").get();
