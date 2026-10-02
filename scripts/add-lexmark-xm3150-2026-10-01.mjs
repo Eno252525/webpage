@@ -8,7 +8,7 @@
 // ships in the repo as scripts/assets/lexmark-xm3150.webp and is copied into
 // uploads/ here.
 //
-// SKU PR0001 — first in a new PR#### sequence for printers.
+// sku left empty on purpose — Eno assigns SKUs.
 //
 // Idempotent: keyed by slug (insert-or-update); the photo is only copied if
 // missing. Safe to re-run — required on the server, where products.db and
@@ -27,7 +27,7 @@ const P = {
   slug: 'lexmark-xm3150',
   name: 'Lexmark XM3150 — Printer / Fotokopje / Skaner Laser Mono A4',
   brand: 'Lexmark',
-  sku: 'PR0001',
+  sku: '',
   price: 26000,
   sale_price: 12000,
   asset: 'lexmark-xm3150.webp',
@@ -69,8 +69,6 @@ db.prepare(
 const catId = db.prepare('SELECT id FROM categories WHERE slug = ?').get('printere')?.id;
 if (!catId) throw new Error('category "printere" not found');
 
-const clash = db.prepare('SELECT slug FROM products WHERE sku = ? AND slug != ?').get(P.sku, P.slug);
-if (clash) throw new Error(`SKU ${P.sku} is already used by ${clash.slug}`);
 
 const row = {
   name: P.name, slug: P.slug, short_description: P.short_description, description: P.description,

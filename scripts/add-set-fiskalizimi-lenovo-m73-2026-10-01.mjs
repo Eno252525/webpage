@@ -14,7 +14,7 @@
 // repo as scripts/assets/set-fiskalizimi-lenovo-m73.webp and is copied into
 // uploads/ here.
 //
-// SKU POS0023 — next in the POS sequence (POS0022 was the last one taken).
+// sku left empty on purpose — Eno assigns SKUs.
 //
 // Idempotent: keyed by slug (insert-or-update); the photo is only copied if
 // missing. Safe to re-run — required on the server, where products.db and
@@ -33,7 +33,7 @@ const P = {
   slug: 'set-fiskalizimi-lenovo-m73-g2020',
   name: 'Set Fiskalizimi — Lenovo M73 G2020 / 8GB / 128GB SSD + Monitor 22" + Printer Bixolon SRP-350II',
   brand: 'Lenovo',
-  sku: 'POS0023',
+  sku: '',
   price: 12000,
   sale_price: 10000,
   asset: 'set-fiskalizimi-lenovo-m73.webp',
@@ -68,8 +68,6 @@ const db = new Database(dbPath);
 const catId = db.prepare('SELECT id FROM categories WHERE slug = ?').get('pos')?.id;
 if (!catId) throw new Error('category "pos" not found');
 
-const clash = db.prepare('SELECT slug FROM products WHERE sku = ? AND slug != ?').get(P.sku, P.slug);
-if (clash) throw new Error(`SKU ${P.sku} is already used by ${clash.slug}`);
 
 const row = {
   name: P.name, slug: P.slug, short_description: P.short_description, description: P.description,

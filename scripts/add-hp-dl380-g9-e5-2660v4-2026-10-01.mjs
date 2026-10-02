@@ -8,7 +8,7 @@
 // (3.2 GHz turbo, 35MB cache), so two of them give 28 cores / 56 threads.
 // Same chassis as the existing listing, so it reuses its photo.
 //
-// SKU SR0013 — next in the server sequence (SR0012 was the last one taken).
+// sku left empty on purpose — Eno assigns SKUs.
 //
 // Idempotent: keyed by slug (insert-or-update). Safe to re-run — which is
 // required on the server, where products.db is git-ignored and never arrives
@@ -26,7 +26,7 @@ const P = {
   slug: 'hp-dl380-g9-e5-2660-v4',
   name: 'HP DL380 G9 - 2 x E5-2660 V4 / 32GB RAM / 2 x 300GB SAS',
   brand: 'HP',
-  sku: 'SR0013',
+  sku: '',
   price: 40000,
   images: ['/uploads/hp-dl380-g9.webp'],
   short_description:
@@ -52,8 +52,6 @@ const db = new Database(dbPath);
 const catId = db.prepare('SELECT id FROM categories WHERE slug = ?').get('server')?.id;
 if (!catId) throw new Error('category "server" not found');
 
-const clash = db.prepare('SELECT slug FROM products WHERE sku = ? AND slug != ?').get(P.sku, P.slug);
-if (clash) throw new Error(`SKU ${P.sku} is already used by ${clash.slug}`);
 
 const row = {
   name: P.name,
