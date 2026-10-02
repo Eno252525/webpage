@@ -6,7 +6,7 @@
 // ships in the repo as scripts/assets/apple-imac-24-m1-2021.webp and is copied
 // into uploads/ here.
 //
-// SKU PCL0003 — next in the shared PCL#### PC/AIO sequence (PCL0001-0002 taken).
+// sku left empty on purpose — Eno assigns SKUs.
 //
 // Idempotent: keyed by slug (insert-or-update); the photo is only copied if
 // missing. Safe to re-run — required on the server, where products.db and
@@ -25,7 +25,7 @@ const P = {
   slug: 'apple-imac-24-m1-2021',
   name: 'Apple iMac 24" 4.5K (2021) - M1 / 8GB RAM / 256GB SSD',
   brand: 'Apple',
-  sku: 'PCL0003',
+  sku: '',
   price: 90000,
   asset: 'apple-imac-24-m1-2021.webp',
   short_description:
@@ -55,8 +55,6 @@ else { fs.copyFileSync(path.join(here, 'assets', P.asset), out); console.log(`Im
 const db = new Database(dbPath);
 const catId = db.prepare('SELECT id FROM categories WHERE slug = ?').get('aio')?.id;
 if (!catId) throw new Error('category "aio" not found');
-const clash = db.prepare('SELECT slug FROM products WHERE sku = ? AND slug != ?').get(P.sku, P.slug);
-if (clash) throw new Error(`SKU ${P.sku} is already used by ${clash.slug}`);
 
 const row = {
   name: P.name, slug: P.slug, short_description: P.short_description, description: P.description,
