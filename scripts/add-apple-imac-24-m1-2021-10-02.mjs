@@ -6,7 +6,7 @@
 // ships in the repo as scripts/assets/apple-imac-24-m1-2021.webp and is copied
 // into uploads/ here.
 //
-// SKU PCL0002 — next in the AIO sequence (PCL0001 is the only one taken).
+// SKU PCL0003 — next in the shared PCL#### PC/AIO sequence (PCL0001-0002 taken).
 //
 // Idempotent: keyed by slug (insert-or-update); the photo is only copied if
 // missing. Safe to re-run — required on the server, where products.db and
@@ -25,7 +25,7 @@ const P = {
   slug: 'apple-imac-24-m1-2021',
   name: 'Apple iMac 24" 4.5K (2021) - M1 / 8GB RAM / 256GB SSD',
   brand: 'Apple',
-  sku: 'PCL0002',
+  sku: 'PCL0003',
   price: 90000,
   asset: 'apple-imac-24-m1-2021.webp',
   short_description:
