@@ -116,6 +116,10 @@ const PRODUCT_RESLUG = {
   // catalog (12500 Lekë, used).
   'hdd-6tb': 'hdd-6tb-perdorur',
 
+  // The WD Ultrastar 12TB listing was taken off 2026-10-16 in favour of the
+  // generic SATA "HDD 12TB" (hidden, not deleted).
+  'wd-ultrastar-dc-hc520-12tb': 'hdd-12tb',
+
   // The HP ProBook 4540s was removed 2026-08-31 -> the nearest surviving
   // laptop (same 14" ProBook, 8GB/128GB SSD).
   'hp-probook-4540s': 'hp-probook-640-g1',
