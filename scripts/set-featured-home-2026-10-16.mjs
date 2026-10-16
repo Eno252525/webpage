@@ -1,6 +1,7 @@
 // Marks the products the home page leads with (hero deck + spotlight), per
 // Eno 2026-10-16. Picked from what visitors look at most (Google Analytics,
-// Sep 30 – Oct 15: HP Z840, HP Z8 G4 AI, RTX 3090) plus the workstation /
+// Sep 30 – Oct 15: HP Z840, RTX 3090; the HP Z8 G4 AI sold out the same day
+// and was dropped) plus the workstation /
 // gaming / Apple lines that do best on Instagram. Nothing was featured before,
 // so the home page fell back to whatever happened to be on sale.
 //
@@ -25,7 +26,6 @@ const FEATURED = [
   'pc-gaming-ryzen-5-5600-rx-580',
   'nvidia-rtx-3090-24gb',
   'apple-mac-mini-2018-i3-8100b',
-  'hp-z8-g4-ai-server-2x-xeon-platinum-8168-rtx-3090',
 ];
 
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
