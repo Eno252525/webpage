@@ -636,6 +636,8 @@ function queryProducts(query = {}) {
     newest: 'p.featured DESC, p.created_at DESC',
     featured: 'p.featured DESC, p.created_at DESC',
     popularity: 'p.featured DESC, p.view_count DESC, p.created_at DESC',
+    // Pure page-view order (in-stock first) for the home page's "most viewed" row.
+    views: 'p.in_stock DESC, p.view_count DESC, p.created_at DESC',
   };
   const useRelevance = searchScore && (!orderby || orderby === 'newest' || orderby === 'relevance');
   const order = useRelevance
