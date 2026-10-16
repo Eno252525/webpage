@@ -1,5 +1,5 @@
-import { t } from './i18n.js?v=20261016g';
-import { addItem, getItems, removeItemAt, setQtyAt, getTotal, buildWhatsAppURL, updateBadge } from './basket.js?v=20261016g';
+import { t } from './i18n.js?v=20261016h';
+import { addItem, getItems, removeItemAt, setQtyAt, getTotal, buildWhatsAppURL, updateBadge } from './basket.js?v=20261016h';
 
 export function fmtPrice(p) {
   return Math.round(Number(p)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });

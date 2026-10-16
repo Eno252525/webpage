@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/shared.css?v=20261016g">
+  <link rel="stylesheet" href="/css/shared.css?v=20261016h">
   <style>
     /* Header (two-row nav + search) and its behaviour are shared —
        see css/shared.css and js/header.js. */
@@ -609,11 +609,11 @@
   </footer>
 
   <script type="module">
-    import { getProduct, getProductBySlug, getCategories } from '/js/api.js?v=20261016g';
-    import { renderProductCard, initBasketDrawer, wireAddToBasketButtons, showToast, parseSpecText, renderSpecGrid, escapeHtml } from '/js/ui.js?v=20261016g';
-    import { addItem, updateBadge } from '/js/basket.js?v=20261016g';
-    import { loadConfig } from '/js/config.js?v=20261016g';
-    import { initHeader } from '/js/header.js?v=20261016g';
+    import { getProduct, getProductBySlug, getCategories } from '/js/api.js?v=20261016h';
+    import { renderProductCard, initBasketDrawer, wireAddToBasketButtons, showToast, parseSpecText, renderSpecGrid, escapeHtml } from '/js/ui.js?v=20261016h';
+    import { addItem, updateBadge } from '/js/basket.js?v=20261016h';
+    import { loadConfig } from '/js/config.js?v=20261016h';
+    import { initHeader } from '/js/header.js?v=20261016h';
 
     loadConfig().then(() => {
       const wa = document.getElementById('footer-wa');

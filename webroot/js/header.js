@@ -1,9 +1,9 @@
 /* Shared site header: mobile drawer, shop mega-menu, search + suggestions.
    Every page ships the same header markup (see any *.html) and calls
    initHeader() once, so behaviour can never drift page to page. */
-import { searchProducts } from '/js/api.js?v=20261016g';
-import { escapeHtml } from '/js/ui.js?v=20261016g';
-import { initFooter } from '/js/footer.js?v=20261016g';
+import { searchProducts } from '/js/api.js?v=20261016h';
+import { escapeHtml } from '/js/ui.js?v=20261016h';
+import { initFooter } from '/js/footer.js?v=20261016h';
 
 const SEARCH_PAGE = '/shop.html';
 
@@ -193,7 +193,9 @@ function initScrollHide() {
     ticking = true;
     requestAnimationFrame(() => {
       const y = window.scrollY;
-      if (y < 10 || y < lastY - 6) header.classList.remove('header-hidden');
+      // Hide only once the space the header sits in has scrolled off screen;
+      // before that, hiding it would leave a blank band at the top.
+      if (y <= header.offsetHeight || y < lastY - 6) header.classList.remove('header-hidden');
       else if (y > lastY + 6) header.classList.add('header-hidden');
       lastY = y;
       ticking = false;
