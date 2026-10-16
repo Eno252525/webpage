@@ -1,9 +1,9 @@
 /* Shared site header: mobile drawer, shop mega-menu, search + suggestions.
    Every page ships the same header markup (see any *.html) and calls
    initHeader() once, so behaviour can never drift page to page. */
-import { searchProducts } from '/js/api.js?v=20261016';
-import { escapeHtml } from '/js/ui.js?v=20261016';
-import { initFooter } from '/js/footer.js?v=20261016';
+import { searchProducts } from '/js/api.js?v=20261016c';
+import { escapeHtml } from '/js/ui.js?v=20261016c';
+import { initFooter } from '/js/footer.js?v=20261016c';
 
 const SEARCH_PAGE = '/shop.html';
 
