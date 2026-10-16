@@ -10,7 +10,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rateLimit.js';
 import {
   getAllProductsAdmin, getProduct, createProduct, updateProduct,
-  deleteProduct, getCategories, createCategory, deleteCategory
+  deleteProduct, getCategories, createCategory, deleteCategory, getNewsletterSubscribers
 } from '../database.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -188,6 +188,15 @@ router.delete('/products/:id', requireAuth, (req, res) => {
 });
 
 // ── Categories ────────────────────────────────────────────────────────────────
+
+// Newsletter sign-ups from the footer form, as a CSV download (opens in Excel).
+router.get('/newsletter.csv', requireAuth, (req, res) => {
+  const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = getNewsletterSubscribers();
+  const csv = ['email,source,created_at', ...rows.map(r => [r.email, r.source, r.created_at].map(cell).join(','))].join('\r\n');
+  res.setHeader('Content-Disposition', 'attachment; filename="newsletter.csv"');
+  res.type('text/csv').send('\ufeff' + csv);
+});
 
 router.get('/categories', requireAuth, (req, res) => {
   res.json(getCategories());

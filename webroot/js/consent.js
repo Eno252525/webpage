@@ -26,10 +26,10 @@ function save(choice) {
 }
 
 const CSS = `
-.cc-banner{position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:760px;margin:0 auto;
+.cc-banner{position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:680px;margin:0 auto;
   background:#fff;color:#141414;border:1px solid rgba(20,20,20,.12);
   box-shadow:0 12px 40px rgba(20,20,20,.14),0 2px 8px rgba(240,160,32,.12);
-  padding:20px 22px;display:flex;gap:20px;align-items:center;font-family:'Inter',sans-serif;
+  padding:14px 18px;display:flex;gap:16px;align-items:center;font-family:'Inter',sans-serif;
   transform:translateY(0);opacity:1;transition:transform .25s ease,opacity .25s ease}
 .cc-banner[hidden]{display:none}
 .cc-banner.cc-out{transform:translateY(24px);opacity:0}
@@ -47,8 +47,13 @@ const CSS = `
 .cc-more{color:#C07810;font-weight:600}.cc-more:hover{color:#141414}
 .cc-link{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;opacity:.7}
 .cc-link:hover{opacity:1}
-@media (max-width:640px){.cc-banner{flex-direction:column;align-items:stretch;left:12px;right:12px;bottom:12px;padding:18px}
-  .cc-actions{width:100%}.cc-btn{flex:1}}
+@media (max-width:640px){
+  /* A slim bar at the bottom of the screen instead of a card over half the page */
+  .cc-banner{left:0;right:0;bottom:0;max-width:none;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    border-left:0;border-right:0;border-bottom:0;box-shadow:0 -6px 20px rgba(20,20,20,.12)}
+  .cc-text{font-size:12.5px;line-height:1.4}
+  .cc-actions{gap:6px}
+  .cc-btn{min-width:0;padding:9px 12px;font-size:10.5px;letter-spacing:.1em}}
 `;
 
 let banner;
@@ -65,9 +70,7 @@ function build() {
   banner.setAttribute('aria-label', 'Pëlqimi për cookies');
   banner.hidden = true;
   banner.innerHTML = `
-    <p class="cc-text"><strong>Cookies</strong>
-      Përdorim cookies (Google Analytics, Meta Pixel) për të matur vizitat dhe për të përmirësuar reklamat tona.
-      Faqja funksionon njësoj edhe nëse i refuzoni.
+    <p class="cc-text">Përdorim cookies për të matur vizitat dhe për reklamat tona.
       <a class="cc-more" href="/politika-e-privatesise.html">Më shumë</a></p>
     <div class="cc-actions">
       <button type="button" class="cc-btn cc-deny">Refuzoj</button>

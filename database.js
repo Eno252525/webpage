@@ -2,6 +2,7 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { readFileSync, writeFileSync, renameSync, existsSync } from 'fs';
+import { FACET_DEFS, FACET_GROUPS, groupForCategory, facetValue, facetParams } from './facets.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const db = new Database(path.join(__dirname, 'products.db'));
@@ -166,6 +167,19 @@ db.prepare(
   "INSERT OR IGNORE INTO categories (name, slug, parent_id, sort_order) VALUES ('Printerë', 'printere', NULL, 11)"
 ).run();
 
+// ── Newsletter subscribers ───────────────────────────────────────────────────
+// The footer "Abonohu" form stores addresses here; the admin downloads them as
+// CSV from /api/admin/newsletter.csv. One row per address (re-subscribing is a
+// no-op), with the page it came from.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    email      TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    source     TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+`);
+
 // ── Migration: Server is a top-level category (was nested under Networking) ──
 {
   const serverCat = db.prepare("SELECT id, parent_id FROM categories WHERE slug = 'server'").get();
@@ -322,6 +336,13 @@ const categoryMatchStmt = db.prepare(`
   SELECT DISTINCT id FROM subtree
 `);
 
+// Text with separators turned into spaces and a leading space, so
+// `LIKE '% tok%'` matches a token only at the start of a word ("pc" finds
+// "Terra PC" and "PC Gaming", not "PCIe" buried in a description).
+const wordText = col =>
+  `(' ' || replace(replace(replace(replace(replace(replace(replace(replace(COALESCE(${col}, ''), '/', ' '), '(', ' '), ')', ' '), '-', ' '), ',', ' '), '"', ' '), ':', ' '), ';', ' ') || ' ')`;
+const normToken = tok => tok.replace(/[-/(),":;]+/g, ' ').trim();
+
 function buildProductSearch(q) {
   const tokens = expandSearchTokens(q);
   const clauses = [];
@@ -329,36 +350,101 @@ function buildProductSearch(q) {
   const params = {};
   tokens.forEach((tok, i) => {
     const key = `_sq${i}`;
-    const pat = `%${tok}%`;
-    params[key] = pat;
-    const catIds = categoryMatchStmt.all(pat, pat).map(r => r.id);
+    const wkey = `_sw${i}`;
+    params[key] = `%${tok}%`;
+    // Two-letter tokens must be whole words ("pc" ≠ "PCIe"); longer ones may
+    // start a word ("think" → "ThinkPad").
+    params[wkey] = tok.length <= 2 ? `% ${normToken(tok)} %` : `% ${normToken(tok)}%`;
+    const catIds = categoryMatchStmt.all(`%${tok}%`, `%${tok}%`).map(r => r.id);
     const catInList = catIds.length ? `p.category_id IN (${catIds.join(',')})` : null;
     const catClause = catInList ? ` OR ${catInList}` : '';
-    clauses.push(`(
-      p.name LIKE :${key}
-      OR p.sku LIKE :${key}
-      OR p.short_description LIKE :${key}
-      OR p.description LIKE :${key}
-      OR p.brand LIKE :${key}
-      OR p.attributes LIKE :${key}
-      ${catClause}
-    )`);
-    // Per-token relevance: sku 6, name 5, category 5, brand 3, attrs 2, short 1, desc 1.
-    // SKU tops the list so an exact part-number query surfaces that product first.
-    // Name and category tie next so "laptop" surfaces actual laptops
-    // (category match) ahead of docks that merely mention "laptop" in text.
+    // Short tokens ("pc", "hp") only match at a word start everywhere; longer
+    // ones may match inside names, SKUs, brands and specs, but descriptions
+    // always need a word start, so prose doesn't drag in unrelated products.
+    const short = tok.length <= 2;
+    const inName = short ? `${wordText('p.name')} LIKE :${wkey}` : `p.name LIKE :${key}`;
+    const inSku = short ? `${wordText('p.sku')} LIKE :${wkey}` : `p.sku LIKE :${key}`;
+    const inBrand = short ? `${wordText('p.brand')} LIKE :${wkey}` : `p.brand LIKE :${key}`;
+    const inAttrs = short ? `${wordText('p.attributes')} LIKE :${wkey}` : `p.attributes LIKE :${key}`;
+    const inShort = `${wordText('p.short_description')} LIKE :${wkey}`;
+    const inDesc = `${wordText('p.description')} LIKE :${wkey}`;
+    clauses.push(`(${inName} OR ${inSku} OR ${inShort} OR ${inDesc} OR ${inBrand} OR ${inAttrs}${catClause})`);
+    // Per-token relevance: a name hit at a word start counts most, then SKU and
+    // category, brand, specs; prose mentions count least. Name and category
+    // lead so "laptop" surfaces actual laptops ahead of docks that mention one.
     scoreParts.push(
-      `(CASE WHEN p.sku LIKE :${key} THEN 6 ELSE 0 END)`,
-      `(CASE WHEN p.name LIKE :${key} THEN 5 ELSE 0 END)`,
+      `(CASE WHEN ${wordText('p.name')} LIKE :${wkey} THEN 8 WHEN ${inName} THEN 4 ELSE 0 END)`,
+      `(CASE WHEN ${inSku} THEN 6 ELSE 0 END)`,
       catInList ? `(CASE WHEN ${catInList} THEN 5 ELSE 0 END)` : '0',
-      `(CASE WHEN p.brand LIKE :${key} THEN 3 ELSE 0 END)`,
-      `(CASE WHEN p.attributes LIKE :${key} THEN 2 ELSE 0 END)`,
-      `(CASE WHEN p.short_description LIKE :${key} THEN 1 ELSE 0 END)`,
-      `(CASE WHEN p.description LIKE :${key} THEN 1 ELSE 0 END)`,
+      `(CASE WHEN ${inBrand} THEN 3 ELSE 0 END)`,
+      `(CASE WHEN ${inAttrs} THEN 2 ELSE 0 END)`,
+      `(CASE WHEN ${inShort} THEN 1 ELSE 0 END)`,
+      `(CASE WHEN ${inDesc} THEN 1 ELSE 0 END)`,
     );
   });
+  // The whole query as a phrase inside the name ("z4 g4", "monitor arm").
+  if (tokens.length > 1) {
+    params._sphrase = `%${String(q).trim().replace(/\s+/g, ' ')}%`;
+    scoreParts.push(`(CASE WHEN p.name LIKE :_sphrase THEN 10 ELSE 0 END)`);
+  }
   const score = scoreParts.length ? scoreParts.join(' + ') : '0';
   return { clauses, params, score };
+}
+
+// ── Typo tolerance ───────────────────────────────────────────────────────────
+// When a search finds nothing, each unknown word is swapped for the closest
+// word in the catalogue (product names, brands, categories) within an edit
+// distance of 1 (2 for words of 7+ letters): "pavillion" → "pavilion",
+// "lenvo" → "lenovo". The vocabulary is rebuilt at most once a minute.
+let vocabCache = { at: 0, words: [] };
+function catalogueWords() {
+  if (Date.now() - vocabCache.at < 60_000) return vocabCache.words;
+  const rows = db.prepare(`
+    SELECT p.name AS t FROM products p WHERE ${VISIBLE_ONLY}
+    UNION ALL SELECT p.brand FROM products p WHERE ${VISIBLE_ONLY}
+    UNION ALL SELECT name FROM categories
+  `).all();
+  const set = new Set();
+  for (const r of rows) {
+    for (const w of String(r.t || '').toLowerCase().split(/[^a-z0-9ëç]+/)) if (w.length >= 3) set.add(w);
+  }
+  vocabCache = { at: Date.now(), words: [...set] };
+  return vocabCache.words;
+}
+
+function editDistance(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    let best = i;
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      if (cur[j] < best) best = cur[j];
+    }
+    if (best > max) return max + 1;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+export function correctSearch(q) {
+  const words = catalogueWords();
+  const known = new Set(words);
+  let changed = false;
+  const out = String(q || '').split(/\s+/).filter(Boolean).map(w => {
+    const lw = w.toLowerCase();
+    if (lw.length < 4 || /\d/.test(lw) || known.has(lw) || words.some(v => v.startsWith(lw))) return w;
+    const max = lw.length >= 7 ? 2 : 1;
+    let best = null, bestD = max + 1;
+    for (const v of words) {
+      const d = editDistance(lw, v, max);
+      if (d < bestD) { best = v; bestD = d; if (d === 1 && max === 1) break; }
+    }
+    if (best) { changed = true; return best; }
+    return w;
+  });
+  return changed ? out.join(' ') : null;
 }
 
 // Switch-only filter expressions. Switch products store networking specs as
@@ -424,13 +510,53 @@ function cpuGenSQL(gen) {
   return `(${cpu} LIKE 'i_-${g}___%' OR ${cpu} LIKE '%Gen ${g}%' OR ${cpu} LIKE '%Gen${g}%')`;
 }
 
-export function getProducts({ category, brand, form_factor, min_price, max_price, orderby, page, per_page, search, featured, sale, sw_ports, sw_uplink, sw_speed, sw_layer, sw_poe, cpu_family, cpu_gen } = {}) {
+// Product ids whose attributes match every selected spec filter (f_<id>).
+// Returns null when no spec filter is set.
+function idsMatchingFacets(selected) {
+  const ids = Object.keys(selected);
+  if (!ids.length) return null;
+  const rows = db.prepare(`SELECT id, attributes FROM products p WHERE ${VISIBLE_ONLY}`).all();
+  const out = [];
+  for (const r of rows) {
+    let a = {};
+    try { a = JSON.parse(r.attributes || '{}'); } catch { /* ignore */ }
+    if (ids.every(id => facetValue(id, a) === selected[id])) out.push(r.id);
+  }
+  return out;
+}
+
+export function getProducts(query = {}) {
+  const result = queryProducts(query);
+  const search = String(query.search || '').trim();
+  if (result.total > 0 || !search || query._retry) return result;
+  // Nothing found: try the typo-corrected query, then the words that match.
+  const corrected = correctSearch(search);
+  if (corrected) {
+    const r = queryProducts({ ...query, search: corrected, _retry: true });
+    if (r.total > 0) return { ...r, corrected_query: corrected };
+  }
+  const words = search.split(/\s+/).filter(Boolean);
+  if (words.length > 1) {
+    const matching = words.filter(w => queryProducts({ search: w, per_page: 1, _retry: true }).total > 0);
+    if (matching.length && matching.length < words.length) {
+      const partial = matching.join(' ');
+      const r = queryProducts({ ...query, search: partial, _retry: true });
+      if (r.total > 0) return { ...r, corrected_query: partial };
+    }
+  }
+  return result;
+}
+
+// SQL conditions for a shop query. `omit` leaves out dimensions the caller
+// handles itself (the facet counter does category / brand / form factor and
+// spec filters in JS, so each list can count "everything but itself").
+function buildConditions({ category, brand, form_factor, min_price, max_price, search, featured, sale, sw_ports, sw_uplink, sw_speed, sw_layer, sw_poe, cpu_family, cpu_gen, ...rest } = {}, omit = new Set()) {
   // Split filters: "base" (non-price) drives the slider range; price-bounds
   // narrow the visible products on top of that.
   const baseConditions = [VISIBLE_ONLY];
   const baseParams = {};
 
-  if (category) {
+  if (category && !omit.has('category')) {
     const cat = db.prepare('SELECT id FROM categories WHERE slug = ?').get(category);
     if (cat) {
       // Include products from this category AND all subcategories (any depth)
@@ -438,15 +564,19 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
       baseParams.catId = cat.id;
     }
   }
-  if (brand) { baseConditions.push('LOWER(p.brand) = LOWER(:brand)'); baseParams.brand = brand; }
-  if (form_factor) { baseConditions.push("json_extract(p.attributes, '$.Form Factor') = :form_factor"); baseParams.form_factor = form_factor; }
+  if (brand && !omit.has('brand')) { baseConditions.push('LOWER(p.brand) = LOWER(:brand)'); baseParams.brand = brand; }
+  if (form_factor && !omit.has('form_factor')) { baseConditions.push("json_extract(p.attributes, '$.Form Factor') = :form_factor"); baseParams.form_factor = form_factor; }
+  let searchScore = null;
   if (search) {
-    const { clauses: searchClauses, params: searchParams } = buildProductSearch(search);
+    const { clauses: searchClauses, params: searchParams, score } = buildProductSearch(search);
     if (searchClauses.length) {
       baseConditions.push(...searchClauses);
       Object.assign(baseParams, searchParams);
+      searchScore = score;
     }
   }
+  const facetIds = omit.has('facets') ? null : idsMatchingFacets(facetParams(rest));
+  if (facetIds) baseConditions.push(facetIds.length ? `p.id IN (${facetIds.join(',')})` : '0');
   if (featured === '1' || featured === true) { baseConditions.push('p.featured = 1'); }
   if (sale === '1') { baseConditions.push('p.sale_price IS NOT NULL AND p.sale_price > 0'); }
 
@@ -484,19 +614,33 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
   if (min_price) { priceConditions.push('COALESCE(NULLIF(p.sale_price, 0), p.price) >= :min_price'); priceParams.min_price = Number(min_price); }
   if (max_price) { priceConditions.push('COALESCE(NULLIF(p.sale_price, 0), p.price) <= :max_price'); priceParams.max_price = Number(max_price); }
 
+  return { baseConditions, baseParams, priceConditions, priceParams, searchScore };
+}
+
+function queryProducts(query = {}) {
+  const { orderby, page, per_page } = query;
+  const { baseConditions, baseParams, priceConditions, priceParams, searchScore } = buildConditions(query);
+
   const allConditions = [...baseConditions, ...priceConditions];
   const allParams = { ...baseParams, ...priceParams };
   const where = allConditions.length ? 'WHERE ' + allConditions.join(' AND ') : '';
   const baseWhere = baseConditions.length ? 'WHERE ' + baseConditions.join(' AND ') : '';
 
+  // Price sorts are strictly by price ("price on request" rows last), so a
+  // featured product never breaks the order. With a search, the default sort
+  // is relevance: best match first, featured and newest as tie-breakers.
+  const effPrice = 'COALESCE(NULLIF(p.sale_price, 0), p.price)';
   const orderMap = {
-    price_asc: 'p.featured DESC, COALESCE(NULLIF(p.sale_price, 0), p.price) ASC',
-    price_desc: 'p.featured DESC, COALESCE(NULLIF(p.sale_price, 0), p.price) DESC',
+    price_asc: `(${effPrice} <= 0) ASC, ${effPrice} ASC`,
+    price_desc: `(${effPrice} <= 0) ASC, ${effPrice} DESC`,
     newest: 'p.featured DESC, p.created_at DESC',
     featured: 'p.featured DESC, p.created_at DESC',
     popularity: 'p.featured DESC, p.view_count DESC, p.created_at DESC',
   };
-  const order = orderMap[orderby] || 'p.featured DESC, p.created_at DESC';
+  const useRelevance = searchScore && (!orderby || orderby === 'newest' || orderby === 'relevance');
+  const order = useRelevance
+    ? `(${searchScore}) DESC, p.featured DESC, p.created_at DESC`
+    : (orderMap[orderby] || 'p.featured DESC, p.created_at DESC');
 
   const limit = Math.min(Number(per_page) || 12, 100);
   const offset = (Math.max(Number(page) || 1, 1) - 1) * limit;
@@ -527,6 +671,105 @@ export function getProducts({ category, brand, form_factor, min_price, max_price
     page: Math.max(Number(page) || 1, 1),
     price_max: priceMaxRow?.price_max || 0,
   };
+}
+
+// ── Shop sidebar facets ──────────────────────────────────────────────────────
+// Everything the sidebar lists for the current query, with counts: categories,
+// brands, form factors and the spec filters of the product family in view.
+// Each list counts the products matching every *other* active filter, so a
+// visitor sees exactly what each choice would leave. The family ("group") is
+// the selected category's; with no category, it is inferred when at least 75%
+// of the matches belong to one family (a "pc" search → computer filters).
+export function getProductFacets(query = {}) {
+  const omit = new Set(['category', 'brand', 'form_factor', 'facets']);
+  const { baseConditions, baseParams, priceConditions, priceParams } = buildConditions(query, omit);
+  const where = [...baseConditions, ...priceConditions].join(' AND ');
+  const rows = db.prepare(`
+    SELECT p.id, p.category_id, p.brand, p.attributes FROM products p WHERE ${where}
+  `).all({ ...baseParams, ...priceParams });
+
+  const cats = db.prepare('SELECT id, slug, parent_id FROM categories').all();
+  const byId = new Map(cats.map(c => [c.id, c]));
+  const ancestors = id => { const out = []; let c = byId.get(id); while (c) { out.push(c); c = byId.get(c.parent_id); } return out; };
+  const slugOf = id => byId.get(id)?.slug;
+  const groupOfCat = id => { for (const c of ancestors(id)) { const g = groupForCategory(c.slug); if (g) return g; } return null; };
+
+  const catSlug = String(query.category || '');
+  const catRow = cats.find(c => c.slug === catSlug);
+  const inCat = r => !catRow || ancestors(r.category_id).some(c => c.id === catRow.id);
+  const brand = String(query.brand || '').toLowerCase();
+  const inBrand = r => !brand || String(r.brand || '').toLowerCase() === brand;
+  const ff = String(query.form_factor || '');
+  const selected = facetParams(query);
+
+  const items = rows.map(r => {
+    let a = {};
+    try { a = JSON.parse(r.attributes || '{}'); } catch { /* ignore */ }
+    return { ...r, attrs: a, ff: a['Form Factor'] ?? null, group: groupOfCat(r.category_id) };
+  });
+  const passFacets = (it, skip) => Object.entries(selected).every(([id, v]) => id === skip || facetValue(id, it.attrs) === v);
+  const pass = (it, skip) =>
+    (skip === 'category' || inCat(it)) && (skip === 'brand' || inBrand(it))
+    && (skip === 'ff' || !ff || it.ff === ff) && passFacets(it, skip);
+
+  const count = (list, keyFn) => {
+    const m = new Map();
+    for (const it of list) for (const k of [].concat(keyFn(it))) if (k != null && k !== '') m.set(k, (m.get(k) || 0) + 1);
+    return m;
+  };
+
+  // Category counts roll up to every ancestor, so "Desktop" includes PC + AIO.
+  // They ignore spec / form-factor filters: those belong to one product family
+  // and are cleared when the visitor picks another category.
+  const catCounts = count(items.filter(it => inBrand(it)), it => ancestors(it.category_id).map(c => c.slug));
+  const brandCounts = count(items.filter(it => pass(it, 'brand')), it => (it.brand || '').trim());
+  // Form factor (SFF / MT / USFF…) only means something for computers.
+
+  const matching = items.filter(it => pass(it));
+  let group = catRow ? (groupOfCat(catRow.id) || null) : null;
+  if (!catRow && (query.search || query.brand) && matching.length) {
+    const g = count(matching, it => it.group);
+    const [top, n] = [...g.entries()].sort((a, b) => b[1] - a[1])[0] || [];
+    if (top && n / matching.length >= 0.75) group = top;
+  }
+
+  const ffCounts = group === 'computers'
+    ? count(items.filter(it => it.group === group && pass(it, 'ff')), it => it.ff)
+    : new Map();
+
+  const facets = [];
+  for (const id of (FACET_GROUPS[group]?.facets || [])) {
+    const def = FACET_DEFS[id];
+    const list = items.filter(it => it.group === group && pass(it, id));
+    const m = count(list, it => facetValue(id, it.attrs));
+    if (selected[id] && !m.has(selected[id])) m.set(selected[id], 0);
+    // A filter needs a real choice, but not a wall of one-off values.
+    if (m.size < 2 && !selected[id]) continue;
+    if (m.size > 12) continue;
+    const values = [...m.keys()].sort(def.order || ((a, b) => a.localeCompare(b))).map(v => ({ value: v, count: m.get(v) }));
+    facets.push({ id, label: def.label, values });
+  }
+
+  const sortCount = m => [...m.entries()].map(([value, n]) => ({ value, count: n }));
+  return {
+    group,
+    total: matching.length,
+    categories: Object.fromEntries(catCounts),
+    brands: sortCount(brandCounts).sort((a, b) => a.value.localeCompare(b.value)),
+    form_factors: sortCount(ffCounts).sort((a, b) => a.value.localeCompare(b.value)),
+    facets,
+  };
+}
+
+// ── Newsletter ───────────────────────────────────────────────────────────────
+export function addNewsletterSubscriber(email, source = '') {
+  const r = db.prepare('INSERT OR IGNORE INTO newsletter_subscribers (email, source) VALUES (?, ?)')
+    .run(String(email).trim().toLowerCase(), String(source || '').slice(0, 200));
+  return { added: r.changes === 1 };
+}
+
+export function getNewsletterSubscribers() {
+  return db.prepare('SELECT email, source, created_at FROM newsletter_subscribers ORDER BY created_at DESC').all();
 }
 
 export function getProduct(id) {

@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/shared.css">
+  <link rel="stylesheet" href="/css/shared.css?v=20261016">
   <style>
     .shop-layout {
       display: grid;
@@ -341,9 +341,9 @@
     .list-info .spec-value { font-size: 1.3rem; padding-top: 3px; padding-bottom: 3px; }
     .list-name {
       font-family: 'Inter', sans-serif;
-      font-weight: 900; font-size: 1.55rem;
-      letter-spacing: 0.04em; text-transform: uppercase;
-      color: #141414; line-height: 1.2; display: block;
+      font-weight: 800; font-size: 1.65rem;
+      letter-spacing: -0.005em;
+      color: #141414; line-height: 1.25; display: block;
       transition: color 0.15s;
     }
     .list-name:hover { color: var(--color-amber); }
@@ -403,6 +403,26 @@
       .product-list-item { grid-template-columns: 104px 1fr; }
       .list-img-wrap { min-height: 104px; }
     }
+    /* Facet counts, quick category links, "did you mean" note */
+    .cat-link { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .f-count { flex-shrink: 0; font-size: 1.05rem; font-weight: 500; color: rgba(20,20,20,0.38); font-variant-numeric: tabular-nums; }
+    .cat-link.active .f-count { color: inherit; opacity: 0.7; }
+    .cat-link.is-empty { opacity: 0.45; }
+    .quick-links { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 0 14px; padding-bottom: 2px; }
+    .quick-links::-webkit-scrollbar { display: none; }
+    .quick-link {
+      flex-shrink: 0; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1.25rem;
+      padding: 8px 14px; background: #fff; color: #141414;
+      border: 1px solid rgba(20,20,20,0.14);
+      transition: border-color 0.15s, color 0.15s, transform 0.15s;
+    }
+    .quick-link:hover { border-color: var(--color-amber); color: var(--color-amber-dark); }
+    .quick-link:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 2px; }
+    .quick-link:active { transform: translateY(1px); }
+    .quick-links[hidden], .search-note[hidden] { display: none; }
+    .search-note { font-size: 1.3rem; color: rgba(20,20,20,0.65); margin: 0 0 14px; }
+    .search-note strong { color: #141414; }
   </style>
 </head>
 <body>
@@ -724,6 +744,7 @@
             <svg class="sort-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </button>
           <div class="sort-menu" id="sort-menu" role="listbox" aria-label="Rendit sipas">
+            <div class="sort-item" role="option" data-value="relevance" hidden>Më të përshtatshme</div>
             <div class="sort-item" role="option" data-value="newest">Më të reja</div>
             <div class="sort-item" role="option" data-value="price_asc">Çmim ↑</div>
             <div class="sort-item" role="option" data-value="price_desc">Çmim ↓</div>
@@ -740,8 +761,12 @@
         </div>
       </div>
 
+      <!-- Shortcuts to popular categories (unfiltered shop only) -->
+      <div class="quick-links" id="quick-links" hidden></div>
+
       <!-- Active filter chips -->
       <div class="filter-chips" id="filter-chips"></div>
+      <p class="search-note" id="search-note" hidden></p>
 
       <!-- Product grid -->
       <div class="product-grid" id="product-grid"></div>
@@ -776,10 +801,10 @@
             <a href="https://www.facebook.com/itstorealbania/" class="social-link" aria-label="Facebook" target="_blank" rel="noopener">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             </a>
-            <a href="https://www.instagram.com/itstore_computers/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener">
+            <a href="https://www.instagram.com/itstore.al/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
             </a>
-            <a href="#" class="social-link" aria-label="WhatsApp" id="footer-wa">
+            <a href="https://wa.me/355693181062" class="social-link" aria-label="WhatsApp" id="footer-wa">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             </a>
           </div>
@@ -800,8 +825,6 @@
           <ul>
             <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
             <li><a href="/na-kontaktoni.html">Na Kontaktoni</a></li>
-            <li><a href="#">Kthimi i Produktit</a></li>
-            <li><a href="#">Blog</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -828,22 +851,25 @@
           <p style="font-size:1.2rem;font-weight:300;color:rgba(20,20,20,0.5);margin-bottom:20px;line-height:1.65;">
             Merrni ofertat e fundit dhe produktet e reja direkt në email.
           </p>
-          <input type="email" class="newsletter-input" placeholder="Adresa juaj email">
-          <button class="newsletter-btn">Abonohu</button>
+          <form class="newsletter-form" novalidate>
+            <input type="email" name="email" class="newsletter-input" placeholder="Adresa juaj email" autocomplete="email" required aria-label="Adresa juaj email">
+            <button type="submit" class="newsletter-btn">Abonohu</button>
+            <p class="newsletter-msg" role="status" aria-live="polite"></p>
+          </form>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2025 IT Store — Information &amp; Technology Resource Specialist · <a href="/politika-e-privatesise.html">Politika e privatësisë</a></p>
+        <p>&copy; <span class="footer-year">2026</span> IT Store — Information &amp; Technology Resource Specialist · <a href="/politika-e-privatesise.html">Politika e privatësisë</a></p>
       </div>
     </div>
   </footer>
 
   <script type="module">
-    import { getProducts, getCategories, getBrands, getFormFactors } from '/js/api.js';
-    import { renderProductCard, renderProductListItem, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, escapeHtml } from '/js/ui.js';
-    import { updateBadge } from '/js/basket.js';
-    import { loadConfig } from '/js/config.js';
-    import { initHeader } from '/js/header.js';
+    import { getProducts, getCategories, getFacets } from '/js/api.js?v=20261016';
+    import { renderProductCard, renderProductListItem, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, escapeHtml } from '/js/ui.js?v=20261016';
+    import { updateBadge } from '/js/basket.js?v=20261016';
+    import { loadConfig } from '/js/config.js?v=20261016';
+    import { initHeader } from '/js/header.js?v=20261016';
 
 
     loadConfig().then(() => {
@@ -856,8 +882,10 @@
       cat: '', brand: '', form_factor: '', min: '', max: '', sort: 'newest', page: 1, search: '', per_page: 32, sale: '',
       // Switch-only filters (only rendered when cat === 'switch')
       sw_ports: '', sw_uplink: '', sw_speed: '', sw_layer: '', sw_poe: '',
-      // PC/Desktop/AIO-only CPU filters (only rendered for those categories)
-      cpu_family: '', cpu_gen: ''
+      // Legacy CPU filters (old links); the sidebar now uses spec facets (f)
+      cpu_family: '', cpu_gen: '',
+      // Spec filters for the product family in view: { cpu: 'Intel Core i5', ram: '16GB' }
+      f: {}
     };
 
     // ── Init from URL ──────────────────────────────────────────────────────
@@ -878,6 +906,7 @@
     if (params.has('sw_poe')) state.sw_poe = params.get('sw_poe');
     if (params.has('cpu_family')) state.cpu_family = params.get('cpu_family');
     if (params.has('cpu_gen')) state.cpu_gen = params.get('cpu_gen');
+    for (const [k, v] of params) if (k.startsWith('f_') && v) state.f[k.slice(2)] = v;
 
     // ── Header & basket init ───────────────────────────────────────────────
     initBasketDrawer();
@@ -887,28 +916,20 @@
       onSearch: q => {
         state.search = q;
         state.page = 1;
-        pushState(); renderChips(); loadProducts();
+        pushState(); loadProducts();
       }
     });
 
 
-    // ── Load categories & brands ───────────────────────────────────────────
+    // ── Categories (tree) + sidebar facets ─────────────────────────────────
+    // The category tree is fetched once; everything else in the sidebar comes
+    // from /api/products/facets for the current query, so every list shows
+    // only what fits what is on screen (a "pc" search shows PC brands and CPU
+    // / RAM filters, never switch ports).
     let allCategories = [];
-    let allBrands = [];
-    let allFormFactors = [];
-    try {
-      [allCategories, allBrands, allFormFactors] = await Promise.all([
-        getCategories(),
-        getBrands(state.cat ? { category: state.cat } : {}),
-        getFormFactors({ ...(state.cat ? { category: state.cat } : {}), ...(state.brand ? { brand: state.brand } : {}) }),
-      ]);
-    } catch {
-      try { allCategories = await getCategories(); } catch {}
-    }
-
-    const PC_SLUGS = new Set(['pc', 'desktop']);
-    // CPU family/generation filters appear only for these categories.
-    const CPU_FILTER_SLUGS = new Set(['pc', 'desktop', 'aio']);
+    try { allCategories = await getCategories(); } catch {}
+    let facets = { group: null, categories: {}, brands: [], form_factors: [], facets: [] };
+    const facetLabel = id => facets.facets.find(f => f.id === id)?.label || id;
 
     // Slider ceiling — replaced by the API's `price_max` (rounded up to a tidy
     // number) so the track always ends near the priciest product in view.
@@ -934,20 +955,25 @@
         cat.slug === state.cat || (cat.children || []).some(subtreeHasActive);
 
       // Render a category and its subcategories (any depth) as sidebar list items.
+      const catCount = slug => facets.categories[slug] || 0;
+      const countBadge = n => `<span class="f-count">${n}</span>`;
       const renderCatNode = cat => {
-        if (!cat.children?.length) {
-          return `<li><span class="cat-link ${state.cat === cat.slug ? 'active' : ''}" data-slug="${cat.slug}">${cat.name}</span></li>`;
+        // Hide categories with nothing to show for the current query.
+        if (!catCount(cat.slug) && state.cat !== cat.slug && !subtreeHasActive(cat)) return '';
+        const kids = (cat.children || []).map(renderCatNode).join('');
+        if (!kids) {
+          return `<li><span class="cat-link ${state.cat === cat.slug ? 'active' : ''}" data-slug="${cat.slug}">${escapeHtml(cat.name)}${countBadge(catCount(cat.slug))}</span></li>`;
         }
         const isOpen = subtreeHasActive(cat);
         return `<li class="cat-accordion">
             <div class="cat-parent-row">
-              <span class="cat-link ${state.cat === cat.slug ? 'active' : ''}" data-slug="${cat.slug}">${cat.name}</span>
+              <span class="cat-link ${state.cat === cat.slug ? 'active' : ''}" data-slug="${cat.slug}">${escapeHtml(cat.name)}${countBadge(catCount(cat.slug))}</span>
               <button class="cat-toggle" aria-expanded="${isOpen}">
                 <svg class="cat-chevron ${isOpen ? 'open' : ''}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </button>
             </div>
             <ul class="cat-children ${isOpen ? 'open' : ''}">
-              ${cat.children.map(renderCatNode).join('')}
+              ${kids}
             </ul>
           </li>`;
       };
@@ -957,27 +983,25 @@
         ...allCategories.map(renderCatNode),
       ].join('');
 
-      const brandItems = allBrands.length ? `
+      const brandItems = `
         <li><span class="cat-link ${!state.brand ? 'active' : ''}" data-brand="">Të gjitha</span></li>
-        ${allBrands.map(b => `
-          <li><span class="cat-link ${state.brand === b ? 'active' : ''}" data-brand="${b}">${b}</span></li>
-        `).join('')}
-      ` : '<li style="color:rgba(20,20,20,0.35);font-size:1.2rem;padding:6px 10px;">Nuk ka markë</li>';
+        ${facets.brands.map(b => `
+          <li><span class="cat-link ${state.brand === b.value ? 'active' : ''}" data-brand="${escapeHtml(b.value)}">${escapeHtml(b.value)}${countBadge(b.count)}</span></li>
+        `).join('')}`;
 
       const FF_LABELS = { SFF: 'SFF — Small Form Factor', MT: 'MT — Mini Tower', USFF: 'USFF — Ultra Small', T: 'T — Tower' };
-      // Only show the Form Factor filter when a specific category is selected —
-      // never on "Të gjitha" (state.cat === '') and never for switches.
-      const showFF = allFormFactors.length > 0 && !!state.cat && state.cat !== 'switch';
-      const ffItems = allFormFactors.map(ff => `
+      // Form factor comes back only for computers (SFF / MT / USFF…).
+      const showFF = facets.form_factors.length > 1 || !!state.form_factor;
+      const ffItems = facets.form_factors.map(ff => `
         <li>
-          <span class="cat-link ff-link ${state.form_factor === ff ? 'active' : ''}" data-ff="${ff}">
-            ${FF_LABELS[ff] || ff}
+          <span class="cat-link ff-link ${state.form_factor === ff.value ? 'active' : ''}" data-ff="${escapeHtml(ff.value)}">
+            ${escapeHtml(FF_LABELS[ff.value] || ff.value)}${countBadge(ff.count)}
           </span>
         </li>`).join('');
 
       // Switch-only filter sections (ports, speed, uplink, layer, PoE).
       // Each is rendered as a single-select list mirroring the brand/FF lists.
-      const showSwitch = state.cat === 'switch';
+      const showSwitch = facets.group === 'switch';
       const swItem = (group, value, label) => `
         <li>
           <span class="cat-link sw-link ${state[group] === value ? 'active' : ''}" data-sw-group="${group}" data-sw-value="${value}">
@@ -1012,27 +1036,24 @@
         </div>
       ` : '';
 
-      // CPU-only filter sections (processor family + generation), shown for
-      // the PC / Desktop / AIO categories. They reuse the sw-link mechanism:
-      // the group name is the state key it writes to (cpu_family / cpu_gen).
-      const showCpu = CPU_FILTER_SLUGS.has(state.cat);
-      const cpuSections = showCpu ? `
+      // Spec filters for the product family in view (computers: CPU / RAM /
+      // storage…, monitors: size / resolution…), each value with its count.
+      const specSections = facets.facets.map(f => `
         <div class="sidebar-section">
-          <div class="sidebar-title">Procesori</div>
-          ${swList('cpu_family', [['i3','Intel Core i3'],['i5','Intel Core i5'],['i7','Intel Core i7'],['i9','Intel Core i9']])}
-        </div>
-        <div class="sidebar-section">
-          <div class="sidebar-title">Gjenerata e procesorit</div>
-          ${swList('cpu_gen', [['12','Gen 12'],['11','Gen 11'],['10','Gen 10'],['9','Gen 9'],['8','Gen 8'],['7','Gen 7'],['6','Gen 6'],['5','Gen 5'],['4','Gen 4'],['3','Gen 3']])}
-        </div>
-      ` : '';
+          <div class="sidebar-title">${escapeHtml(f.label)}</div>
+          <ul class="cat-list fc-list">
+            <li><span class="cat-link fc-link ${!state.f[f.id] ? 'active' : ''}" data-fc="${f.id}" data-fv="">Të gjitha</span></li>
+            ${f.values.map(v => `
+              <li><span class="cat-link fc-link ${state.f[f.id] === v.value ? 'active' : ''} ${v.count ? '' : 'is-empty'}" data-fc="${f.id}" data-fv="${escapeHtml(v.value)}">${escapeHtml(v.value)}${countBadge(v.count)}</span></li>`).join('')}
+          </ul>
+        </div>`).join('');
 
       return `
         <div class="sidebar-section">
           <div class="sidebar-title">Kategoritë</div>
           <ul class="cat-list">${catItems}</ul>
         </div>
-        ${allBrands.length ? `
+        ${facets.brands.length > 1 || state.brand ? `
         <div class="sidebar-section">
           <div class="sidebar-title">Marka</div>
           <ul class="cat-list brand-list">${brandItems}</ul>
@@ -1045,8 +1066,8 @@
             ${ffItems}
           </ul>
         </div>` : ''}
+        ${specSections}
         ${switchSections}
-        ${cpuSections}
         ${PRICE_MAX > 0 ? `
         <div class="sidebar-section">
           <div class="sidebar-title">Çmimi</div>
@@ -1064,7 +1085,7 @@
         </div>` : ''}
         ${state.cat || state.brand || state.form_factor || state.min || state.max || state.sale
             || state.sw_ports || state.sw_uplink || state.sw_speed || state.sw_layer || state.sw_poe
-            || state.cpu_family || state.cpu_gen ? `
+            || state.cpu_family || state.cpu_gen || Object.keys(state.f).length ? `
           <button class="btn-clear" id="clear-all-filters" style="border:1px solid rgba(0,0,0,0.12);padding:8px 12px;">
             Pastro të gjithë filtrat
           </button>` : ''}`;
@@ -1086,26 +1107,25 @@
     }
 
     function wireSidebarEvents(el) {
-      el.querySelectorAll('.cat-list:not(.brand-list):not(.ff-list):not(.sw-list) .cat-link').forEach(link => {
-        link.addEventListener('click', async () => {
+      el.querySelectorAll('.cat-list:not(.brand-list):not(.ff-list):not(.sw-list):not(.fc-list) .cat-link').forEach(link => {
+        link.addEventListener('click', () => {
           state.cat = link.dataset.slug || '';
           state.page = 1;
-          // Switch-only filters don't apply outside the switch category.
-          if (state.cat !== 'switch') {
-            state.sw_ports = ''; state.sw_uplink = ''; state.sw_speed = ''; state.sw_layer = ''; state.sw_poe = '';
-          }
-          // CPU filters don't apply outside the PC / Desktop / AIO categories.
-          if (!CPU_FILTER_SLUGS.has(state.cat)) {
-            state.cpu_family = ''; state.cpu_gen = '';
-          }
-          const catParam = state.cat ? { category: state.cat } : {};
-          [allBrands, allFormFactors] = await Promise.all([
-            getBrands(catParam).catch(() => []),
-            getFormFactors({ ...catParam, ...(state.brand ? { brand: state.brand } : {}) }).catch(() => []),
-          ]);
-          if (state.brand && !allBrands.includes(state.brand)) state.brand = '';
-          if (state.form_factor && !allFormFactors.includes(state.form_factor)) state.form_factor = '';
-          pushState(); renderSidebar(); loadProducts();
+          // Spec, switch and form-factor filters belong to a product family;
+          // a new category starts them fresh. Brand stays if it still fits.
+          state.f = {}; state.form_factor = '';
+          state.sw_ports = ''; state.sw_uplink = ''; state.sw_speed = ''; state.sw_layer = ''; state.sw_poe = '';
+          state.cpu_family = ''; state.cpu_gen = '';
+          pushState(); loadProducts();
+          closeSidebarSheet();
+        });
+      });
+      el.querySelectorAll('.fc-list .fc-link').forEach(link => {
+        link.addEventListener('click', () => {
+          const id = link.dataset.fc;
+          if (link.dataset.fv) state.f[id] = link.dataset.fv; else delete state.f[id];
+          state.page = 1;
+          pushState(); loadProducts();
           closeSidebarSheet();
         });
       });
@@ -1114,18 +1134,15 @@
           const group = link.dataset.swGroup;
           state[group] = link.dataset.swValue || '';
           state.page = 1;
-          pushState(); renderSidebar(); loadProducts();
+          pushState(); loadProducts();
           closeSidebarSheet();
         });
       });
       el.querySelectorAll('.brand-list .cat-link').forEach(link => {
-        link.addEventListener('click', async () => {
+        link.addEventListener('click', () => {
           state.brand = link.dataset.brand || '';
           state.page = 1;
-          const catParam = state.cat ? { category: state.cat } : {};
-          allFormFactors = await getFormFactors({ ...catParam, ...(state.brand ? { brand: state.brand } : {}) }).catch(() => []);
-          if (state.form_factor && !allFormFactors.includes(state.form_factor)) state.form_factor = '';
-          pushState(); renderSidebar(); loadProducts();
+          pushState(); loadProducts();
           closeSidebarSheet();
         });
       });
@@ -1133,7 +1150,7 @@
         link.addEventListener('click', () => {
           state.form_factor = link.dataset.ff || '';
           state.page = 1;
-          pushState(); renderSidebar(); loadProducts();
+          pushState(); loadProducts();
           closeSidebarSheet();
         });
       });
@@ -1152,14 +1169,13 @@
       initPriceSlider(el);
       el.querySelector('#clear-price')?.addEventListener('click', () => {
         state.min = ''; state.max = ''; state.page = 1;
-        pushState(); renderSidebar(); loadProducts();
+        pushState(); loadProducts();
       });
-      el.querySelector('#clear-all-filters')?.addEventListener('click', async () => {
+      el.querySelector('#clear-all-filters')?.addEventListener('click', () => {
         state.cat = ''; state.brand = ''; state.form_factor = ''; state.min = ''; state.max = ''; state.sale = ''; state.page = 1;
         state.sw_ports = ''; state.sw_uplink = ''; state.sw_speed = ''; state.sw_layer = ''; state.sw_poe = '';
-        state.cpu_family = ''; state.cpu_gen = '';
-        [allBrands, allFormFactors] = await Promise.all([getBrands({}).catch(() => []), getFormFactors({}).catch(() => [])]);
-        pushState(); renderSidebar(); loadProducts();
+        state.cpu_family = ''; state.cpu_gen = ''; state.f = {};
+        pushState(); loadProducts();
       });
     }
 
@@ -1213,7 +1229,7 @@
             state.min = curMin > 0 ? String(curMin) : '';
             state.max = curMax < PRICE_MAX ? String(curMax) : '';
             state.page = 1;
-            pushState(); renderSidebar(); loadProducts();
+            pushState(); loadProducts();
           }
           document.addEventListener('mousemove', onMove);
           document.addEventListener('mouseup', onEnd);
@@ -1257,6 +1273,7 @@
       if (state.sw_poe) p.set('sw_poe', state.sw_poe);
       if (state.cpu_family) p.set('cpu_family', state.cpu_family);
       if (state.cpu_gen) p.set('cpu_gen', state.cpu_gen);
+      for (const [k, v] of Object.entries(state.f)) if (v) p.set('f_' + k, v);
       const qs = p.toString();
       history.pushState(state, '', '/shop.html' + (qs ? '?' + qs : ''));
     }
@@ -1266,7 +1283,7 @@
     function renderChips() {
       const chips = [];
       if (state.sale === '1') {
-        chips.push({ label: 'Sale', clear: () => { state.sale = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+        chips.push({ label: 'Sale', clear: () => { state.sale = ''; state.page = 1; pushState(); loadProducts(); } });
       }
       if (state.cat) {
         const findCat = cats => {
@@ -1278,17 +1295,17 @@
           return null;
         };
         const cat = findCat(allCategories);
-        chips.push({ label: cat?.name || state.cat, clear: () => { state.cat = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+        chips.push({ label: cat?.name || state.cat, clear: () => { state.cat = ''; state.page = 1; pushState(); loadProducts(); } });
       }
       if (state.brand) {
-        chips.push({ label: state.brand, clear: () => { state.brand = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+        chips.push({ label: state.brand, clear: () => { state.brand = ''; state.page = 1; pushState(); loadProducts(); } });
       }
       if (state.form_factor) {
-        chips.push({ label: `FF: ${state.form_factor}`, clear: () => { state.form_factor = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+        chips.push({ label: `FF: ${state.form_factor}`, clear: () => { state.form_factor = ''; state.page = 1; pushState(); loadProducts(); } });
       }
       if (state.min || state.max) {
         const label = state.min && state.max ? `${state.min} L – ${state.max} L` : state.min ? `min ${state.min} L` : `max ${state.max} L`;
-        chips.push({ label, clear: () => { state.min = ''; state.max = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+        chips.push({ label, clear: () => { state.min = ''; state.max = ''; state.page = 1; pushState(); loadProducts(); } });
       }
       const SW_LABELS = {
         sw_ports:  { '8':'8 porta','12':'12 porta','16':'16 porta','24':'24 porta','48':'48 porta' },
@@ -1300,13 +1317,16 @@
       for (const group of ['sw_ports','sw_speed','sw_uplink','sw_layer','sw_poe']) {
         if (!state[group]) continue;
         const label = SW_LABELS[group][state[group]] || state[group];
-        chips.push({ label, clear: () => { state[group] = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+        chips.push({ label, clear: () => { state[group] = ''; state.page = 1; pushState(); loadProducts(); } });
       }
       if (state.cpu_family) {
-        chips.push({ label: `Core ${state.cpu_family}`, clear: () => { state.cpu_family = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+        chips.push({ label: `Core ${state.cpu_family}`, clear: () => { state.cpu_family = ''; state.page = 1; pushState(); loadProducts(); } });
       }
       if (state.cpu_gen) {
-        chips.push({ label: `Gen ${state.cpu_gen}`, clear: () => { state.cpu_gen = ''; state.page = 1; pushState(); renderSidebar(); loadProducts(); } });
+        chips.push({ label: `Gen ${state.cpu_gen}`, clear: () => { state.cpu_gen = ''; state.page = 1; pushState(); loadProducts(); } });
+      }
+      for (const [id, v] of Object.entries(state.f)) {
+        chips.push({ label: `${facetLabel(id)}: ${v}`, clear: () => { delete state.f[id]; state.page = 1; pushState(); loadProducts(); } });
       }
       if (state.search) {
         chips.push({ label: `"${state.search}"`, clear: () => { state.search = ''; searchInput.value = ''; state.page = 1; pushState(); renderChips(); loadProducts(); } });   // searchInput = shared header field
@@ -1328,11 +1348,16 @@
     const sortTrigger = document.getElementById('sort-trigger');
     const sortMenu = document.getElementById('sort-menu');
     const sortLabelEl = document.getElementById('sort-label');
-    const SORT_LABELS = { newest: 'Më të reja', price_asc: 'Çmim ↑', price_desc: 'Çmim ↓', popularity: 'Më të kërkuara' };
+    const SORT_LABELS = { relevance: 'Më të përshtatshme', newest: 'Më të reja', price_asc: 'Çmim ↑', price_desc: 'Çmim ↓', popularity: 'Më të kërkuara' };
 
+    // With a search, the default order is best match ("relevance"); the option
+    // only shows while searching.
     function setSortUI(val) {
-      sortLabelEl.textContent = SORT_LABELS[val] || val;
-      sortMenu.querySelectorAll('.sort-item').forEach(item => item.classList.toggle('selected', item.dataset.value === val));
+      const shown = state.search && val === 'newest' ? 'relevance' : val;
+      sortLabelEl.textContent = SORT_LABELS[shown] || shown;
+      const relItem = sortMenu.querySelector('[data-value="relevance"]');
+      if (relItem) relItem.hidden = !state.search;
+      sortMenu.querySelectorAll('.sort-item').forEach(item => item.classList.toggle('selected', item.dataset.value === shown));
     }
 
     sortTrigger.addEventListener('click', () => {
@@ -1400,6 +1425,25 @@
 
     // ── Load products ──────────────────────────────────────────────────────
     let currentProducts = [];
+    let loadSeq = 0;
+
+    // Shortcuts to categories visitors search for a lot (from site search:
+    // "ups", "nas", "komponente", "docking station"), shown on the unfiltered shop.
+    const QUICK_LINKS = [
+      ['workstation', 'Workstation'], ['server', 'Servera'], ['gpu', 'Karta grafike'], ['komponente', 'Komponentë'],
+      ['ups', 'UPS'], ['nas', 'NAS'], ['docking-station', 'Docking Station'], ['monitore', 'Monitorë'],
+    ];
+    function renderQuickLinks() {
+      const el = document.getElementById('quick-links');
+      const show = !state.cat && !state.search && !state.brand && !state.sale;
+      el.hidden = !show;
+      if (!show || el.childElementCount) return;
+      el.innerHTML = QUICK_LINKS.map(([slug, label]) => `<button type="button" class="quick-link" data-slug="${slug}">${label}</button>`).join('');
+      el.querySelectorAll('.quick-link').forEach(btn => btn.addEventListener('click', () => {
+        state.cat = btn.dataset.slug; state.page = 1; state.f = {};
+        pushState(); loadProducts();
+      }));
+    }
 
     async function loadProducts() {
       renderChips();
@@ -1425,10 +1469,25 @@
       if (state.sw_poe) apiParams.sw_poe = state.sw_poe;
       if (state.cpu_family) apiParams.cpu_family = state.cpu_family;
       if (state.cpu_gen) apiParams.cpu_gen = state.cpu_gen;
+      for (const [k, v] of Object.entries(state.f)) if (v) apiParams['f_' + k] = v;
 
+      renderQuickLinks();
+      setSortUI(state.sort);
+      const seq = ++loadSeq;
       try {
-        const { products, total, pages, price_max } = await getProducts(apiParams);
+        const [{ products, total, pages, price_max, corrected_query }, nextFacets] = await Promise.all([
+          getProducts(apiParams),
+          getFacets(apiParams).catch(() => null),
+        ]);
+        if (seq !== loadSeq) return; // a newer query replaced this one
         currentProducts = products;
+        if (nextFacets) facets = nextFacets;
+        // Drop spec filters that don't exist for this product family anymore.
+        for (const id of Object.keys(state.f)) {
+          if (!facets.facets.some(f => f.id === id)) { delete state.f[id]; pushState(); }
+        }
+        renderSidebar();
+        renderChips();
 
         // Resize the price slider to the actual range of products matching the
         // current non-price filters. Clamp any user-set min/max that's now
@@ -1444,6 +1503,10 @@
         }
 
         document.getElementById('results-count').textContent = `${total} produkte`;
+        // "Did you mean": the API retried with a corrected / shortened query.
+        const note = document.getElementById('search-note');
+        note.hidden = !corrected_query;
+        if (corrected_query) note.innerHTML = `Nuk u gjet asgjë për <strong>"${escapeHtml(state.search)}"</strong> — po shfaqen rezultatet për <strong>"${escapeHtml(corrected_query)}"</strong>.`;
 
         if (products.length === 0) {
           grid.innerHTML = `<div class="shop-empty"><h3>Nuk u gjetën produkte</h3><p>Provo të ndryshosh filtrat ose kërkimin.</p></div>`;

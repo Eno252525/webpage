@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url';
 import productsRouter from './routes/products.js';
 import categoriesRouter from './routes/categories.js';
 import searchRouter from './routes/search.js';
+import newsletterRouter from './routes/newsletter.js';
 import adminRouter from './routes/admin.js';
 import { renderPage, buildSitemapXml, buildMetaFeedXml, addScriptNonce } from './seo.js';
 import { injectTracking, trackingCsp } from './tracking.js';
@@ -47,6 +48,21 @@ if (!process.env.ADMIN_PASSWORD_HASH) {
 // Trust one reverse-proxy hop so req.ip / req.secure reflect the real client.
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
+
+// ── Canonical origin: https://itstore.al ─────────────────────────────────────
+// http:// and www. used to serve the full site too, so Google indexed duplicate
+// copies and visitors could stay on plain http. 301 them to the one origin.
+// Only redirect on an explicit "http" from the proxy: if the header is missing
+// we can't tell, and guessing would loop every https request back to itself.
+const CANONICAL_HOST = 'itstore.al';
+app.use((req, res, next) => {
+  const host = (req.hostname || '').toLowerCase();
+  const proto = String(req.get('x-forwarded-proto') || '').split(',')[0].trim().toLowerCase();
+  const isWww = host === `www.${CANONICAL_HOST}`;
+  const isHttp = proto === 'http' && (host === CANONICAL_HOST || isWww);
+  if (isWww || isHttp) return res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
+  next();
+});
 
 // ── Security headers ─────────────────────────────────────────────────────────
 // A fresh nonce per request authorises our first-party inline <script> blocks
@@ -164,7 +180,12 @@ app.get('/favicon.ico', (req, res) => res.redirect('/favicon.png'));
 
 // Public config (exposes only what frontend needs)
 app.get('/api/config', (req, res) => {
-  res.json({ whatsappNumber: process.env.WHATSAPP_NUMBER || '' });
+  res.json({
+    whatsappNumber: process.env.WHATSAPP_NUMBER || '',
+    // Fixed bottom WhatsApp bar on phones + bubble elsewhere — on unless
+    // STICKY_WHATSAPP=0 in .env.
+    stickyWhatsapp: process.env.STICKY_WHATSAPP !== '0',
+  });
 });
 
 // Coarse per-IP limiter for the public read API — generous enough for normal
@@ -176,6 +197,9 @@ const apiLimiter = rateLimit({ windowMs: 60 * 1000, max: 300, message: 'Shumë k
 app.use('/api/products', apiLimiter, productsRouter);
 app.use('/api/categories', apiLimiter, categoriesRouter);
 app.use('/api/search', apiLimiter, searchRouter);
+// Newsletter sign-up: a few per minute per IP is plenty for a real visitor.
+const newsletterLimiter = rateLimit({ windowMs: 60 * 1000, max: 5, message: 'Shumë kërkesa. Provoni sërish më vonë.' });
+app.use('/api/newsletter', newsletterLimiter, newsletterRouter);
 app.use('/api/admin', adminRouter);
 
 // Admin routes

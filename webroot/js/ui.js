@@ -1,5 +1,5 @@
-import { t } from './i18n.js';
-import { addItem, getItems, removeItemAt, setQtyAt, getTotal, buildWhatsAppURL, updateBadge } from './basket.js';
+import { t } from './i18n.js?v=20261016';
+import { addItem, getItems, removeItemAt, setQtyAt, getTotal, buildWhatsAppURL, updateBadge } from './basket.js?v=20261016';
 
 export function fmtPrice(p) {
   return Math.round(Number(p)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -56,25 +56,61 @@ export function renderSpecGrid(pairs, maxRows) {
   return `<div class="spec-grid">${rows}</div>`;
 }
 
+// Price markup for cards and list rows. No price → "Çmim sipas kërkesës",
+// never "0 L"; a sale price only counts when it is below the regular price.
+function priceMarkup(product) {
+  const price = Number(product.price) || 0;
+  const sale = Number(product.sale_price) || 0;
+  if (price <= 0 && sale <= 0) return `<span class="price-on-request">Çmim sipas kërkesës</span>`;
+  if (sale > 0 && price > sale) {
+    return `<span class="price-main price-sale">${fmtPrice(sale)} L</span><span class="price-was">${fmtPrice(price)} L</span>`;
+  }
+  return `<span class="price-main">${fmtPrice(sale > 0 ? sale : price)} L</span>`;
+}
+
+function discountPercent(product) {
+  const price = Number(product.price) || 0;
+  const sale = Number(product.sale_price) || 0;
+  return sale > 0 && price > sale ? Math.round((1 - sale / price) * 100) : 0;
+}
+
+// Card title + spec tags. Names follow "Model - CPU / RAM / SSD / GPU", so the
+// part before the first dash is the title and the " / " list becomes tags;
+// names without such a list keep the full name and borrow up to three short
+// spec values from the attributes instead.
+const TAG_KEYS = ['CPU', 'RAM', 'SSD', 'GPU', 'Memoria', 'Capacity', 'Screen Size', 'Resolution', 'Ports', 'Screen', 'Kapaciteti'];
+export function splitProductName(product) {
+  const name = String(product.name || '');
+  const m = name.match(/^(.+?)\s+[-—–]\s+(.+)$/);
+  if (m && /\s\/\s/.test(m[2])) {
+    return { title: m[1].trim(), tags: m[2].split(/\s+\/\s+/).map(t => t.trim()).filter(Boolean).slice(0, 4) };
+  }
+  const attrs = product.attributes && typeof product.attributes === 'object' ? product.attributes : {};
+  const tags = [];
+  for (const k of TAG_KEYS) {
+    const v = attrs[k];
+    if (typeof v === 'string' && v.length <= 24 && !name.includes(v)) tags.push(v);
+    if (tags.length === 3) break;
+  }
+  return { title: name, tags };
+}
+
+const specTags = tags => tags.length
+  ? `<div class="product-tags">${tags.map(t => `<span class="product-tag">${escapeHtml(t)}</span>`).join('')}</div>` : '';
+
 export function renderProductListItem(product) {
   const name = escapeHtml(product.name);
   const slug = escapeHtml(product.slug);
   const id = Number(product.id);
-  const hasPrice = Number(product.price) > 0 || Number(product.sale_price) > 0;
-  const price = !hasPrice ? '' : product.sale_price
-    ? `<span class="price-main price-sale">${fmtPrice(product.sale_price)} L</span><span class="price-was">${fmtPrice(product.price)} L</span>`
-    : `<span class="price-main">${fmtPrice(product.price)} L</span>`;
+  const price = priceMarkup(product);
   const isUsed = isUsedBadge(product.badge);
   const badge = product.badge
     ? `<span class="product-badge${isUsed ? ' badge-used' : ''}">${escapeHtml(product.badge)}</span>` : '';
   const img = (product.images || [])[0]
     ? `<img src="${escapeHtml(product.images[0])}" alt="${name}" loading="lazy">`
     : `<img src="https://placehold.co/200x200/EDE9E3/F0A020" alt="${name}">`;
-  const discountPct = product.sale_price && Number(product.price) > 0
-    ? Math.round((1 - Number(product.sale_price) / Number(product.price)) * 100) : 0;
-  const saleSticker = discountPct > 0
-    ? `<span class="sale-sticker">-${discountPct}%</span>`
-    : (product.sale_price ? `<span class="sale-sticker">SALE</span>` : '');
+  const discountPct = discountPercent(product);
+  const saleSticker = discountPct > 0 ? `<span class="sale-sticker">-${discountPct}%</span>` : '';
   const stockBadge = product.in_stock
     ? `<span class="list-stock-badge in-stock">Në stok</span>`
     : `<span class="list-stock-badge out-stock">Pa stok</span>`;
@@ -124,10 +160,8 @@ export function renderProductCard(product) {
   const name = escapeHtml(product.name);
   const slug = escapeHtml(product.slug);
   const id = Number(product.id);
-  const hasPrice = Number(product.price) > 0 || Number(product.sale_price) > 0;
-  const price = !hasPrice ? '' : product.sale_price
-    ? `<span class="price-main price-sale">${fmtPrice(product.sale_price)} L</span><span class="price-was">${fmtPrice(product.price)} L</span>`
-    : `<span class="price-main">${fmtPrice(product.price)} L</span>`;
+  const price = priceMarkup(product);
+  const { title, tags } = splitProductName(product);
   const isUsed = isUsedBadge(product.badge);
   const badge = product.badge
     ? `<span class="product-badge${isUsed ? ' badge-used' : ''}">${escapeHtml(product.badge)}</span>` : '';
@@ -138,11 +172,8 @@ export function renderProductCard(product) {
     ? `<span class="product-brand">${escapeHtml(product.brand)}</span>` : '';
   const stockClass = product.in_stock ? '' : 'out-of-stock';
   const usedTag = conditionTag(product.badge);
-  const discountPct = product.sale_price && Number(product.price) > 0
-    ? Math.round((1 - Number(product.sale_price) / Number(product.price)) * 100) : 0;
-  const saleSticker = discountPct > 0
-    ? `<span class="sale-sticker">-${discountPct}%</span>`
-    : (product.sale_price ? `<span class="sale-sticker">SALE</span>` : '');
+  const discountPct = discountPercent(product);
+  const saleSticker = discountPct > 0 ? `<span class="sale-sticker">-${discountPct}%</span>` : '';
   return `
     <div class="product-card ${stockClass}" data-id="${id}" data-slug="${slug}">
       <a href="${slug ? '/product/' + slug : '/product.html?id=' + id}" class="product-card-link" aria-label="${name}">
@@ -153,7 +184,8 @@ export function renderProductCard(product) {
         </div>
         <div class="product-info">
           ${brandLabel}
-          <p class="product-name">${name}</p>
+          <p class="product-name" title="${name}">${escapeHtml(title)}</p>
+          ${specTags(tags)}
           ${usedTag}
           <p class="product-price">${price}</p>
         </div>
@@ -283,10 +315,13 @@ export function renderDrawerContents() {
   }).join('');
 
   footerEl.innerHTML = `
+    ${Number(getTotal()) > 0 ? `
     <div class="basket-total">
       <span>${t.total}</span>
       <span class="basket-total-amount">${fmtPrice(getTotal())} L</span>
     </div>
+    ${items.some(i => !(Number(i.price) > 0)) ? `<p class="basket-total-note">+ produkte me çmim sipas kërkesës</p>` : ''}` : `
+    <p class="basket-total-note">Çmimi konfirmohet në WhatsApp</p>`}
     <a href="${buildWhatsAppURL()}" target="_blank" rel="noopener" class="btn-primary btn-whatsapp" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;text-align:center;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>

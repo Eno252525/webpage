@@ -303,9 +303,28 @@ html:has(.mobile-nav.open), body:has(.mobile-nav.open) { overflow: hidden; }
 }
 .product-name {
   font-family: 'Inter', sans-serif;
-  font-weight: 900; font-size: 1.4rem;
-  letter-spacing: 0.06em; text-transform: uppercase;
-  color: #141414; margin-bottom: 5px; line-height: 1.15;
+  font-weight: 800; font-size: 1.55rem;
+  letter-spacing: -0.005em;
+  color: #141414; margin-bottom: 7px; line-height: 1.22;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* Specs pulled out of the product name ("i5-8500 / 8GB / 256GB") as tags */
+.product-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.product-tag {
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1.08rem; line-height: 1.3;
+  color: rgba(20,20,20,0.72); background: rgba(20,20,20,0.055);
+  border: 1px solid rgba(20,20,20,0.08); padding: 2px 7px;
+}
+/* Phones: a 2-column card is ~140px wide, so tags would stack one per line —
+   show them as one compact "a · b · c" line instead (max two lines). */
+@media (max-width: 640px) {
+  .product-tags {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    margin-bottom: 6px; font-size: 1.15rem; line-height: 1.4; color: rgba(20,20,20,0.66);
+  }
+  .product-tag { display: inline; background: none; border: 0; padding: 0; white-space: normal; font-size: inherit; color: inherit; }
+  .product-tag + .product-tag::before { content: ' · '; color: rgba(20,20,20,0.35); }
 }
 .product-price {
   font-size: 1.3rem; font-weight: 300;
@@ -459,6 +478,7 @@ html:has(.mobile-nav.open), body:has(.mobile-nav.open) { overflow: hidden; }
 .basket-footer { padding: 20px 24px; border-top: 1px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 12px; }
 .basket-total { display: flex; justify-content: space-between; align-items: center; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: #141414; }
 .basket-total-amount { color: var(--color-amber-dark); font-weight: 800; }
+.basket-total-note { font-family: 'Inter', sans-serif; font-size: 1.15rem; color: rgba(20,20,20,0.55); margin: 4px 0 12px; }
 .btn-whatsapp { background: #25D366 !important; font-size: 1.15rem !important; }
 .btn-whatsapp:hover { background: #1ebe5d !important; }
 
@@ -545,6 +565,24 @@ footer {
   cursor: pointer; transition: background 0.15s, color 0.15s;
 }
 .newsletter-btn:hover { background: #141414; color: white; }
+.newsletter-btn:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 2px; }
+.newsletter-btn:disabled { opacity: 0.6; cursor: wait; }
+.newsletter-msg { min-height: 1.4em; margin-top: 8px; font-family: 'Inter', sans-serif; font-size: 1.15rem; line-height: 1.45; }
+.newsletter-msg.ok { color: #15803d; }
+.newsletter-msg.err { color: #dc2626; }
+
+/* Floating WhatsApp bubble (STICKY_WHATSAPP=0 turns it off) */
+.wa-bubble {
+  position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 250; /* under sheets / basket */
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: #25D366; color: #fff;
+  box-shadow: 0 8px 24px rgba(18,140,62,0.35), 0 2px 6px rgba(0,0,0,0.18);
+  transition: transform 0.2s ease;
+}
+.wa-bubble:hover { transform: scale(1.06); }
+.wa-bubble:focus-visible { outline: 3px solid #128C3E; outline-offset: 3px; }
+.wa-bubble:active { transform: scale(0.97); }
 .footer-bottom {
   display: flex; justify-content: space-between; align-items: center; padding-top: 32px;
 }

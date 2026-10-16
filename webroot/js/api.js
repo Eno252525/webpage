@@ -35,3 +35,12 @@ export const getBrands = (params = {}) => {
 
 export const searchProducts = (q) =>
   q.length >= 2 ? req(`/api/search?q=${encodeURIComponent(q)}`) : Promise.resolve([]);
+
+// Sidebar filters (categories, brands, form factors, spec facets) with counts
+// for the same params as getProducts.
+export const getFacets = (params = {}) => {
+  const q = new URLSearchParams(Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== '' && v !== null)
+  ));
+  return req(`/api/products/facets${q.toString() ? '?' + q : ''}`);
+};

@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/shared.css">
+  <link rel="stylesheet" href="/css/shared.css?v=20261016">
   <style>
     /* Header (two-row nav + search) and its behaviour are shared —
        see css/shared.css and js/header.js. */
@@ -56,16 +56,21 @@
     }
     .stock-badge.in { background: rgba(34,197,94,0.1); color: #16a34a; border: 1px solid rgba(34,197,94,0.3); }
     .stock-badge.out { background: rgba(239,68,68,0.08); color: #dc2626; border: 1px solid rgba(239,68,68,0.2); }
+    /* WhatsApp is the main action (the shop has no checkout); the basket, for
+       asking about several items at once, is the secondary outline button. */
     .btn-add-to-basket-lg {
       display: flex; align-items: center; justify-content: center; gap: 10px;
-      background: var(--color-amber); color: #141414;
+      background: transparent; color: #141414;
       font-family: 'Inter', sans-serif;
-      font-weight: 800; font-size: 1.5rem; letter-spacing: 0.12em; text-transform: uppercase;
-      padding: 16px 32px; border: none; cursor: pointer;
-      transition: background 0.15s, color 0.15s; width: 100%;
+      font-weight: 800; font-size: 1.4rem; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 14px 32px; border: 2px solid #141414; cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s; width: 100%;
     }
-    .btn-add-to-basket-lg:hover { background: #141414; color: white; }
+    .btn-add-to-basket-lg:hover { background: var(--color-amber); border-color: var(--color-amber); color: #141414; }
+    .btn-add-to-basket-lg:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
+    .btn-add-to-basket-lg:active { transform: translateY(1px); }
     .btn-add-to-basket-lg:disabled { opacity: 0.4; cursor: not-allowed; }
+    .detail-price-request { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 2rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-amber-dark); }
     .btn-wa-product {
       display: flex; align-items: center; justify-content: center; gap: 10px;
       background: #25D366; color: #fff;
@@ -75,6 +80,28 @@
       transition: background 0.15s;
     }
     .btn-wa-product:hover { background: #1ab554; color: #fff; }
+    .btn-wa-product:focus-visible { outline: 2px solid #128C3E; outline-offset: 3px; }
+    .btn-wa-product:active { transform: translateY(1px); }
+    /* Fixed WhatsApp bar on phones (STICKY_WHATSAPP=0 turns it off): price +
+       button, shown while the in-page WhatsApp button is off screen. */
+    .wa-sticky {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 250; /* under the basket drawer */
+      display: none; align-items: center; gap: 12px;
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(255,255,255,0.97); border-top: 1px solid rgba(20,20,20,0.1);
+      box-shadow: 0 -8px 24px rgba(20,20,20,0.08);
+      transform: translateY(110%); transition: transform 0.25s ease;
+    }
+    .wa-sticky.show { transform: translateY(0); }
+    .wa-sticky-info { flex: 1; min-width: 0; }
+    .wa-sticky-name { font-family: 'Inter', sans-serif; font-size: 1.15rem; color: rgba(20,20,20,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wa-sticky-price { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.75rem; color: #141414; line-height: 1.15; }
+    .wa-sticky-price.req { font-size: 1.3rem; color: var(--color-amber-dark); text-transform: uppercase; letter-spacing: 0.04em; }
+    .wa-sticky .btn-wa-product { width: auto; flex-shrink: 0; padding: 13px 18px; font-size: 1.3rem; letter-spacing: 0.08em; }
+    @media (max-width: 768px) {
+      .wa-sticky { display: flex; }
+      body.has-wa-sticky { padding-bottom: 76px; }
+    }
     /* Options picker (variable products) */
     .options-section { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
     .options-group { display: flex; flex-direction: column; gap: 8px; }
@@ -517,10 +544,10 @@
             <a href="https://www.facebook.com/itstorealbania/" class="social-link" aria-label="Facebook" target="_blank" rel="noopener">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             </a>
-            <a href="https://www.instagram.com/itstore_computers/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener">
+            <a href="https://www.instagram.com/itstore.al/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
             </a>
-            <a href="#" class="social-link" aria-label="WhatsApp" id="footer-wa">
+            <a href="https://wa.me/355693181062" class="social-link" aria-label="WhatsApp" id="footer-wa">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             </a>
           </div>
@@ -542,8 +569,6 @@
           <ul>
             <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
             <li><a href="/na-kontaktoni.html">Na Kontaktoni</a></li>
-            <li><a href="#">Kthimi i Produktit</a></li>
-            <li><a href="#">Blog</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -570,22 +595,25 @@
           <p style="font-size:1.2rem;font-weight:300;color:rgba(20,20,20,0.5);margin-bottom:20px;line-height:1.65;">
             Merrni ofertat e fundit dhe produktet e reja direkt në email.
           </p>
-          <input type="email" class="newsletter-input" placeholder="Adresa juaj email">
-          <button class="newsletter-btn">Abonohu</button>
+          <form class="newsletter-form" novalidate>
+            <input type="email" name="email" class="newsletter-input" placeholder="Adresa juaj email" autocomplete="email" required aria-label="Adresa juaj email">
+            <button type="submit" class="newsletter-btn">Abonohu</button>
+            <p class="newsletter-msg" role="status" aria-live="polite"></p>
+          </form>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2025 IT Store — Information &amp; Technology Resource Specialist · <a href="/politika-e-privatesise.html">Politika e privatësisë</a></p>
+        <p>&copy; <span class="footer-year">2026</span> IT Store — Information &amp; Technology Resource Specialist · <a href="/politika-e-privatesise.html">Politika e privatësisë</a></p>
       </div>
     </div>
   </footer>
 
   <script type="module">
-    import { getProduct, getProductBySlug, getCategories } from '/js/api.js';
-    import { renderProductCard, initBasketDrawer, wireAddToBasketButtons, showToast, parseSpecText, renderSpecGrid, escapeHtml } from '/js/ui.js';
-    import { addItem, updateBadge } from '/js/basket.js';
-    import { loadConfig } from '/js/config.js';
-    import { initHeader } from '/js/header.js';
+    import { getProduct, getProductBySlug, getCategories } from '/js/api.js?v=20261016';
+    import { renderProductCard, initBasketDrawer, wireAddToBasketButtons, showToast, parseSpecText, renderSpecGrid, escapeHtml } from '/js/ui.js?v=20261016';
+    import { addItem, updateBadge } from '/js/basket.js?v=20261016';
+    import { loadConfig } from '/js/config.js?v=20261016';
+    import { initHeader } from '/js/header.js?v=20261016';
 
     loadConfig().then(() => {
       const wa = document.getElementById('footer-wa');
@@ -660,7 +688,7 @@
       const hasPrice = currentPrice > 0 || Number(p.price) > 0 || Number(p.sale_price) > 0;
       const showSale = !pricesMap && Number(p.sale_price) > 0 && Number(p.price) > Number(p.sale_price);
       const priceHTML = !hasPrice
-        ? ''
+        ? `<span class="detail-price-request">Çmim sipas kërkesës</span>`
         : showSale
           ? `<span class="detail-price-main price-sale" id="detail-price-main">${fmtLek(p.sale_price)}</span><span class="detail-price-was">${fmtLek(p.price)}</span>`
           : `<span class="detail-price-main" id="detail-price-main">${fmtLek(currentPrice)}</span>`;
@@ -736,6 +764,10 @@
                 <p class="specs-title">Specifikimet</p>
                 <table class="specs-table"><tbody>${specsRows}</tbody></table>
               </div>` : ''}
+            <a href="${initialWaURL}" target="_blank" rel="noopener" class="btn-wa-product" id="wa-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+              Porosit në WhatsApp
+            </a>
             <button class="btn-add-to-basket-lg" id="add-btn" ${p.in_stock ? '' : 'disabled'}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
@@ -743,10 +775,7 @@
               </svg>
               ${p.in_stock ? 'Shto në Shportë' : 'Pa stok'}
             </button>
-            <a href="${initialWaURL}" target="_blank" rel="noopener" class="btn-wa-product" id="wa-btn">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-              Porosit në WhatsApp
-            </a>
+
           </div>
         </div>
 
@@ -796,7 +825,12 @@
         const refresh = () => {
           currentPrice = resolveVariantPrice();
           if (priceEl) priceEl.textContent = fmtLek(currentPrice);
-          if (waBtn) waBtn.href = 'https://wa.me/' + waNumber + '?text=' + encodeURIComponent(buildWaMsg());
+          const waURL = 'https://wa.me/' + waNumber + '?text=' + encodeURIComponent(buildWaMsg());
+          if (waBtn) waBtn.href = waURL;
+          const stickyBtn = document.querySelector('.wa-sticky .btn-wa-product');
+          if (stickyBtn) stickyBtn.href = waURL;
+          const stickyPrice = document.querySelector('.wa-sticky-price');
+          if (stickyPrice && currentPrice > 0) stickyPrice.textContent = fmtLek(currentPrice);
         };
         document.querySelectorAll('#options-section .option-pill').forEach(pill => {
           pill.addEventListener('click', () => {
@@ -811,6 +845,30 @@
           });
         });
       }
+
+      // Fixed WhatsApp bar for phones — on unless the server disables it
+      // (STICKY_WHATSAPP=0). It slides in while the in-page WhatsApp button
+      // is off screen, so contacting the shop is always one tap away.
+      loadConfig().then(cfg => {
+        if (!cfg?.stickyWhatsapp || document.querySelector('.wa-sticky')) return;
+        const shownPrice = showSale ? Number(p.sale_price) : currentPrice;
+        const bar = document.createElement('div');
+        bar.className = 'wa-sticky';
+        bar.innerHTML = `
+          <div class="wa-sticky-info">
+            <div class="wa-sticky-name">${name}</div>
+            <div class="wa-sticky-price ${hasPrice ? '' : 'req'}">${hasPrice ? fmtLek(shownPrice) : 'Çmim sipas kërkesës'}</div>
+          </div>
+          <a class="btn-wa-product" href="${document.getElementById('wa-btn')?.href || initialWaURL}" target="_blank" rel="noopener">
+            ${document.querySelector('#wa-btn svg')?.outerHTML || ''} WhatsApp
+          </a>`;
+        document.body.appendChild(bar);
+        document.body.classList.add('has-wa-sticky');
+        const mainBtn = document.getElementById('wa-btn');
+        if (!mainBtn || !('IntersectionObserver' in window)) { bar.classList.add('show'); return; }
+        new IntersectionObserver(([e]) => bar.classList.toggle('show', !e.isIntersecting))
+          .observe(mainBtn);
+      });
 
       // Add to basket — pass the live variant price (not the "from" price on
       // the product row) so the basket totals match what the customer sees.

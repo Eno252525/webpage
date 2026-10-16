@@ -84,8 +84,13 @@ export function buildWhatsAppURL() {
       : '';
     return `- ${i.name}${opts ? ` (${opts})` : ''} × ${i.qty} — ${priceLabel}${link ? `\n  ${link}` : ''}`;
   }).join('\n');
-  const total = Math.round(Number(getTotal())).toLocaleString('en-US');
-  const msg = `Përshëndetje, dua të porosis:\n${lines}\nTotali: ${total} L`;
+  // No "Totali: 0 L" when every line is price-on-request.
+  const total = Math.round(Number(getTotal()));
+  const unpriced = items.some(i => !(Number(i.price) > 0));
+  const totalLine = total > 0
+    ? `\nTotali: ${total.toLocaleString('en-US')} L${unpriced ? ' + produktet me çmim sipas kërkesës' : ''}`
+    : '';
+  const msg = `Përshëndetje, dua të porosis:\n${lines}${totalLine}`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 }
 

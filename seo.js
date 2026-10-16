@@ -37,7 +37,7 @@ const STREET     = 'Rr. Ibrahim Pashë Bushatlliu';
 const CITY       = 'Tiranë';
 const COUNTRY    = 'AL';
 const MAP_URL    = 'https://maps.app.goo.gl/fKkAVGhZ26QBwA2s9';
-const INSTAGRAM  = 'https://www.instagram.com/itstore_computers/';
+const INSTAGRAM  = 'https://www.instagram.com/itstore.al/';
 
 // ── Small helpers ────────────────────────────────────────────────────────────
 const HTML_ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -177,7 +177,9 @@ function productLd(p) {
     itemCondition: 'https://schema.org/RefurbishedCondition',
     category: p.category_name || undefined,
     url,
-    offers: {
+    // "Price on request" items carry no Offer: a price of 0 would show up in
+    // Google as a free product.
+    offers: Number(effectivePrice(p)) > 0 ? {
       '@type': 'Offer',
       url,
       priceCurrency: 'ALL',
@@ -187,7 +189,7 @@ function productLd(p) {
       availability: p.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/RefurbishedCondition',
       seller: { '@id': `${SITE_URL}/#store` },
-    },
+    } : undefined,
   };
   if (images.length) node.image = images;
   if (p.brand) node.brand = { '@type': 'Brand', name: p.brand };
@@ -275,7 +277,7 @@ function productSsr(p) {
   const waText = encodeURIComponent(`Përshëndetje, jam i interesuar për: ${p.name}`);
   const priceLine = hasPrice
     ? `Çmimi: ${fmtPrice(price)} L${onSale ? ` <span style="opacity:.5;font-weight:400;text-decoration:line-through;">${fmtPrice(p.price)} L</span>` : ''}`
-    : '';
+    : 'Çmim sipas kërkesës';
   const optionsBlock = optionsMap
     ? `<h2>Konfigurimet e Disponueshme</h2>${Object.entries(optionsMap).map(([k, vs]) =>
         `<p><strong>${esc(k)}:</strong> ${(Array.isArray(vs) ? vs : []).map(esc).join(', ')}</p>`
@@ -414,8 +416,10 @@ export function renderPage(pageKey, { query = {}, slug = '', nonce = '' } = {}) 
       image: absImg(p.images && p.images[0]) || LOGO,
       ogType: 'product',
       extraMeta: [
-        `  <meta property="product:price:amount" content="${price}">`,
-        `  <meta property="product:price:currency" content="ALL">`,
+        ...(Number(price) > 0 ? [
+          `  <meta property="product:price:amount" content="${price}">`,
+          `  <meta property="product:price:currency" content="ALL">`,
+        ] : []),
         `  <meta property="product:availability" content="${p.in_stock ? 'in stock' : 'out of stock'}">`,
         `  <meta property="product:condition" content="refurbished">`,
       ].join('\n'),

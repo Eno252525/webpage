@@ -1,5 +1,5 @@
 import express from 'express';
-import { getProducts, getProduct, getProductBySlug, getBrands, getFormFactors, incrementProductViews } from '../database.js';
+import { getProducts, getProduct, getProductBySlug, getBrands, getFormFactors, getProductFacets, incrementProductViews } from '../database.js';
 
 const router = express.Router();
 
@@ -13,6 +13,15 @@ router.get('/form-factors', (req, res) => {
     res.json(getFormFactors(req.query));
   } catch (err) {
     fail(res, 'form-factors', err);
+  }
+});
+
+// Sidebar filters for the current shop query (categories, brands, specs).
+router.get('/facets', (req, res) => {
+  try {
+    res.json(getProductFacets(req.query));
+  } catch (err) {
+    fail(res, 'facets', err);
   }
 });
 
