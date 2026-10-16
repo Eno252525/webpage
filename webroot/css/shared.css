@@ -318,6 +318,21 @@ html:has(.mobile-nav.open), body:has(.mobile-nav.open) { overflow: hidden; }
 /* Each spec stays on one line ("16GB DDR4" never splits); lines break between specs */
 .product-tag { display: inline-block; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: top; }
 .product-tag:not(:last-child)::after { content: '·'; margin: 0 0.45em; color: var(--color-amber); font-weight: 800; }
+/* Computers: labelled spec rows (CPU / RAM / SSD / GPU), labels in a narrow
+   muted column, values aligned beside them. */
+.product-specs {
+  display: grid; grid-template-columns: auto 1fr; column-gap: 10px; row-gap: 2px;
+  margin: 0 0 8px; font-family: 'Inter', sans-serif; font-size: 1.28rem; line-height: 1.4;
+}
+.product-specs dt {
+  font-weight: 700; font-size: 0.82em; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--color-amber-dark); padding-top: 0.12em;
+}
+.product-specs dd { margin: 0; min-width: 0; color: rgba(20,20,20,0.72); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 640px) {
+  .product-specs { font-size: 1.18rem; column-gap: 8px; }
+  .product-specs dd { white-space: normal; overflow-wrap: anywhere; }  /* wrap a long value rather than cut it */
+}
 /* Phones: a 2-column card fits one spec per line, so show them as a short
    list (all four visible, no separators) instead of a dotted line. */
 @media (max-width: 640px) {

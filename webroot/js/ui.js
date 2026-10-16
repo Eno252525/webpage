@@ -1,5 +1,5 @@
-import { t } from './i18n.js?v=20261016d';
-import { addItem, getItems, removeItemAt, setQtyAt, getTotal, buildWhatsAppURL, updateBadge } from './basket.js?v=20261016d';
+import { t } from './i18n.js?v=20261016f';
+import { addItem, getItems, removeItemAt, setQtyAt, getTotal, buildWhatsAppURL, updateBadge } from './basket.js?v=20261016f';
 
 export function fmtPrice(p) {
   return Math.round(Number(p)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -79,8 +79,34 @@ function discountPercent(product) {
 // names without such a list keep the full name and borrow up to three short
 // spec values from the attributes instead.
 const TAG_KEYS = ['CPU', 'RAM', 'SSD', 'GPU', 'Memoria', 'Capacity', 'Screen Size', 'Resolution', 'Ports', 'Screen', 'Kapaciteti'];
+// Computers (anything with a CPU + RAM spec) get labelled rows instead:
+// "CPU i5-8500 / RAM 8GB / SSD 256GB / GPU P2000", straight from the attributes.
+const SPEC_ROWS = [['CPU', 'CPU'], ['RAM', 'RAM'], ['SSD', 'SSD'], ['Storage', 'Disk'], ['GPU', 'GPU']];
+function computerSpecs(attrs) {
+  if (!attrs || !attrs.CPU || !attrs.RAM) return null;
+  const rows = [];
+  for (const [key, label] of SPEC_ROWS) {
+    if (label === 'Disk' && attrs.SSD) continue;
+    let v = typeof attrs[key] === 'string' ? attrs[key].trim() : '';
+    if (!v) continue;
+    v = v.replace(/\s*\(.*\)\s*$/, '').trim();                    // "Ryzen 5 5600 (6 bërthama …)" → "Ryzen 5 5600"
+    // Brand words the model already implies: "NVIDIA GeForce RTX 3070" → "RTX 3070",
+    // "AMD Radeon RX 580" → "RX 580", "2x Intel Xeon" → "2x Xeon".
+    v = v.replace(/\b(?:NVIDIA|GeForce|Intel(?: Core)?)\s+/gi, '').replace(/\bAMD\s+(?:Radeon\s+(?=RX)|(?=Ryzen))/gi, '').trim();
+    if (label === 'GPU' && /integr|uhd|hd graphics/i.test(v)) continue; // integrated graphics: nothing to show
+    rows.push([label, v]);
+  }
+  return rows.length >= 2 ? rows : null;
+}
+
 export function splitProductName(product) {
   const name = String(product.name || '');
+  const attrs0 = product.attributes && typeof product.attributes === 'object' ? product.attributes : {};
+  const rows = computerSpecs(attrs0);
+  if (rows) {
+    const m0 = name.match(/^(.+?)\s+[-—–]\s+(.+)$/);
+    return { title: m0 && /\s\/\s/.test(m0[2]) ? m0[1].trim() : name, tags: [], rows };
+  }
   const m = name.match(/^(.+?)\s+[-—–]\s+(.+)$/);
   if (m && /\s\/\s/.test(m[2])) {
     return { title: m[1].trim(), tags: m[2].split(/\s+\/\s+/).map(t => t.trim()).filter(Boolean).slice(0, 4) };
@@ -95,8 +121,10 @@ export function splitProductName(product) {
   return { title: name, tags };
 }
 
-const specTags = tags => tags.length
-  ? `<div class="product-tags">${tags.map(t => `<span class="product-tag">${escapeHtml(t)}</span>`).join('')}</div>` : '';
+const specTags = (tags, rows) => rows?.length
+  ? `<dl class="product-specs">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${escapeHtml(v)}</dd>`).join('')}</dl>`
+  : tags.length
+    ? `<div class="product-tags">${tags.map(t => `<span class="product-tag">${escapeHtml(t)}</span>`).join('')}</div>` : '';
 
 export function renderProductListItem(product) {
   const name = escapeHtml(product.name);
@@ -161,7 +189,7 @@ export function renderProductCard(product) {
   const slug = escapeHtml(product.slug);
   const id = Number(product.id);
   const price = priceMarkup(product);
-  const { title, tags } = splitProductName(product);
+  const { title, tags, rows } = splitProductName(product);
   const isUsed = isUsedBadge(product.badge);
   const badge = product.badge
     ? `<span class="product-badge${isUsed ? ' badge-used' : ''}">${escapeHtml(product.badge)}</span>` : '';
@@ -185,7 +213,7 @@ export function renderProductCard(product) {
         <div class="product-info">
           ${brandLabel}
           <p class="product-name" title="${name}">${escapeHtml(title)}</p>
-          ${specTags(tags)}
+          ${specTags(tags, rows)}
           ${usedTag}
           <p class="product-price">${price}</p>
         </div>
