@@ -785,7 +785,8 @@ footer {
   transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1);
   padding-left: 12px;
 }
-.mobile-shop-children.open { max-height: 1600px; }
+/* Generous cap: the list is ~1620px tall and grows with every category */
+.mobile-shop-children.open { max-height: 4000px; }
 .mobile-shop-children li { border-bottom: none; }
 .mobile-shop-children a {
   display: block; padding: 9px 0 9px 12px;

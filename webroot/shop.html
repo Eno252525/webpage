@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/shared.css?v=20261016c">
+  <link rel="stylesheet" href="/css/shared.css?v=20261016d">
   <style>
     .shop-layout {
       display: grid;
@@ -408,7 +408,10 @@
     .f-count { flex-shrink: 0; font-size: 1.05rem; font-weight: 500; color: rgba(20,20,20,0.38); font-variant-numeric: tabular-nums; }
     .cat-link.active .f-count { color: inherit; opacity: 0.7; }
     .cat-link.is-empty { opacity: 0.45; }
-    .quick-links { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 0 14px; padding-bottom: 2px; }
+    /* Grid items default to min-width:auto, so the scrolling quick-link row would
+       stretch the column past the phone screen — keep the column at its track width. */
+    .shop-main { min-width: 0; }
+    .quick-links { max-width: 100%; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 0 14px; padding-bottom: 2px; }
     .quick-links::-webkit-scrollbar { display: none; }
     .quick-link {
       flex-shrink: 0; cursor: pointer;
@@ -865,11 +868,11 @@
   </footer>
 
   <script type="module">
-    import { getProducts, getCategories, getFacets } from '/js/api.js?v=20261016c';
-    import { renderProductCard, renderProductListItem, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, escapeHtml } from '/js/ui.js?v=20261016c';
-    import { updateBadge } from '/js/basket.js?v=20261016c';
-    import { loadConfig } from '/js/config.js?v=20261016c';
-    import { initHeader } from '/js/header.js?v=20261016c';
+    import { getProducts, getCategories, getFacets } from '/js/api.js?v=20261016d';
+    import { renderProductCard, renderProductListItem, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, escapeHtml } from '/js/ui.js?v=20261016d';
+    import { updateBadge } from '/js/basket.js?v=20261016d';
+    import { loadConfig } from '/js/config.js?v=20261016d';
+    import { initHeader } from '/js/header.js?v=20261016d';
 
 
     loadConfig().then(() => {
