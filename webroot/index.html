@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/shared.css?v=20261016f">
+  <link rel="stylesheet" href="/css/shared.css?v=20261016g">
   <style>
     /* Header (two-row nav + search) and its behaviour are shared —
        see css/shared.css and js/header.js. */
@@ -381,12 +381,14 @@
       .hero-sub { display: none; }
       .hero-cta-row { display: none; }
       .quick-label { display: none; }
-      .quick-row {
-        flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
-        margin: 0 calc(-1 * var(--site-px)); padding: 0 var(--site-px);
+      /* Phones: all six shortcuts at once, as a 3 × 2 grid of small tiles */
+      .quick-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .quick-chip {
+        flex-direction: column; justify-content: flex-start; gap: 5px;
+        padding: 10px 4px 8px; min-height: 62px; text-align: center;
+        white-space: normal; font-size: 1.12rem; line-height: 1.2; font-weight: 600;
       }
-      .quick-row::-webkit-scrollbar { display: none; }
-      .quick-chip { padding: 8px 12px; font-size: 1.25rem; }
+      .quick-chip svg { width: 17px; height: 17px; }
       .rot-stage { aspect-ratio: 16/9; }
       .rot-body { padding: 12px 14px 14px; gap: 6px; }
       .rot-name { font-size: 1.6rem; }
@@ -781,6 +783,10 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="13" rx="2"/><path d="M12 16v4M8 20h8"/></svg>
               Monitor 27"
             </a>
+            <a class="quick-chip" href="/shop.html?cat=gaming">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M7 12h4M9 10v4"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1" fill="currentColor"/></svg>
+              PC Gaming
+            </a>
             <a class="quick-chip is-sale" href="/shop.html?sale=1">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>
               Ofertat
@@ -1063,11 +1069,11 @@
   </footer>
 
   <script type="module">
-    import { getProducts, getFacets } from '/js/api.js?v=20261016f';
-    import { renderProductCard, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, parseSpecText, escapeHtml, fmtPrice } from '/js/ui.js?v=20261016f';
-    import { updateBadge } from '/js/basket.js?v=20261016f';
-    import { loadConfig } from '/js/config.js?v=20261016f';
-    import { initHeader } from '/js/header.js?v=20261016f';
+    import { getProducts, getFacets } from '/js/api.js?v=20261016g';
+    import { renderProductCard, renderSkeletons, initBasketDrawer, wireAddToBasketButtons, parseSpecText, escapeHtml, fmtPrice } from '/js/ui.js?v=20261016g';
+    import { updateBadge } from '/js/basket.js?v=20261016g';
+    import { loadConfig } from '/js/config.js?v=20261016g';
+    import { initHeader } from '/js/header.js?v=20261016g';
 
     initHeader();
     initBasketDrawer();
@@ -1087,11 +1093,10 @@
     const discPct = (p) => (Number(p.sale_price) > 0 && Number(p.price) > Number(p.sale_price))
       ? Math.round((1 - Number(p.sale_price) / Number(p.price)) * 100) : 0;
     const arrowSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
-    const DAY = 864e5;
-    const isNew = (p) => {
-      const t = Date.parse(String(p.created_at || '').replace(' ', 'T') + 'Z');
-      return t && Date.now() - t < 14 * DAY;
-    };
+    // "E re" means brand new (unused) — the "I RI" condition — never just
+    // "recently added".
+    const norm = (v) => String(v || '').trim().toLowerCase().replace(/ë/g, 'e');
+    const isNew = (p) => norm(p.badge) === 'i ri' || norm((p.attributes || {}).Gjendja) === 'i ri';
 
     // Round-robin pick across a key (brand, category) so one group never
     // dominates a row; keeps the input order inside each group.
@@ -1232,10 +1237,12 @@
       }
       const pause = (on) => { paused = on; box.classList.toggle('paused', on); on ? clearTimeout(timer) : schedule(); };
       btns.forEach((b, i) => b.addEventListener('click', () => show(i)));
-      box.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') pause(true); });
-      box.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') pause(false); });
-      box.addEventListener('focusin', () => pause(true));
-      box.addEventListener('focusout', () => pause(false));
+      // Hovering the product pauses it; hovering the progress bars does not.
+      const frame = box.querySelector('.rot-frame');
+      frame.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') pause(true); });
+      frame.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') pause(false); });
+      frame.addEventListener('focusin', () => pause(true));
+      frame.addEventListener('focusout', () => pause(false));
       document.addEventListener('visibilitychange', () => pause(document.hidden));
 
       // Drag / swipe — the track follows the finger or mouse, then settles on

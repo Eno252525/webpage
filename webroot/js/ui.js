@@ -1,5 +1,5 @@
-import { t } from './i18n.js?v=20261016f';
-import { addItem, getItems, removeItemAt, setQtyAt, getTotal, buildWhatsAppURL, updateBadge } from './basket.js?v=20261016f';
+import { t } from './i18n.js?v=20261016g';
+import { addItem, getItems, removeItemAt, setQtyAt, getTotal, buildWhatsAppURL, updateBadge } from './basket.js?v=20261016g';
 
 export function fmtPrice(p) {
   return Math.round(Number(p)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -105,7 +105,9 @@ export function splitProductName(product) {
   const rows = computerSpecs(attrs0);
   if (rows) {
     const m0 = name.match(/^(.+?)\s+[-—–]\s+(.+)$/);
-    return { title: m0 && /\s\/\s/.test(m0[2]) ? m0[1].trim() : name, tags: [], rows };
+    // Keep the full name when the suffix adds something the rows can't show
+    // (e.g. "… + Monitor 22\"" on a set).
+    return { title: m0 && /\s\/\s/.test(m0[2]) && !m0[2].includes('+') ? m0[1].trim() : name, tags: [], rows };
   }
   const m = name.match(/^(.+?)\s+[-—–]\s+(.+)$/);
   if (m && /\s\/\s/.test(m[2])) {
@@ -130,37 +132,31 @@ export function renderProductListItem(product) {
   const name = escapeHtml(product.name);
   const slug = escapeHtml(product.slug);
   const id = Number(product.id);
+  const href = slug ? '/product/' + slug : '/product.html?id=' + id;
   const price = priceMarkup(product);
-  const isUsed = isUsedBadge(product.badge);
-  const badge = product.badge
-    ? `<span class="product-badge${isUsed ? ' badge-used' : ''}">${escapeHtml(product.badge)}</span>` : '';
+  const { title, tags, rows } = splitProductName(product);
   const img = (product.images || [])[0]
     ? `<img src="${escapeHtml(product.images[0])}" alt="${name}" loading="lazy">`
     : `<img src="https://placehold.co/200x200/EDE9E3/F0A020" alt="${name}">`;
   const discountPct = discountPercent(product);
   const saleSticker = discountPct > 0 ? `<span class="sale-sticker">-${discountPct}%</span>` : '';
-  const stockBadge = product.in_stock
-    ? `<span class="list-stock-badge in-stock">Në stok</span>`
-    : `<span class="list-stock-badge out-stock">Pa stok</span>`;
-  const specPairs = parseSpecText(product.short_description);
-  const shortDesc = specPairs
-    ? renderSpecGrid(specPairs, 4)
-    : product.short_description
-      ? `<p class="list-short-desc">${escapeHtml(product.short_description.slice(0, 180))}${product.short_description.length > 180 ? '…' : ''}</p>`
-      : '';
+  // Same spec rows / tags as the grid card; a short line of text only when
+  // the product has neither.
+  const specs = specTags(tags, rows) || (product.short_description
+    ? `<p class="list-short-desc">${escapeHtml(product.short_description.slice(0, 160))}${product.short_description.length > 160 ? '…' : ''}</p>`
+    : '');
   const stockClass = product.in_stock ? '' : 'out-of-stock';
-  const usedTag = conditionTag(product.badge);
+  const stockBadge = product.in_stock ? '' : `<span class="list-stock-badge out-stock">Pa stok</span>`;
   return `
     <div class="product-list-item ${stockClass}" data-id="${id}" data-slug="${slug}">
-      <a href="${slug ? '/product/' + slug : '/product.html?id=' + id}" class="list-img-link" aria-label="${name}">
-        <div class="list-img-wrap">${img}${badge}${saleSticker}</div>
+      <a href="${href}" class="list-img-link" aria-label="${name}">
+        <div class="list-img-wrap">${img}${saleSticker}</div>
       </a>
       <div class="list-info">
         ${product.brand ? `<span class="product-brand">${escapeHtml(product.brand)}</span>` : ''}
-        <a href="${slug ? '/product/' + slug : '/product.html?id=' + id}" class="list-name">${name}</a>
-        ${usedTag}
-        ${shortDesc}
-        <div class="list-meta">${stockBadge}</div>
+        <a href="${href}" class="list-name" title="${name}">${escapeHtml(title)}</a>
+        ${specs}
+        <div class="list-meta">${conditionTag(product.badge)}${stockBadge}</div>
       </div>
       <div class="list-right">
         <div class="product-price list-price">${price}</div>
