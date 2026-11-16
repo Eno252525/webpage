@@ -414,6 +414,22 @@
     /* Grid items default to min-width:auto, so the scrolling quick-link row would
        stretch the column past the phone screen — keep the column at its track width. */
     .shop-main { min-width: 0; }
+    /* Heading band (2026-11): dark strip with the category's studio photo fading in from the right */
+    .shop-head { position: relative; overflow: hidden; background: #111214; color: #fff; margin-bottom: 20px; min-height: 132px; display: flex; align-items: center; }
+    .shop-head-img { position: absolute; right: 0; top: 0; width: min(52%, 520px); height: 100%; object-fit: cover; object-position: center 42%; opacity: 0.92; }
+    .shop-head::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #111214 0%, #111214 50%, rgba(17,18,20,0.55) 68%, rgba(17,18,20,0) 100%); pointer-events: none; }
+    .shop-head-text { position: relative; z-index: 1; padding: 22px 28px; max-width: 72%; }
+    .shop-head-eyebrow { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.05rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-amber); margin-bottom: 8px; }
+    .shop-head-title { font-family: 'Inter', sans-serif; font-weight: 900; font-size: clamp(2.4rem, 3vw, 3.8rem); line-height: 1; letter-spacing: -0.012em; text-transform: uppercase; color: #fff; overflow-wrap: anywhere; }
+    .shop-head-sub { margin-top: 10px; font-size: 1.3rem; font-weight: 300; color: rgba(255,255,255,0.66); line-height: 1.5; }
+    @media (max-width: 640px) {
+      .shop-head { min-height: 0; margin-bottom: 14px; }
+      .shop-head-img { width: 62%; opacity: 0.55; }
+      .shop-head::after { background: linear-gradient(90deg, #111214 0%, rgba(17,18,20,0.9) 52%, rgba(17,18,20,0.45) 100%); }
+      .shop-head-text { padding: 16px 16px 17px; max-width: 100%; }
+      .shop-head-title { font-size: 2.2rem; }
+      .shop-head-sub { font-size: 1.2rem; margin-top: 7px; }
+    }
     .quick-links { max-width: 100%; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 0 14px; padding-bottom: 2px; }
     .quick-links::-webkit-scrollbar { display: none; }
     .quick-link {
@@ -737,6 +753,15 @@
 
     <!-- MAIN -->
     <main class="shop-main">
+      <!-- Heading band: says where you are (category / offers / search) and carries the page's H1 -->
+      <div class="shop-head" id="shop-head">
+        <img class="shop-head-img" id="shop-head-img" src="/media/cat-workstation-wide.webp" alt="" width="1200" height="720" decoding="async">
+        <div class="shop-head-text">
+          <p class="shop-head-eyebrow">IT Store · Tiranë</p>
+          <h1 class="shop-head-title" id="shop-title">Të gjitha produktet</h1>
+          <p class="shop-head-sub" id="shop-sub">Të testuara një nga një · me garanci · dërgesë në gjithë Shqipërinë</p>
+        </div>
+      </div>
       <div class="shop-toolbar">
         <button class="mobile-filter-btn" id="mobile-filter-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
@@ -1289,6 +1314,30 @@
     window.addEventListener('popstate', () => location.reload());
 
     // ── Filter chips ───────────────────────────────────────────────────────
+    // Heading band: title, photo and count for the current view.
+    const HEAD_IMG = { workstation: 'cat-workstation-wide', desktop: 'cat-pc', pc: 'cat-pc', laptop: 'cat-laptop', gaming: 'cat-gaming', gpu: 'cat-gpu',
+      monitore: 'cat-monitore', server: 'cat-server', ram: 'cat-ram', ssd: 'cat-storage', hdd: 'cat-storage', sas: 'cat-storage', komponente: 'cat-gpu',
+      aio: 'cat-aio', nas: 'cat-nas', aksesore: 'cat-aksesore', networking: 'cat-server', ups: 'cat-server' };
+    function updateShopHead(total) {
+      const title = document.getElementById('shop-title'), sub = document.getElementById('shop-sub'), img = document.getElementById('shop-head-img');
+      if (!title) return;
+      // the chain of categories from the top level down to the active one
+      const chain = (cats, path = []) => { for (const c of cats || []) { const p = [...path, c]; if (c.slug === state.cat) return p; const n = chain(c.children, p); if (n) return n; } return null; };
+      const path = state.cat ? chain(allCategories) : null;
+      let name = 'Të gjitha produktet';
+      if (state.search) name = `Kërkimi: ${state.search}`;
+      else if (path) name = path[path.length - 1].name;
+      else if (state.sale === '1') name = 'Ofertat';
+      else if (state.brand) name = state.brand;
+      title.textContent = name;
+      const key = path ? (path.map(c => c.slug).reverse().find(sl => HEAD_IMG[sl] || Object.keys(HEAD_IMG).find(k => sl.startsWith(k)))) : null;
+      const file = key ? (HEAD_IMG[key] || HEAD_IMG[Object.keys(HEAD_IMG).find(k => key.startsWith(k))]) : (state.sale === '1' ? 'cat-monitore' : 'cat-workstation-wide');
+      const src = `/media/${file}.webp`;
+      if (img && img.getAttribute('src') !== src) img.src = src;
+      const n = Number(total) || 0;
+      sub.textContent = `${n} ${n === 1 ? 'produkt' : 'produkte'} · të testuara një nga një · me garanci`;
+    }
+
     function renderChips() {
       const chips = [];
       if (state.sale === '1') {
@@ -1512,6 +1561,7 @@
         }
 
         document.getElementById('results-count').textContent = `${total} produkte`;
+        updateShopHead(total);
         // "Did you mean": the API retried with a corrected / shortened query.
         const note = document.getElementById('search-note');
         note.hidden = !corrected_query;

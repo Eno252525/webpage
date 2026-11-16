@@ -350,7 +350,10 @@ export function renderPage(pageKey, { query = {}, slug = '', nonce = '' } = {}) 
         breadcrumbLd(crumbs),
       ],
     };
-    return { status: 200, html: inject(readPage('shop.html'), seo, null, nonce) };
+    // The page's own JS sets this heading for visitors; crawlers that don't run JS get it here.
+    const h1 = cat ? cat.name : String(query.sale || '') === '1' ? 'Ofertat' : 'Të gjitha produktet';
+    const shopHtml = readPage('shop.html').replace('id="shop-title">Të gjitha produktet</h1>', `id="shop-title">${esc(h1)}</h1>`);
+    return { status: 200, html: inject(shopHtml, seo, null, nonce) };
   }
 
   if (pageKey === 'about') {
