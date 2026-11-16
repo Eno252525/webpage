@@ -1,0 +1,105 @@
+{
+  "nvidia-rtx-3090-24gb": {
+    "studio": "/media/p/studio-22.webp",
+    "video": "/media/p/spin-001.mp4"
+  },
+  "apple-imac-24-m1-2021": {
+    "studio": "/media/p/studio-2.webp"
+  },
+  "lenovo-thinkpad-t14s": {
+    "studio": "/media/p/studio-26.webp",
+    "video": "/media/p/spin-006.mp4"
+  },
+  "lenovo-thinkpad-t14-gen2": {
+    "studio": "/media/p/studio-10.webp",
+    "video": "/media/p/spin-024.mp4"
+  },
+  "hp-z8-g4": {
+    "studio": "/media/p/studio-23.webp",
+    "video": "/media/p/spin-002.mp4"
+  },
+  "hp-z8-g4-ai-server-2x-xeon-platinum-8168-rtx-3090": {
+    "studio": "/media/p/studio-25.webp",
+    "video": "/media/p/spin-002.mp4"
+  },
+  "msi-msi-infinite-b904": {
+    "studio": "/media/p/studio-13.webp",
+    "video": "/media/p/spin-028.mp4"
+  },
+  "dell-precision-5820": {
+    "studio": "/media/p/studio-7.webp"
+  },
+  "dell-precision-5820-2": {
+    "studio": "/media/p/studio-7.webp"
+  },
+  "dell-precision-5820-3": {
+    "studio": "/media/p/studio-7.webp"
+  },
+  "acer-kg271b-monitor-27-240hz": {
+    "studio": "/media/p/studio-9.webp",
+    "video": "/media/p/spin-022.mp4"
+  },
+  "cooler-master-assembluar": {
+    "studio": "/media/p/studio-12.webp"
+  },
+  "lg-32ud99-w": {
+    "studio": "/media/p/studio-14.webp"
+  },
+  "humanscale-m8-1-monitor-arm": {
+    "studio": "/media/p/studio-15.webp"
+  },
+  "pc-gaming-ryzen-5-5600-rx-580": {
+    "studio": "/media/p/studio-16.webp",
+    "video": "/media/p/spin-014.mp4"
+  },
+  "fujitsu-esprimo-p910-i5-3220": {
+    "studio": "/media/p/studio-17.webp"
+  },
+  "dell-pro-max-tower-t2-ultra-7-265k": {
+    "studio": "/media/p/studio-19.webp",
+    "video": "/media/p/spin-020.mp4"
+  },
+  "hp-dl380-g10-24sff-gold-6132-32gb": {
+    "studio": "/media/p/studio-20.webp",
+    "video": "/media/p/spin-023.mp4"
+  },
+  "hp-dl380-g10-gold-6138": {
+    "studio": "/media/p/studio-20.webp",
+    "video": "/media/p/spin-023.mp4"
+  },
+  "buffalo-nas-ls441d": {
+    "studio": "/media/p/studio-24.webp",
+    "video": "/media/p/spin-004.mp4"
+  },
+  "hp-z2-g5-i7-10700": {
+    "studio": "/media/p/studio-27.webp"
+  },
+  "ram-ddr4-pc-udimm": {
+    "studio": "/media/p/studio-28.webp"
+  },
+  "ram-ddr4-laptop-so-dimm": {
+    "studio": "/media/p/studio-8.webp"
+  },
+  "buffalo-terastation-ws5220dn-2x-2tb-hdd": {
+    "studio": "/media/p/studio-29.webp"
+  },
+  "buffalo-nas-ws5220dn08w6eu": {
+    "studio": "/media/p/studio-29.webp"
+  },
+  "nvidia-quadro-rtx-5000-graphics-card": {
+    "studio": "/media/p/studio-31.webp",
+    "video": "/media/p/spin-016.mp4"
+  },
+  "hp-zbook-15-g3": {
+    "studio": "/media/p/studio-33.webp",
+    "video": "/media/p/spin-019.mp4"
+  },
+  "hp-z840": {
+    "studio": "/media/p/studio-35.webp",
+    "video": "/media/p/spin-007.mp4"
+  },
+  "hp-z840-e5-2643-v3-gtx-980": {
+    "studio": "/media/p/studio-35.webp",
+    "video": "/media/p/spin-007.mp4"
+  }
+}

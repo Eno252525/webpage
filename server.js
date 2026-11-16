@@ -95,6 +95,12 @@ app.use((req, res, next) => {
   res.setHeader('X-XSS-Protection', '0');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  // Pages and API answers carry live prices/stock (and a per-request nonce):
+  // never let a browser or proxy reuse them without revalidating.
+  // (express.static keeps an existing Cache-Control, so leave asset paths alone.)
+  if (!/\.(?:css|js|mjs|png|jpe?g|webp|gif|svg|ico|mp4|webm|woff2?|json|txt)$/i.test(req.path)) {
+    res.setHeader('Cache-Control', 'no-cache');
+  }
   next();
 });
 
@@ -172,6 +178,8 @@ app.use((req, res, next) => {
 // so stale-HTML caching is not a risk. Upload filenames are content-stable.
 // `index`/`redirect` are disabled so directory requests (e.g. /admin) fall
 // through to the nonce-injecting routes below instead of being served raw.
+// Site imagery and clips are renamed when they change, so they can be cached hard.
+app.use('/media', express.static(path.join(webrootDir, 'media'), { maxAge: '30d', immutable: true }));
 app.use(express.static(path.join(__dirname, 'webroot'), { maxAge: '1d', index: false, redirect: false }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '30d', immutable: true }));
 

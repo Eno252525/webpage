@@ -1,7 +1,16 @@
 import express from 'express';
+import fs from 'fs';
 import { getProducts, getProduct, getProductBySlug, getBrands, getFormFactors, getProductFacets, incrementProductViews } from '../database.js';
 
 const router = express.Router();
+
+// Studio photo + short clip per product slug (built by scripts/build-media.mjs).
+// Optional: a missing or broken manifest just means no extra media.
+let mediaMap = {};
+try {
+  mediaMap = JSON.parse(fs.readFileSync(new URL('../media-map.json', import.meta.url), 'utf8'));
+} catch { mediaMap = {}; }
+const withMedia = product => (mediaMap[product.slug] ? { ...product, media: mediaMap[product.slug] } : product);
 
 function fail(res, scope, err) {
   console.error(`[products] ${scope} —`, err.message);
@@ -48,7 +57,7 @@ router.get('/slug/:slug', (req, res) => {
     // hidden = 1 → off the site: the row stays in the DB, the API denies it.
     if (!product || product.hidden) return res.status(404).json({ error: 'Produkti nuk u gjet' });
     incrementProductViews(product.id);
-    res.json(product);
+    res.json(withMedia(product));
   } catch (err) {
     fail(res, 'detail-slug', err);
   }
@@ -59,7 +68,7 @@ router.get('/:id', (req, res) => {
     const product = getProduct(Number(req.params.id));
     if (!product || product.hidden) return res.status(404).json({ error: 'Produkti nuk u gjet' });
     incrementProductViews(product.id);
-    res.json(product);
+    res.json(withMedia(product));
   } catch (err) {
     fail(res, 'detail', err);
   }

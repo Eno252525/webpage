@@ -50,3 +50,4 @@ products-final.json
 # OS / editor
 .DS_Store
 Thumbs.db
+_media_src/

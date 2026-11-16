@@ -141,15 +141,30 @@
     .quick-chip.is-sale { border-color: rgba(226,56,56,0.5); }
     .quick-chip.is-sale svg { color: #FF6B6B; }
 
-    /* Rotating hero product — one big stage that cycles the featured picks */
-    .hero-copy, .hero-rot { min-width: 0; }
-    .hero-rot { position: relative; }
-    .rot-frame {
-      position: relative; overflow: hidden;
-      background: var(--ink-2); border: 1px solid var(--ink-line);
-      box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(240,160,32,0.05);
+    /* Hero visual — the teardown clip, with the featured-product ticker docked under it */
+    .hero-copy, .hero-visual { min-width: 0; }
+    .hero-stage {
+      position: relative; aspect-ratio: 16/9; overflow: hidden;
+      background: #0b0c0e url('/media/hero-poster.webp') center/cover no-repeat;
+      border: 1px solid var(--ink-line); border-bottom: 0;
+      box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
     }
-    /* Slides sit side by side on a track that follows the finger / mouse */
+    .hero-stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-stage-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(14,15,17,0) 52%, rgba(14,15,17,0.88) 100%); }
+    .hero-stage-cap {
+      position: absolute; left: 18px; right: 18px; bottom: 13px; z-index: 2;
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.09em; text-transform: uppercase;
+      color: rgba(255,255,255,0.82); text-decoration: none;
+    }
+    .hero-stage-cap .dot { flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%; background: var(--color-amber); animation: tagpulse 2s ease-out infinite; }
+    .hero-stage-cap svg { margin-left: auto; flex-shrink: 0; color: var(--color-amber); transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+    .hero-stage-cap:hover svg { transform: translateX(4px); }
+    .hero-stage-cap:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 4px; }
+
+    /* Featured picks — a slim ticker that cycles under the clip */
+    .hero-rot { position: relative; }
+    .rot-frame { position: relative; overflow: hidden; background: var(--ink-2); border: 1px solid var(--ink-line); }
     .rot-track {
       display: flex; touch-action: pan-y; user-select: none; -webkit-user-select: none;
       transition: transform 0.62s cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -157,45 +172,25 @@
     }
     .rot-track.dragging { transition: none; cursor: grabbing; }
     .rot-slide {
-      flex: 0 0 100%; min-width: 0; display: grid; grid-template-rows: auto 1fr;
+      flex: 0 0 100%; min-width: 0; display: grid; grid-template-columns: 92px minmax(0, 1fr) auto;
+      align-items: center; gap: 16px; padding: 10px 18px 10px 10px;
       color: #fff; text-decoration: none; -webkit-user-drag: none;
     }
     .rot-slide img { -webkit-user-drag: none; pointer-events: none; }
     .rot-slide:focus-visible { outline: 2px solid var(--color-amber); outline-offset: -2px; }
-    .rot-stage {
-      position: relative; aspect-ratio: 16/10; overflow: hidden;
-      background: radial-gradient(ellipse 60% 70% at 50% 55%, #2a2d33 0%, #16181b 62%, #101113 100%);
-      display: flex; align-items: center; justify-content: center; padding: 5% 8%;
-    }
-    .rot-stage::after {
-      content: ''; position: absolute; left: 18%; right: 18%; bottom: 7%; height: 14%;
-      background: radial-gradient(ellipse at center, rgba(240,160,32,0.28), transparent 70%);
-      filter: blur(6px); pointer-events: none;
-    }
-    .rot-stage img {
-      position: relative; z-index: 1; max-width: 100%; max-height: 100%; object-fit: contain;
-      border-radius: 4px; filter: drop-shadow(0 22px 30px rgba(0,0,0,0.55));
-      transform: scale(0.96); transition: transform 5.5s ease-out;
-    }
-    .rot-slide.on .rot-stage img { transform: scale(1.03); }
-    .rot-disc { position: absolute; top: 0; right: 0; z-index: 3; background: var(--sale-red); color: #fff; font-family: var(--mono); font-weight: 700; font-size: 1.25rem; letter-spacing: 0.04em; padding: 6px 12px; }
-    .rot-kicker {
-      position: absolute; top: 14px; left: 14px; z-index: 3;
-      display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; line-height: 1;
-      font-family: var(--mono); font-weight: 700; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase;
-      background: var(--color-amber); color: #141414;
-    }
-    .rot-kicker svg { flex-shrink: 0; }
-    .rot-body { padding: 18px 22px 20px; display: flex; flex-direction: column; gap: 8px; }
-    .rot-brand { font-family: var(--mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-amber); }
-    .rot-name { font-family: 'Inter', sans-serif; font-weight: 800; font-size: clamp(1.7rem, 1.9vw, 2.2rem); line-height: 1.18; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .rot-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-    .rot-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 4px; }
+    .rot-stage { position: relative; width: 92px; height: 92px; background: #fff; display: flex; align-items: center; justify-content: center; padding: 6px; }
+    .rot-stage img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .rot-disc { position: absolute; top: 0; left: 0; z-index: 3; background: var(--sale-red); color: #fff; font-family: var(--mono); font-weight: 700; font-size: 1rem; letter-spacing: 0.04em; padding: 3px 6px; }
+    .rot-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .rot-brand { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-weight: 700; font-size: 1rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-amber); }
+    .rot-name { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.5rem; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rot-body .p-now { font-size: 2rem; }
+    .rot-body .p-was { font-size: 1.25rem; }
     .rot-go { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 700; font-size: 1.1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-amber); white-space: nowrap; }
     .rot-go svg { transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
     .rot-slide:hover .rot-go svg { transform: translateX(4px); }
-    /* Progress segments under the stage — one per product */
-    .rot-nav { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; margin-top: 12px; }
+    /* Progress segments — one per product */
+    .rot-nav { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; margin-top: 10px; }
     .rot-dot { position: relative; height: 16px; border: 0; padding: 0; background: none; cursor: pointer; }
     .rot-dot::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 3px; margin-top: -1.5px; background: rgba(255,255,255,0.16); border-radius: 2px; transition: background 0.2s; }
     .rot-dot:hover::after { background: rgba(255,255,255,0.32); }
@@ -205,7 +200,7 @@
     .hero-rot.paused .rot-dot.on i { animation-play-state: paused; }
     .rot-dot:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 2px; }
     @keyframes rotfill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-    .rot-skel { aspect-ratio: 16/14; background: var(--ink-2); border: 1px solid var(--ink-line); }
+    .rot-skel { height: 114px; background: var(--ink-2); border: 1px solid var(--ink-line); }
 
     /* Small "live" tags on cards — words only, never numbers */
     .card-tag {
@@ -225,7 +220,6 @@
     @media (prefers-reduced-motion: reduce) {
       .card-tag .dot, .rot-dot.on i { animation: none; }
       .rot-dot.on i { transform: scaleX(1); }
-      .rot-stage img { transition: none; transform: none; }
       .rot-track { transition: none; }
     }
 
@@ -240,23 +234,128 @@
     .sec-link.on-dark { color: var(--color-amber); }
     .sec-link:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 3px; }
 
-    .cat-tiles { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; }
+    .cat-tiles { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
     .cat-tile {
-      position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
-      padding: 18px 16px 16px; background: #fff; text-decoration: none; color: #141414;
-      border: 1px solid rgba(20,20,20,0.08);
-      box-shadow: 0 1px 2px rgba(60,40,10,0.04), 0 6px 18px -10px rgba(60,40,10,0.18);
-      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s, border-color 0.25s;
+      position: relative; display: block; overflow: hidden; aspect-ratio: 1;
+      background: var(--ink); color: #fff; text-decoration: none;
+      box-shadow: 0 1px 2px rgba(60,40,10,0.06), 0 10px 24px -14px rgba(20,20,20,0.5);
     }
-    .cat-tile::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--color-amber); transform: scaleX(0); transform-origin: left; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
-    .cat-tile:hover { transform: translateY(-3px); border-color: rgba(240,160,32,0.45); box-shadow: 0 2px 4px rgba(60,40,10,0.05), 0 16px 28px -14px rgba(192,120,16,0.35); }
+    .cat-tile.is-big { grid-column: span 2; grid-row: span 2; aspect-ratio: auto; }
+    .cat-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s cubic-bezier(0.22,0.61,0.36,1); }
+    .cat-tile::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(14,15,17,0) 42%, rgba(14,15,17,0.86) 100%); }
+    .cat-tile::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; z-index: 3; background: var(--color-amber); transform: scaleX(0); transform-origin: left; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .cat-tile:hover img { transform: scale(1.07); }
     .cat-tile:hover::after { transform: scaleX(1); }
-    .cat-tile:active { transform: translateY(-1px); }
-    .cat-tile:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 2px; }
-    .cat-ic { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--ink); color: var(--color-amber); transition: background 0.25s, color 0.25s; }
-    .cat-tile:hover .cat-ic { background: var(--color-amber); color: #141414; }
-    .cat-name { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.45rem; letter-spacing: 0.01em; line-height: 1.1; }
-    .cat-count { font-family: var(--mono); font-weight: 700; font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-amber-dark); margin-top: -6px; }
+    .cat-tile:focus-visible { outline: 3px solid var(--color-amber); outline-offset: 2px; }
+    .cat-meta { position: absolute; left: 14px; right: 12px; bottom: 12px; z-index: 2; display: flex; flex-direction: column; gap: 3px; }
+    .cat-name { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.55rem; letter-spacing: 0.01em; line-height: 1.1; }
+    .cat-tile.is-big .cat-name { font-size: clamp(2.2rem, 2.4vw, 3rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.005em; }
+    .cat-count { font-family: var(--mono); font-weight: 700; font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-amber); min-height: 1.2em; }
+    .cat-kicker { position: absolute; top: 12px; left: 12px; z-index: 2; background: var(--color-amber); color: #141414; font-family: var(--mono); font-weight: 700; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 9px; }
+
+    /* ── TRUST BAR (under the hero) ───────────────────────────────────── */
+    .trustbar { background: var(--ink-2); border-top: 1px solid var(--ink-line); color: #fff; padding: 0 var(--site-px); }
+    .trustbar-inner { max-width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+    .tb-item { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-left: 1px solid var(--ink-line); }
+    .tb-item:first-child { border-left: 0; padding-left: 0; }
+    .tb-item svg { flex-shrink: 0; color: var(--color-amber); }
+    .tb-t { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.3rem; line-height: 1.25; }
+    .tb-d { font-size: 1.15rem; font-weight: 300; color: rgba(255,255,255,0.52); line-height: 1.35; }
+
+    /* ── BRAND MARQUEE ────────────────────────────────────────────────── */
+    .brands { background: #fff; border-bottom: 1px solid rgba(20,20,20,0.08); overflow: hidden; position: relative; }
+    .brands::before, .brands::after { content: ''; position: absolute; top: 0; bottom: 0; width: 90px; z-index: 2; pointer-events: none; }
+    .brands::before { left: 0; background: linear-gradient(90deg, #fff, rgba(255,255,255,0)); }
+    .brands::after { right: 0; background: linear-gradient(270deg, #fff, rgba(255,255,255,0)); }
+    .brands-track { display: flex; width: max-content; animation: brandscroll 42s linear infinite; }
+    .brands:hover .brands-track, .brands:focus-within .brands-track { animation-play-state: paused; }
+    .brands a {
+      display: inline-flex; align-items: center; gap: 28px; padding: 15px 0 15px 28px;
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(20,20,20,0.38); text-decoration: none; white-space: nowrap; transition: color 0.2s;
+    }
+    .brands a::after { content: ''; width: 5px; height: 5px; background: var(--color-amber); transform: rotate(45deg); }
+    .brands a:hover { color: #141414; }
+    .brands a:focus-visible { outline: 2px solid var(--color-amber); outline-offset: -3px; color: #141414; }
+    @keyframes brandscroll { to { transform: translateX(-50%); } }
+
+    /* ── PROCESS (how a device gets ready) ────────────────────────────── */
+    .process { position: relative; overflow: hidden; background: var(--ink); color: #fff; padding: clamp(40px,5vw,76px) var(--site-px); }
+    .process-inner { position: relative; z-index: 2; max-width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(26px,4.4vw,70px); align-items: center; }
+    .process-sub { font-size: clamp(1.4rem,1.5vw,1.65rem); font-weight: 300; color: rgba(255,255,255,0.6); line-height: 1.6; margin: 14px 0 22px; max-width: 46ch; }
+    .steps { list-style: none; display: flex; flex-direction: column; counter-reset: step; }
+    .step {
+      position: relative; display: grid; grid-template-columns: 44px 1fr; gap: 4px 14px; width: 100%; text-align: left;
+      padding: 14px 14px 14px 0; background: none; border: 0; border-top: 1px solid var(--ink-line); color: inherit; cursor: pointer;
+      font-family: inherit; transition: background 0.25s;
+    }
+    .steps li:last-child .step { border-bottom: 1px solid var(--ink-line); }
+    .step-n { grid-row: span 2; font-family: var(--mono); font-weight: 700; font-size: 1.3rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.34); padding-top: 3px; transition: color 0.25s; }
+    .step-t { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.65rem; letter-spacing: 0.02em; text-transform: uppercase; color: rgba(255,255,255,0.62); transition: color 0.25s; }
+    .step-d { font-size: 1.35rem; font-weight: 300; line-height: 1.5; color: rgba(255,255,255,0.46); transition: color 0.25s; }
+    .step::after { content: ''; position: absolute; left: 0; top: -1px; height: 2px; width: 100%; background: var(--color-amber); transform: scaleX(0); transform-origin: left; transition: transform 0.45s cubic-bezier(0.4,0,0.2,1); }
+    .step.on::after { transform: scaleX(1); }
+    .step.on .step-n { color: var(--color-amber); }
+    .step.on .step-t { color: #fff; }
+    .step.on .step-d { color: rgba(255,255,255,0.74); }
+    .step:hover .step-t { color: #fff; }
+    .step:focus-visible { outline: 2px solid var(--color-amber); outline-offset: -2px; }
+    .process-stage { position: relative; aspect-ratio: 16/9; overflow: hidden; background: #0b0c0e url('/media/process-1.webp') center/cover no-repeat; border: 1px solid var(--ink-line); box-shadow: 0 30px 60px -22px rgba(0,0,0,0.7); }
+    .process-stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .process-badge { position: absolute; top: 14px; left: 14px; z-index: 2; background: rgba(14,15,17,0.82); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); color: #fff; font-family: var(--mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 6px 11px; }
+    .process-badge b { color: var(--color-amber); font-weight: 700; }
+    .process-link { display: inline-flex; margin-top: 22px; }
+
+    /* ── WIDE VIDEO BAND (business orders) ────────────────────────────── */
+    .band { position: relative; overflow: hidden; background: #0b0c0e; color: #fff; padding: clamp(46px,6vw,96px) var(--site-px); }
+    /* The clip is small (854px), so it sits in a framed panel at its native
+       size instead of being stretched (and blurred) across the whole band. */
+    .band-media { position: absolute; z-index: 2; top: 50%; right: max(var(--site-px), calc((100% - var(--wrap)) / 2)); width: min(46%, 600px); aspect-ratio: 16/9; transform: translateY(-50%); overflow: hidden; background: #0b0c0e url('/media/cat-workstation-wide.webp') center/cover no-repeat; border: 1px solid var(--ink-line); box-shadow: 0 30px 60px -22px rgba(0,0,0,0.7); }
+    .band-media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    @media (max-width: 1100px) { .band-media { position: relative; top: auto; right: auto; width: 100%; transform: none !important; margin-bottom: 26px; } }
+    .band-inner { position: relative; z-index: 2; max-width: var(--wrap); margin: 0 auto; }
+    .band-title { font-family: 'Inter', sans-serif; font-weight: 900; font-size: clamp(2.8rem,4vw,5rem); letter-spacing: -0.012em; text-transform: uppercase; line-height: 0.96; margin: 14px 0 14px; max-width: 16ch; }
+    .band-title .amber { color: var(--color-amber); }
+    .band-sub { font-size: clamp(1.4rem,1.55vw,1.7rem); font-weight: 300; color: rgba(255,255,255,0.7); line-height: 1.6; max-width: 46ch; margin-bottom: 24px; }
+    .band-points { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+    .band-cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+    /* ── GPU row with the morph clip beside it ────────────────────────── */
+    .gpu-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 0; align-items: stretch; }
+    .gpu-clip { position: relative; overflow: hidden; background: #0b0c0e url('/media/gpu-tall.webp') center/cover no-repeat; border: 1px solid rgba(255,255,255,0.08); border-right: 0; text-decoration: none; color: #fff; display: block; }
+    .gpu-clip video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .gpu-clip::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,15,17,0) 45%, rgba(14,15,17,0.9) 100%); }
+    .gpu-clip-cap { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 2; }
+    .gpu-clip-cap strong { display: block; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 2.1rem; line-height: 1.02; text-transform: uppercase; margin-bottom: 8px; }
+    .gpu-clip-cap span { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-amber); }
+    .gpu-clip:hover .gpu-clip-cap svg { transform: translateX(4px); }
+    .gpu-clip-cap svg { transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+    .gpu-clip:focus-visible { outline: 2px solid var(--color-amber); outline-offset: -2px; }
+    .gpu-layout .rail .product-card, .gpu-layout .rail .skeleton-card, .gpu-layout .carousel-see-more { flex: 0 0 calc(33.333% - 1.5px); }
+
+    /* ── GUIDES ───────────────────────────────────────────────────────── */
+    .guides { background: #fff; padding: clamp(36px,4.6vw,66px) var(--site-px); }
+    .guide-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .guide-card { display: flex; flex-direction: column; background: var(--color-bg2); text-decoration: none; color: #141414; border: 1px solid rgba(20,20,20,0.08); transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s, border-color 0.25s; }
+    .guide-card:hover { transform: translateY(-4px); border-color: rgba(240,160,32,0.5); box-shadow: 0 18px 32px -18px rgba(192,120,16,0.4); }
+    .guide-card:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 2px; }
+    .guide-img { aspect-ratio: 16/9; overflow: hidden; background: var(--ink); }
+    .guide-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.7s cubic-bezier(0.22,0.61,0.36,1); }
+    .guide-card:hover .guide-img img { transform: scale(1.05); }
+    .guide-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .guide-tag { font-family: var(--mono); font-weight: 700; font-size: 1rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-amber-dark); }
+    .guide-title { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.85rem; line-height: 1.2; }
+    .guide-desc { font-size: 1.35rem; font-weight: 300; line-height: 1.55; color: rgba(20,20,20,0.6); }
+    .guide-go { margin-top: auto; padding-top: 6px; display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 700; font-size: 1.08rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-amber-dark); }
+    .guide-go svg { transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+    .guide-card:hover .guide-go svg { transform: translateX(4px); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .brands-track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; }
+      .brands-track a[aria-hidden] { display: none; }
+      .cat-tile img, .guide-img img { transition: none; }
+      .hero-stage-cap .dot { animation: none; }
+    }
 
     /* ── Product rows (swipe carousels) ───────────────────────────────── */
     .psec { padding: clamp(36px,4.6vw,66px) var(--site-px); }
@@ -355,11 +454,21 @@
     .btn-wa:hover { transform: translateY(-2px); background: #2ee374; box-shadow: 0 14px 28px -10px rgba(37,211,102,0.75), inset 0 -2px 0 rgba(0,0,0,0.12); }
     .btn-wa:active { transform: translateY(0); }
     .btn-wa:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
-    .trust { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .trust-item { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border: 1px solid var(--ink-line); background: rgba(255,255,255,0.025); }
-    .trust-ic { flex-shrink: 0; width: 38px; height: 38px; border: 1.5px solid rgba(240,160,32,0.4); display: flex; align-items: center; justify-content: center; color: var(--color-amber); }
-    .trust-t { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.22rem; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.2; }
-    .trust-d { font-size: 1.15rem; font-weight: 300; color: rgba(255,255,255,0.5); line-height: 1.4; margin-top: 2px; }
+    .closing video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
+    .closing-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(14,15,17,0.96) 0%, rgba(14,15,17,0.8) 50%, rgba(14,15,17,0.55) 100%); }
+    .store-card { background: rgba(14,15,17,0.78); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--ink-line); padding: clamp(20px,2.4vw,30px); }
+    .store-title { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 2.2rem; text-transform: uppercase; letter-spacing: 0.01em; margin: 10px 0 16px; }
+    .store-rows { display: flex; flex-direction: column; }
+    .store-row { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; padding: 12px 0; border-top: 1px solid var(--ink-line); font-size: 1.4rem; line-height: 1.5; color: rgba(255,255,255,0.82); }
+    .store-row svg { color: var(--color-amber); margin-top: 3px; }
+    .store-row a { color: #fff; text-decoration: none; border-bottom: 1px solid rgba(240,160,32,0.5); transition: color 0.15s, border-color 0.15s; }
+    .store-row a:hover { color: var(--color-amber); border-color: var(--color-amber); }
+    .store-row a:focus-visible { outline: 2px solid var(--color-amber); outline-offset: 2px; }
+    .store-row small { display: block; font-size: 1.2rem; color: rgba(255,255,255,0.5); }
+    .store-open { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-weight: 700; font-size: 1.02rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 9px; border: 1px solid var(--ink-line); color: rgba(255,255,255,0.6); }
+    .store-open::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.35); }
+    .store-open.is-open { color: #4ade80; border-color: rgba(74,222,128,0.35); }
+    .store-open.is-open::before { background: #4ade80; box-shadow: 0 0 0 3px rgba(74,222,128,0.18); }
 
     /* The closing strip already carries the trust points. */
     .footer-banner { display: none; }
@@ -367,11 +476,25 @@
     /* ── Responsive ───────────────────────────────────────────────────── */
     @media (max-width: 1180px) {
       .cat-tiles { grid-template-columns: repeat(4, 1fr); }
+      .gpu-layout { grid-template-columns: 210px minmax(0, 1fr); }
     }
     @media (max-width: 1024px) {
       .hero-inner { grid-template-columns: 1fr; gap: 32px; }
-      .hero-rot { max-width: 620px; }
+      .hero-visual { max-width: 720px; }
       .closing-inner { grid-template-columns: 1fr; }
+      .process-inner { grid-template-columns: 1fr; }
+      .process-media { order: -1; }
+      .trustbar-inner { grid-template-columns: 1fr 1fr; }
+      .tb-item { padding: 13px 14px; }
+      .tb-item:nth-child(odd) { border-left: 0; padding-left: 0; }
+      .tb-item:nth-child(n+3) { border-top: 1px solid var(--ink-line); }
+      .guide-grid { grid-template-columns: 1fr 1fr; }
+      .guide-card:last-child { grid-column: span 2; }
+    }
+    @media (max-width: 860px) {
+      .gpu-layout { grid-template-columns: minmax(0, 1fr); }
+      .gpu-clip { display: none; }
+      .gpu-layout .rail .product-card, .gpu-layout .rail .skeleton-card, .gpu-layout .carousel-see-more { flex: 0 0 calc(33.333% - 2px); }
     }
     @media (max-width: 640px) {
       /* Phones: title, shortcuts and the rotating product on the first screen */
@@ -389,29 +512,56 @@
         white-space: normal; font-size: 1.12rem; line-height: 1.2; font-weight: 600;
       }
       .quick-chip svg { width: 17px; height: 17px; }
-      .rot-stage { aspect-ratio: 16/9; }
-      .rot-body { padding: 12px 14px 14px; gap: 6px; }
-      .rot-name { font-size: 1.6rem; }
-      .rot-chips .chip:nth-child(n+3) { display: none; }
+      .hero-stage-cap { left: 12px; right: 12px; bottom: 10px; font-size: 0.95rem; letter-spacing: 0.06em; }
+      .rot-slide { grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding: 8px 12px 8px 8px; }
+      .rot-stage { width: 72px; height: 72px; }
+      .rot-name { font-size: 1.35rem; }
+      .rot-body .p-now { font-size: 1.75rem; }
       .rot-go { display: none; }
       .rot-nav { margin-top: 8px; gap: 5px; }
+      .rot-skel { height: 90px; }
+
+      .trustbar-inner { grid-template-columns: 1fr 1fr; }
+      .tb-item { gap: 9px; padding: 11px 10px; }
+      .tb-item svg { width: 18px; height: 18px; }
+      .tb-t { font-size: 1.15rem; }
+      .tb-d { display: none; }
+      .brands a { font-size: 1.25rem; gap: 20px; padding: 12px 0 12px 20px; }
+      .brands::before, .brands::after { width: 40px; }
+
+      .process { padding: 30px var(--site-px) 34px; }
+      .process-sub { margin: 10px 0 14px; }
+      .step { grid-template-columns: 34px 1fr; padding: 11px 6px 11px 0; }
+      .step-t { font-size: 1.4rem; }
+      .step-d { font-size: 1.25rem; display: none; }
+      .step.on .step-d { display: block; }
+
+      .band { padding: 38px var(--site-px) 40px; }
+      .band-cta .btn-wa { width: 100%; justify-content: center; }
+      .gpu-layout .rail .product-card, .gpu-layout .rail .skeleton-card, .gpu-layout .carousel-see-more { flex: 0 0 calc(72% - 2px); }
+
+      .guides { padding: 28px var(--site-px) 32px; }
+      .guide-grid { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 calc(var(--site-px) * -1); padding: 0 var(--site-px) 4px; }
+      .guide-grid::-webkit-scrollbar { display: none; }
+      .guide-card, .guide-card:last-child { flex: 0 0 78%; scroll-snap-align: center; grid-column: auto; }
+      .guide-title { font-size: 1.6rem; }
+      .guide-desc { display: none; }
 
       .cats-section { padding: 22px var(--site-px) 26px; }
       .cats-section .sec-head { margin-bottom: 14px; }
-      .cat-tiles { grid-template-columns: repeat(4, 1fr); gap: 6px; }
-      .cat-tile { align-items: center; text-align: center; gap: 7px; padding: 12px 4px 10px; }
-      .cat-ic { width: 38px; height: 38px; }
-      .cat-ic svg { width: 19px; height: 19px; }
-      .cat-name { font-size: 1.18rem; letter-spacing: 0; }
-      .cat-count { font-size: 0.88rem; margin-top: -3px; letter-spacing: 0.04em; }
+      /* Phones: one swipeable row of photo tiles */
+      .cat-tiles { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; margin: 0 calc(var(--site-px) * -1); padding: 0 var(--site-px) 4px; }
+      .cat-tiles::-webkit-scrollbar { display: none; }
+      .cat-tile, .cat-tile.is-big { flex: 0 0 37%; aspect-ratio: 4/5; scroll-snap-align: start; }
+      .cat-tile.is-big .cat-name, .cat-name { font-size: 1.35rem; font-weight: 800; text-transform: none; letter-spacing: 0; }
+      .cat-meta { left: 10px; right: 8px; bottom: 9px; }
+      .cat-count { font-size: 0.9rem; letter-spacing: 0.04em; }
+      .cat-kicker { top: 8px; left: 8px; font-size: 0.88rem; padding: 3px 7px; }
       .sec-head { margin-bottom: 16px; }
       .sec-head .eyebrow { font-size: 1rem; letter-spacing: 0.1em; }
       .sec-head .eyebrow::before { width: 16px; }
 
-      .trust { grid-template-columns: 1fr 1fr; gap: 6px; }
-      .trust-item { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; }
-      .trust-d { display: none; }
-      .trust-t { font-size: 1.08rem; }
+      .store-row { font-size: 1.3rem; }
       .btn-wa { width: 100%; justify-content: center; }
     }
 
@@ -472,7 +622,7 @@
                 <div class="dropdown-section-label">Kategorite kryesore</div>
                 <div class="dropdown-featured-grid">
                   <a href="/shop.html?cat=laptop" class="dropdown-cat-card">
-                    <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=225&fit=crop&auto=format" alt="Laptop">
+                    <img src="/media/cat-laptop.webp" loading="lazy" width="400" height="225" alt="Laptop">
                     <div class="dropdown-cat-overlay"></div>
                     <div class="dropdown-cat-content">
                       <span class="dropdown-cat-tag">Kategoria</span>
@@ -480,7 +630,7 @@
                     </div>
                   </a>
                   <a href="/shop.html?cat=monitore" class="dropdown-cat-card">
-                    <img src="https://images.unsplash.com/photo-1621288698258-f76aa9fd2186?w=400&h=225&fit=crop&auto=format" alt="Monitor">
+                    <img src="/media/cat-monitore.webp" loading="lazy" width="400" height="225" alt="Monitor">
                     <div class="dropdown-cat-overlay"></div>
                     <div class="dropdown-cat-content">
                       <span class="dropdown-cat-tag">Kategoria</span>
@@ -488,7 +638,7 @@
                     </div>
                   </a>
                   <a href="/shop.html?cat=pc" class="dropdown-cat-card">
-                    <img src="https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=400&h=225&fit=crop&auto=format" alt="PC & Desktop">
+                    <img src="/media/cat-pc.webp" loading="lazy" width="400" height="225" alt="PC & Desktop">
                     <div class="dropdown-cat-overlay"></div>
                     <div class="dropdown-cat-content">
                       <span class="dropdown-cat-tag">Kategoria</span>
@@ -496,7 +646,7 @@
                     </div>
                   </a>
                   <a href="/shop.html?cat=workstation" class="dropdown-cat-card">
-                    <img src="https://images.unsplash.com/photo-1593152167544-085d3b9c4938?w=400&h=225&fit=crop&auto=format" alt="Workstation">
+                    <img src="/media/cat-workstation.webp" loading="lazy" width="400" height="225" alt="Workstation">
                     <div class="dropdown-cat-overlay"></div>
                     <div class="dropdown-cat-content">
                       <span class="dropdown-cat-tag">Kategoria</span>
@@ -754,7 +904,7 @@
         <div class="hero-copy reveal">
           <span class="eyebrow on-dark">IT Store · Tiranë</span>
           <h1 class="hero-title">Teknologji<br>që punon <span class="amber">për ty.</span></h1>
-          <p class="hero-sub">Laptopë, workstation, servera dhe komponentë — të kontrolluar një nga një, me çmimet më të mira dhe suport që përgjigjet.</p>
+          <p class="hero-sub">Laptopë, workstation, servera dhe komponentë biznesi — të testuar një nga një, me garanci dhe me çmime që kanë kuptim.</p>
           <div class="hero-cta-row">
             <a class="hover-btn" href="/shop.html">
               Shfleto produktet
@@ -793,11 +943,41 @@
             </a>
           </nav>
         </div>
-        <div class="hero-rot reveal" id="hero-rot" style="transition-delay:.1s;">
-          <div class="rot-skel"></div>
+        <div class="hero-visual reveal" style="transition-delay:.1s;">
+          <div class="hero-stage hud">
+            <video data-lazy-video muted loop playsinline preload="none" poster="/media/hero-poster.webp" aria-hidden="true" tabindex="-1">
+              <source data-src="/media/hero.mp4" type="video/mp4">
+            </video>
+            <div class="hero-stage-shade"></div>
+            <a class="hero-stage-cap" href="#si-punojme">
+              <span class="dot"></span>Çdo pajisje hapet, testohet dhe pastrohet
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+          <div class="hero-rot" id="hero-rot">
+            <div class="rot-skel"></div>
+          </div>
         </div>
       </div>
     </section>
+
+
+    <!-- ══ TRUST BAR ═════════════════════════════════════════════════ -->
+    <section class="trustbar" aria-label="Pse IT Store">
+      <div class="trustbar-inner">
+        <div class="tb-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 4v5c0 4-3 7-7 8-4-1-7-4-7-8V7z"/></svg><div><div class="tb-t">Testuar një nga një</div><div class="tb-d">Çdo pajisje kontrollohet para shitjes</div></div></div>
+        <div class="tb-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.5 14.2L7 22l5-3 5 3-1.5-7.8"/></svg><div><div class="tb-t">Me garanci</div><div class="tb-d">Riparim ose zëvendësim</div></div></div>
+        <div class="tb-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><div><div class="tb-t">Dërgesë në gjithë Shqipërinë</div><div class="tb-d">Tiranë brenda ditës · qytetet 24–48 orë</div></div></div>
+        <div class="tb-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg><div><div class="tb-t">Pagesë në dorëzim</div><div class="tb-d">Cash te korrieri ose transfertë bankare</div></div></div>
+      </div>
+    </section>
+
+    <!-- ══ BRANDS ════════════════════════════════════════════════════ -->
+    <nav class="brands" aria-label="Markat">
+      <div class="brands-track">
+        <a href="/shop.html?brand=HP">HP</a><a href="/shop.html?brand=Dell">Dell</a><a href="/shop.html?brand=Lenovo">Lenovo</a><a href="/shop.html?brand=Fujitsu">Fujitsu</a><a href="/shop.html?brand=Apple">Apple</a><a href="/shop.html?brand=NVIDIA">NVIDIA</a><a href="/shop.html?brand=Cisco">Cisco</a><a href="/shop.html?brand=APC">APC</a><a href="/shop.html?brand=Buffalo">Buffalo</a><a href="/shop.html?brand=Intel">Intel</a><a href="/shop.html?brand=HP" aria-hidden="true" tabindex="-1">HP</a><a href="/shop.html?brand=Dell" aria-hidden="true" tabindex="-1">Dell</a><a href="/shop.html?brand=Lenovo" aria-hidden="true" tabindex="-1">Lenovo</a><a href="/shop.html?brand=Fujitsu" aria-hidden="true" tabindex="-1">Fujitsu</a><a href="/shop.html?brand=Apple" aria-hidden="true" tabindex="-1">Apple</a><a href="/shop.html?brand=NVIDIA" aria-hidden="true" tabindex="-1">NVIDIA</a><a href="/shop.html?brand=Cisco" aria-hidden="true" tabindex="-1">Cisco</a><a href="/shop.html?brand=APC" aria-hidden="true" tabindex="-1">APC</a><a href="/shop.html?brand=Buffalo" aria-hidden="true" tabindex="-1">Buffalo</a><a href="/shop.html?brand=Intel" aria-hidden="true" tabindex="-1">Intel</a>
+      </div>
+    </nav>
 
     <!-- ══ SECTION 2 · CATEGORIES (demand order) ═════════════════════ -->
     <section class="cats-section">
@@ -812,37 +992,50 @@
           </a>
         </div>
         <div class="cat-tiles reveal">
-          <a class="cat-tile" href="/shop.html?cat=pc">
-            <span class="cat-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="15" r="2.5"/><path d="M9 6h6"/></svg></span>
-            <span class="cat-name">PC</span><span class="cat-count" data-cat="pc"></span>
+          <a class="cat-tile is-big" href="/shop.html?cat=workstation">
+            <img src="/media/cat-workstation.webp" alt="" width="720" height="720" loading="lazy" decoding="async">
+            <span class="cat-kicker">Më e kërkuara</span>
+            <span class="cat-meta"><span class="cat-name">Workstation</span><span class="cat-count" data-cat="workstation"></span></span>
           </a>
-          <a class="cat-tile" href="/shop.html?cat=workstation">
-            <span class="cat-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1.5"/><path d="M8 6h8M8 9h8M8 12h8"/><circle cx="12" cy="17" r="1.2" fill="currentColor"/></svg></span>
-            <span class="cat-name">Workstation</span><span class="cat-count" data-cat="workstation"></span>
+          <a class="cat-tile " href="/shop.html?cat=pc">
+            <img src="/media/cat-pc.webp" alt="" width="720" height="720" loading="lazy" decoding="async">
+            
+            <span class="cat-meta"><span class="cat-name">PC & Desktop</span><span class="cat-count" data-cat="pc"></span></span>
           </a>
-          <a class="cat-tile" href="/shop.html?cat=laptop">
-            <span class="cat-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="12" rx="1"/><path d="M2 20h20"/></svg></span>
-            <span class="cat-name">Laptop</span><span class="cat-count" data-cat="laptop"></span>
+          <a class="cat-tile " href="/shop.html?cat=laptop">
+            <img src="/media/cat-laptop.webp" alt="" width="720" height="720" loading="lazy" decoding="async">
+            
+            <span class="cat-meta"><span class="cat-name">Laptop</span><span class="cat-count" data-cat="laptop"></span></span>
           </a>
-          <a class="cat-tile" href="/shop.html?cat=gpu">
-            <span class="cat-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2.5"/><circle cx="15" cy="12" r="2.5"/><path d="M4 18v3"/></svg></span>
-            <span class="cat-name">GPU</span><span class="cat-count" data-cat="gpu"></span>
+          <a class="cat-tile " href="/shop.html?cat=gaming">
+            <img src="/media/cat-gaming.webp" alt="" width="720" height="720" loading="lazy" decoding="async">
+            
+            <span class="cat-meta"><span class="cat-name">Gaming</span><span class="cat-count" data-cat="gaming"></span></span>
           </a>
-          <a class="cat-tile" href="/shop.html?cat=monitore">
-            <span class="cat-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="13" rx="2"/><path d="M12 16v4M8 20h8"/></svg></span>
-            <span class="cat-name">Monitor</span><span class="cat-count" data-cat="monitore"></span>
+          <a class="cat-tile " href="/shop.html?cat=gpu">
+            <img src="/media/cat-gpu.webp" alt="" width="720" height="720" loading="lazy" decoding="async">
+            
+            <span class="cat-meta"><span class="cat-name">Karta grafike</span><span class="cat-count" data-cat="gpu"></span></span>
           </a>
-          <a class="cat-tile" href="/shop.html?cat=ssd">
-            <span class="cat-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 12h6"/><circle cx="17" cy="12" r="1" fill="currentColor"/></svg></span>
-            <span class="cat-name">SSD</span><span class="cat-count" data-cat="ssd"></span>
+          <a class="cat-tile " href="/shop.html?cat=monitore">
+            <img src="/media/cat-monitore.webp" alt="" width="720" height="720" loading="lazy" decoding="async">
+            
+            <span class="cat-meta"><span class="cat-name">Monitor</span><span class="cat-count" data-cat="monitore"></span></span>
           </a>
-          <a class="cat-tile" href="/shop.html?cat=ram">
-            <span class="cat-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="1"/><path d="M6 16v3M10 16v3M14 16v3M18 16v3M7 12h2M11 12h2M15 12h2"/></svg></span>
-            <span class="cat-name">RAM</span><span class="cat-count" data-cat="ram"></span>
+          <a class="cat-tile " href="/shop.html?cat=server">
+            <img src="/media/cat-server.webp" alt="" width="720" height="720" loading="lazy" decoding="async">
+            
+            <span class="cat-meta"><span class="cat-name">Server</span><span class="cat-count" data-cat="server"></span></span>
           </a>
-          <a class="cat-tile" href="/shop.html?cat=networking">
-            <span class="cat-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1.5"/><rect x="2" y="14" width="20" height="7" rx="1.5"/><path d="M6 6.5h.01M6 17.5h.01M10 6.5h8M10 17.5h8"/></svg></span>
-            <span class="cat-name">Rrjet &amp; Server</span><span class="cat-count" data-cat="networking"></span>
+          <a class="cat-tile " href="/shop.html?cat=ram">
+            <img src="/media/cat-ram.webp" alt="" width="720" height="720" loading="lazy" decoding="async">
+            
+            <span class="cat-meta"><span class="cat-name">RAM</span><span class="cat-count" data-cat="ram"></span></span>
+          </a>
+          <a class="cat-tile " href="/shop.html?cat=ssd">
+            <img src="/media/cat-storage.webp" alt="" width="720" height="720" loading="lazy" decoding="async">
+            
+            <span class="cat-meta"><span class="cat-name">SSD & Disqe</span><span class="cat-count" data-cat="ssd"></span></span>
           </a>
         </div>
       </div>
@@ -863,6 +1056,34 @@
         <div class="carousel-wrap reveal" data-rail="popular"></div>
       </div>
     </section>
+
+    <!-- ══ PROCESS · how a device gets ready ═════════════════════════ -->
+    <section class="process" id="si-punojme">
+      <div class="hero-grid-bg"></div>
+      <div class="process-inner">
+        <div class="reveal">
+          <span class="eyebrow on-dark">Si punojmë</span>
+          <h2 class="sec-title on-dark">Nga magazina,<br>te tavolina jote</h2>
+          <p class="process-sub">Pajisje biznesi nga kompani evropiane, që kalojnë katër hapa para se të dalin në shitje.</p>
+          <ol class="steps" id="process-steps">
+            <li><button type="button" class="step on" data-t="0"><span class="step-n">01</span><span class="step-t">Pranimi</span><span class="step-d">Çdo njësi regjistrohet dhe kontrollohet nga jashtë: kasa, ekrani, tastiera, portat.</span></button></li>
+            <li><button type="button" class="step" data-t="3.6"><span class="step-n">02</span><span class="step-t">Testimi</span><span class="step-d">Procesori, RAM-i, disku, bateria dhe ekrani testohen një nga një.</span></button></li>
+            <li><button type="button" class="step" data-t="8.4"><span class="step-n">03</span><span class="step-t">Rinovimi</span><span class="step-d">E hapim, e pastrojmë dhe ndërrojmë ose shtojmë RAM e SSD sipas nevojës.</span></button></li>
+            <li><button type="button" class="step" data-t="13.6"><span class="step-n">04</span><span class="step-t">Gati për ty</span><span class="step-d">Sistemi instalohet dhe pajisja del me garanci, gati për punë që në ditën e parë.</span></button></li>
+          </ol>
+          <a class="sec-link on-dark process-link" href="/udhezues/refurbished-vs-i-ri.html">I rinovuar apo i ri? Lexo krahasimin <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+        </div>
+        <div class="process-media reveal" style="transition-delay:.1s;">
+          <div class="process-stage hud">
+            <video id="process-video" data-lazy-video muted loop playsinline preload="none" poster="/media/process-1.webp" aria-label="Video: si përgatitet një laptop në IT Store">
+              <source data-src="/media/process.mp4" type="video/mp4">
+            </video>
+            <span class="process-badge">Hapi <b id="process-num">01</b> / 04</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
 
     <section class="psec on-cream">
       <div class="wrap">
@@ -894,6 +1115,31 @@
       </div>
     </section>
 
+    <!-- ══ BUSINESS BAND ═════════════════════════════════════════════ -->
+    <section class="band">
+      <div class="hero-grid-bg"></div>
+      <div class="band-media hud" aria-hidden="true">
+        <video data-lazy-video muted loop playsinline preload="none" poster="/media/cat-workstation-wide.webp" tabindex="-1">
+          <source data-src="/media/showroom.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="band-inner reveal">
+        <span class="eyebrow on-dark">Për biznese</span>
+        <h2 class="band-title">Pajis zyrën me <span class="amber">një porosi.</span></h2>
+        <p class="band-sub">Kompjutera, monitorë, servera dhe rrjet për zyra të çdo madhësie — me çmime speciale për sasi dhe konsulencë falas për konfigurimin.</p>
+        <div class="band-points">
+          <span class="chip on-dark">Çmime për sasi</span>
+          <span class="chip on-dark">Faturë tatimore</span>
+          <span class="chip on-dark">Konsulencë falas</span>
+        </div>
+        <div class="band-cta">
+          <a class="btn-wa js-wa" data-wa-text="Përshëndetje, dua një ofertë për biznesin tim." href="https://wa.me/355693181062" target="_blank" rel="noopener"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> Kërko ofertë</a>
+          <a class="btn-ghost" href="/shop.html?cat=pc">Shiko kompjuterat e zyrës</a>
+        </div>
+      </div>
+    </section>
+
+
     <section class="psec on-ink">
       <div class="hero-grid-bg"></div>
       <div class="hero-glow" style="top:-40%;left:-15%;right:auto;"></div>
@@ -907,7 +1153,15 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </a>
         </div>
-        <div class="carousel-wrap reveal" data-rail="gpu"></div>
+        <div class="gpu-layout reveal">
+          <a class="gpu-clip" href="/shop.html?cat=gaming">
+            <video data-lazy-video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1">
+              <source data-src="/media/morph.mp4" type="video/mp4">
+            </video>
+            <span class="gpu-clip-cap"><strong>Nga karta,<br>te PC gaming</strong><span>Shiko gaming <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></span>
+          </a>
+          <div class="carousel-wrap" data-rail="gpu"></div>
+        </div>
       </div>
     </section>
 
@@ -945,35 +1199,57 @@
       </div>
     </section>
 
-    <!-- ══ SECTION 4 · CLOSING STRIP (trust + WhatsApp) ═══════════════ -->
+
+    <!-- ══ GUIDES ════════════════════════════════════════════════════ -->
+    <section class="guides">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <div>
+            <span class="eyebrow">Para se të blesh</span>
+            <h2 class="sec-title">Udhëzues</h2>
+          </div>
+          <a class="sec-link" href="/pyetje-te-shpeshta.html">Pyetje të shpeshta <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+        </div>
+        <div class="guide-grid reveal">
+          <a class="guide-card" href="/udhezues/refurbished-vs-i-ri.html">
+            <div class="guide-img"><img src="/media/guide-refurbished.webp" alt="" width="800" height="450" loading="lazy" decoding="async"></div>
+            <div class="guide-body"><span class="guide-tag">Krahasim</span><h3 class="guide-title">Kompjuter i rinovuar apo i ri — cili të vlen?</h3><p class="guide-desc">Çmimi, cilësia dhe garancia, krah për krah.</p><span class="guide-go">Lexo <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></div>
+          </a>
+          <a class="guide-card" href="/udhezues/si-te-zgjedhesh-laptopin-per-pune.html">
+            <div class="guide-img"><img src="/media/guide-laptop.webp" alt="" width="800" height="450" loading="lazy" decoding="async"></div>
+            <div class="guide-body"><span class="guide-tag">Laptop</span><h3 class="guide-title">Si të zgjedhësh laptopin për punë</h3><p class="guide-desc">CPU, RAM, SSD dhe ekrani: çfarë ka rëndësi për buxhetin tënd.</p><span class="guide-go">Lexo <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></div>
+          </a>
+          <a class="guide-card" href="/udhezues/ku-te-blesh-kompjuter-ne-tirane.html">
+            <div class="guide-img"><img src="/media/guide-tirana.webp" alt="" width="800" height="450" loading="lazy" decoding="async"></div>
+            <div class="guide-body"><span class="guide-tag">Tiranë</span><h3 class="guide-title">Ku të blesh kompjuter në Tiranë</h3><p class="guide-desc">Çfarë të kërkosh, çfarë të pyesësh dhe si funksionon dërgesa.</p><span class="guide-go">Lexo <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ CLOSING · WhatsApp + the shop itself ══════════════════════ -->
     <section class="closing">
-      <div class="hero-glow"></div>
+      <video data-lazy-video muted loop playsinline preload="none" poster="/media/whatsapp.webp" aria-hidden="true" tabindex="-1">
+        <source data-src="/media/whatsapp.mp4" type="video/mp4">
+      </video>
+      <div class="closing-shade"></div>
       <div class="closing-inner reveal">
         <div>
-          <span class="eyebrow on-dark">Pyet, blej, mbaro</span>
+          <span class="eyebrow on-dark">Pyet para se të blesh</span>
           <h2 class="closing-title">Nuk je i sigurt<br>çfarë të <span class="amber">zgjedhësh?</span></h2>
-          <p class="closing-sub">Na shkruaj me buxhetin dhe përdorimin — të gjejmë pajisjen e duhur.</p>
+          <p class="closing-sub">Na shkruaj buxhetin dhe për çfarë të duhet. Të përgjigjemi brenda pak minutash me pajisjen e duhur.</p>
           <a class="btn-wa js-wa" href="https://wa.me/355693181062" target="_blank" rel="noopener">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             Na shkruaj në WhatsApp
           </a>
         </div>
-        <div class="trust">
-          <div class="trust-item">
-            <span class="trust-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 4v5c0 4-3 7-7 8-4-1-7-4-7-8V7z"/></svg></span>
-            <div><div class="trust-t">Testuar &amp; me garanci</div><div class="trust-d">Çdo pajisje kontrollohet para se të dalë.</div></div>
-          </div>
-          <div class="trust-item">
-            <span class="trust-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
-            <div><div class="trust-t">Dërgim i shpejtë</div><div class="trust-d">Në të gjithë Shqipërinë.</div></div>
-          </div>
-          <div class="trust-item">
-            <span class="trust-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg></span>
-            <div><div class="trust-t">Suport teknik</div><div class="trust-d">Këshillë para dhe pas blerjes.</div></div>
-          </div>
-          <div class="trust-item">
-            <span class="trust-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
-            <div><div class="trust-t">Çmime reale</div><div class="trust-d">Vlerë e mirë për buxhetin tuaj.</div></div>
+        <div class="store-card">
+          <span class="store-open" id="store-open">Dyqani</span>
+          <h3 class="store-title">Na vizito në dyqan</h3>
+          <div class="store-rows">
+            <div class="store-row"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><div>Rr. Ibrahim Pashë Bushatlliu, Tiranë<small><a href="https://www.google.com/maps/search/?api=1&amp;query=IT+Store+Albania+Tirane" target="_blank" rel="noopener">Hap në Google Maps</a></small></div></div>
+            <div class="store-row"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div>E hënë – e premte 09:00 – 17:30<small>E shtunë 09:00 – 13:00 · E diel mbyllur</small></div></div>
+            <div class="store-row"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg><div><a href="tel:+355693181062">+355 69 318 1062</a><small>Telefon dhe WhatsApp</small></div></div>
           </div>
         </div>
       </div>
@@ -1029,6 +1305,9 @@
           <ul>
             <li><a href="/rreth-nesh.html">Rreth Nesh</a></li>
             <li><a href="/na-kontaktoni.html">Na Kontaktoni</a></li>
+            <li><a href="/pyetje-te-shpeshta.html">Pyetje të Shpeshta</a></li>
+            <li><a href="/udhezues/refurbished-vs-i-ri.html">I rinovuar apo i ri?</a></li>
+            <li><a href="/udhezues/si-te-zgjedhesh-laptopin-per-pune.html">Si të zgjedhësh laptopin</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -1080,7 +1359,10 @@
     updateBadge();
     loadConfig().then(cfg => {
       const n = cfg && cfg.whatsappNumber;
-      if (n) document.querySelectorAll('.js-wa').forEach(a => { a.href = `https://wa.me/${n}`; });
+      document.querySelectorAll('.js-wa').forEach(a => {
+        const t = a.dataset.waText;
+        a.href = `https://wa.me/${n || '355693181062'}${t ? '?text=' + encodeURIComponent(t) : ''}`;
+      });
     });
 
     // ── Small helpers ──────────────────────────────────────────────────────
@@ -1180,24 +1462,21 @@
       const box = document.getElementById('hero-rot');
       if (!box) return;
       if (!list.length) { box.style.display = 'none'; return; }
+      const star = `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7.3L12 17.8 5.8 21.5l1.6-7.3L2 9.5l7.1-.6z"/></svg>`;
       const slides = list.map((p, i) => {
         const d = discPct(p);
         return `
           <a class="rot-slide${i === 0 ? ' on' : ''}" href="${prodHref(p)}" draggable="false" ${i === 0 ? '' : 'tabindex="-1" aria-hidden="true"'}>
             <div class="rot-stage">
-              <span class="rot-kicker"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7.3L12 17.8 5.8 21.5l1.6-7.3L2 9.5l7.1-.6z"/></svg>Zgjedhja jonë</span>
               ${d > 0 ? `<span class="rot-disc">-${d}%</span>` : ''}
-              <img src="${escapeHtml(p.images[0])}" alt="${escapeHtml(p.name)}" ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'}>
+              <img src="${escapeHtml(p.images[0])}" alt="" width="92" height="92" ${i === 0 ? '' : 'loading="lazy"'}>
             </div>
             <div class="rot-body">
-              <span class="rot-brand">${escapeHtml(p.brand || 'IT Store')}</span>
+              <span class="rot-brand">${star}Zgjedhja jonë</span>
               <p class="rot-name">${escapeHtml(p.name)}</p>
-              <div class="rot-chips">${specChips(p, 3)}</div>
-              <div class="rot-foot">
-                <div class="p-block">${priceBlock(p)}</div>
-                <span class="rot-go">Shiko ${arrowSvg}</span>
-              </div>
+              <div class="p-block">${priceBlock(p)}</div>
             </div>
+            <span class="rot-go">Shiko ${arrowSvg}</span>
           </a>`;
       }).join('');
       const dots = list.length > 1
@@ -1343,6 +1622,77 @@
         el.textContent = n ? `${n} produkte` : '';
       });
     }).catch(() => {});
+
+
+    // ── Clips: load when they scroll into view, pause when they leave ──────
+    // Nothing is fetched for visitors who asked for less motion or less data;
+    // they keep the poster image.
+    (function () {
+      const vids = [...document.querySelectorAll('video[data-lazy-video]')];
+      const conn = navigator.connection || {};
+      const still = matchMedia('(prefers-reduced-motion: reduce)').matches || conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '');
+      if (still || !('IntersectionObserver' in window)) return;
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          const v = e.target;
+          if (e.isIntersecting) {
+            if (!v.dataset.loaded) {
+              v.querySelectorAll('source[data-src]').forEach(src => { src.src = src.dataset.src; });
+              v.load(); v.dataset.loaded = '1';
+            }
+            v.play().catch(() => {});
+          } else if (v.dataset.loaded) v.pause();
+        }
+      }, { rootMargin: '200px 0px', threshold: 0.01 });
+      vids.forEach(v => io.observe(v));
+    })();
+
+    // ── Process section: the steps follow the clip; a click jumps the clip ─
+    (function () {
+      const video = document.getElementById('process-video');
+      const steps = [...document.querySelectorAll('#process-steps .step')];
+      const num = document.getElementById('process-num');
+      if (!video || !steps.length) return;
+      const starts = steps.map(b => Number(b.dataset.t));
+      let cur = 0;
+      const setStep = (i) => {
+        if (i === cur) return;
+        cur = i;
+        steps.forEach((b, k) => b.classList.toggle('on', k === i));
+        if (num) num.textContent = String(i + 1).padStart(2, '0');
+      };
+      video.addEventListener('timeupdate', () => {
+        const t = video.currentTime;
+        let i = 0;
+        for (let k = 0; k < starts.length; k++) if (t >= starts[k] - 0.05) i = k;
+        setStep(i);
+      });
+      steps.forEach((b, i) => b.addEventListener('click', () => {
+        setStep(i);
+        if (!video.dataset.loaded) {
+          // No clip (reduced motion / data saver): show that step's still.
+          video.poster = `/media/process-${i + 1}.webp`;
+          return;
+        }
+        try { video.currentTime = starts[i] + 0.1; } catch {}
+        video.play().catch(() => {});
+      }));
+    })();
+
+    // ── "Open now" pill on the store card (Tirana time) ───────────────────
+    (function () {
+      const el = document.getElementById('store-open');
+      if (!el) return;
+      try {
+        const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Tirane', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(new Date());
+        const get = (t) => parts.find(p => p.type === t)?.value;
+        const day = get('weekday'), mins = Number(get('hour')) * 60 + Number(get('minute'));
+        const close = day === 'Sun' ? 0 : day === 'Sat' ? 13 * 60 : 17 * 60 + 30;
+        const open = close && mins >= 9 * 60 && mins < close;
+        el.classList.toggle('is-open', !!open);
+        el.textContent = open ? 'Hapur tani' : 'Mbyllur tani';
+      } catch {}
+    })();
 
     // ── Scroll-reveal ──────────────────────────────────────────────────────
     (function () {
